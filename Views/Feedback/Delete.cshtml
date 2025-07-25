@@ -1,0 +1,150 @@
+@model DiversityPub.Models.Feedback
+@{
+    ViewData["Title"] = "Supprimer le Feedback";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-trash"></i> Supprimer le Feedback
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Attention :</strong> Êtes-vous sûr de vouloir supprimer ce feedback ? 
+                    Cette action est irréversible.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-star"></i> Évaluation
+                        </h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Note :</label>
+                            <div class="d-flex align-items-center">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= Model.Note)
+                                    {
+                                        <i class="fas fa-star text-warning fa-lg"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="far fa-star text-muted fa-lg"></i>
+                                    }
+                                }
+                                <span class="ms-3 badge bg-primary fs-6">@Model.Note/5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Commentaire :</label>
+                            <div class="border rounded p-3 bg-light">
+                                @if (!string.IsNullOrEmpty(Model.Commentaire))
+                                {
+                                    <p class="mb-0">@Model.Commentaire</p>
+                                }
+                                else
+                                {
+                                    <p class="mb-0 text-muted">Aucun commentaire</p>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Date du feedback :</label>
+                            <p class="mb-0">@Model.DateFeedback.ToString("dd/MM/yyyy à HH:mm")</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-bullhorn"></i> Informations de la Campagne
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Campagne :</label>
+                            <div class="border rounded p-3 bg-light">
+                                <p class="mb-1"><strong>@Model.Campagne?.Nom</strong></p>
+                                @if (!string.IsNullOrEmpty(Model.Campagne?.Description))
+                                {
+                                    <p class="mb-0 text-muted small">@Model.Campagne.Description</p>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Client :</label>
+                            <div class="border rounded p-3 bg-light">
+                                <p class="mb-1"><strong>@Model.Campagne?.Client?.RaisonSociale</strong></p>
+                                <p class="mb-0 text-muted small">
+                                    <i class="fas fa-envelope"></i> @Model.Campagne?.Client?.EmailContactPrincipal
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Période de la campagne :</label>
+                            <p class="mb-0">
+                                Du @Model.Campagne?.DateDebut.ToString("dd/MM/yyyy") 
+                                au @Model.Campagne?.DateFin.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Feedback")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                        <div>
+                            <a href="@Url.Action("Details", "Feedback", new { id = Model.Id })" class="btn btn-info">
+                                <i class="fas fa-eye"></i> Voir les détails
+                            </a>
+                            <a href="@Url.Action("Edit", "Feedback", new { id = Model.Id })" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirmer la suppression
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #A32D18, #59311F);
+        color: white;
+    }
+    
+    .text-primary {
+        color: #A32D18 !important;
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    .border {
+        border-color: #dee2e6 !important;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+</style> 

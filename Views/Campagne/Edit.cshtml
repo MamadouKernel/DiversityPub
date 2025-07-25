@@ -1,0 +1,172 @@
+@model DiversityPub.Models.Campagne
+@{
+    ViewData["Title"] = "Modifier la Campagne";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Modifier la Campagne
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Nom" class="form-label">
+                                    <i class="fas fa-bullhorn"></i> Nom de la campagne
+                                </label>
+                                <input asp-for="Nom" class="form-control" required />
+                                <span asp-validation-for="Nom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="ClientId" class="form-label">
+                                    <i class="fas fa-building"></i> Client
+                                </label>
+                                <select asp-for="ClientId" class="form-select" required>
+                                    <option value="">Sélectionner un client</option>
+                                    @foreach (var client in ViewBag.Clients)
+                                    {
+                                        if (client.Id == Model.ClientId)
+                                        {
+                                            <option value="@client.Id" selected>@client.RaisonSociale</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@client.Id">@client.RaisonSociale</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="ClientId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3" 
+                                  placeholder="Décrivez les objectifs et le contexte de cette campagne...">@Model.Description</textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateDebut" class="form-label">
+                                    <i class="fas fa-calendar"></i> Date de début
+                                </label>
+                                <input asp-for="DateDebut" type="date" class="form-control" required />
+                                <span asp-validation-for="DateDebut" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateFin" class="form-label">
+                                    <i class="fas fa-calendar-check"></i> Date de fin
+                                </label>
+                                <input asp-for="DateFin" type="date" class="form-control" required />
+                                <span asp-validation-for="DateFin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Objectifs" class="form-label">
+                            <i class="fas fa-target"></i> Objectifs
+                        </label>
+                        <textarea asp-for="Objectifs" class="form-control" rows="3" 
+                                  placeholder="Définissez les objectifs spécifiques de cette campagne...">@Model.Objectifs</textarea>
+                        <span asp-validation-for="Objectifs" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Statut" class="form-label">
+                            <i class="fas fa-tasks"></i> Statut
+                        </label>
+                        <select asp-for="Statut" class="form-select" required id="statutSelect">
+                            <option value="@DiversityPub.Models.enums.StatutCampagne.EnPreparation">En Préparation</option>
+                            <option value="@DiversityPub.Models.enums.StatutCampagne.EnCours">En cours</option>
+                            <option value="@DiversityPub.Models.enums.StatutCampagne.Terminee">Terminée</option>
+                            <option value="@DiversityPub.Models.enums.StatutCampagne.Annulee" id="annuleeOption">Annulée</option>
+                        </select>
+                        <span asp-validation-for="Statut" class="text-danger"></span>
+                        <div id="annulationWarning" class="alert alert-warning mt-2" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            <strong>Attention :</strong> Impossible d'annuler une campagne qui a des activations en cours.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Campagne")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Validation des dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateDebut = document.getElementById('DateDebut');
+            const dateFin = document.getElementById('DateFin');
+            const statutSelect = document.getElementById('statutSelect');
+            const annuleeOption = document.getElementById('annuleeOption');
+            const annulationWarning = document.getElementById('annulationWarning');
+            
+            // Mettre à jour la date de fin minimale quand la date de début change
+            dateDebut.addEventListener('change', function() {
+                dateFin.min = this.value;
+                if (dateFin.value && dateFin.value < this.value) {
+                    dateFin.value = this.value;
+                }
+            });
+            
+            // Validation de la date de fin
+            dateFin.addEventListener('change', function() {
+                if (this.value < dateDebut.value) {
+                    alert('La date de fin ne peut pas être antérieure à la date de début.');
+                    this.value = dateDebut.value;
+                }
+            });
+            
+            // Vérifier si la campagne a des activations en cours
+            const hasActivationsEnCours = @(Model.Activations?.Any(a => a.Statut == DiversityPub.Models.enums.StatutActivation.EnCours) == true ? "true" : "false");
+            
+            if (hasActivationsEnCours) {
+                // Désactiver l'option "Annulée"
+                annuleeOption.disabled = true;
+                annuleeOption.style.color = '#6c757d';
+                annuleeOption.style.backgroundColor = '#f8f9fa';
+                
+                // Afficher l'avertissement
+                annulationWarning.style.display = 'block';
+            }
+            
+            // Validation lors du changement de statut
+            statutSelect.addEventListener('change', function() {
+                if (this.value === '@DiversityPub.Models.enums.StatutCampagne.Annulee' && hasActivationsEnCours) {
+                    alert('Impossible d\'annuler une campagne qui a des activations en cours.');
+                    this.value = '@Model.Statut'; // Remettre l'ancienne valeur
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

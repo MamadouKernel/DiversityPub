@@ -1,0 +1,155 @@
+@model IEnumerable<DiversityPub.Models.Feedback>
+@{
+    ViewData["Title"] = "Feedbacks";
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> @TempData["Info"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-comments"></i> Feedbacks des Clients
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>
+                                        <i class="fas fa-star"></i> Note
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-comment"></i> Commentaire
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-bullhorn"></i> Campagne
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-building"></i> Client
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-calendar"></i> Date
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-cogs"></i> Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= item.Note)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="far fa-star text-muted"></i>
+                                                    }
+                                                }
+                                                <span class="ms-2 badge bg-primary">@item.Note/5</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.Commentaire))
+                                            {
+                                                <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@item.Commentaire">
+                                                    @item.Commentaire
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Aucun commentaire</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@item.Campagne?.Nom</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@item.Campagne?.Client?.RaisonSociale</span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@item.DateFeedback.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="@Url.Action("Details", "Feedback", new { id = item.Id })" 
+                                                   class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="@Url.Action("Edit", "Feedback", new { id = item.Id })" 
+                                                   class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("Delete", "Feedback", new { id = item.Id })" 
+                                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun feedback trouvé</h5>
+                        <p class="text-muted">Les clients n'ont pas encore laissé de feedback sur leurs campagnes.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+</style> 

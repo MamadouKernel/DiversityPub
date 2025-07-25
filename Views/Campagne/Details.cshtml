@@ -1,0 +1,261 @@
+@model DiversityPub.Models.Campagne
+@{
+    ViewData["Title"] = "Détails de la Campagne";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-bullhorn"></i> Détails de la Campagne
+                </h4>
+                <div>
+                    @if (User.IsInRole("ChefProjet") && Model.Statut == DiversityPub.Models.enums.StatutCampagne.EnCours)
+                    {
+                        <button id="btnValiderCampagne" class="btn btn-success me-2" data-campagne-id="@Model.Id">
+                            <i class="fas fa-check-circle"></i> Valider la Campagne
+                        </button>
+                    }
+                    <a href="@Url.Action("Edit", "Campagne", new { id = Model.Id })" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="@Url.Action("Index", "Campagne")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-info-circle"></i> Informations Générales
+                        </h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nom :</strong></td>
+                                <td>@Model.Nom</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Statut :</strong></td>
+                                <td>
+                                    @switch (Model.Statut)
+                                    {
+                                        case DiversityPub.Models.enums.StatutCampagne.EnPreparation:
+                                            <span class="badge bg-warning">En Préparation</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.EnCours:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.Terminee:
+                                            <span class="badge bg-info">Terminée</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.Annulee:
+                                            <span class="badge bg-danger">Annulée</span>
+                                            break;
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Période :</strong></td>
+                                <td>
+                                    <i class="fas fa-calendar text-muted"></i> 
+                                    Du @Model.DateDebut.ToString("dd/MM/yyyy") au @Model.DateFin.ToString("dd/MM/yyyy")
+                                </td>
+                            </tr>
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <tr>
+                                    <td><strong>Description :</strong></td>
+                                    <td>@Model.Description</td>
+                                </tr>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Objectifs))
+                            {
+                                <tr>
+                                    <td><strong>Objectifs :</strong></td>
+                                    <td>@Model.Objectifs</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        @if (Model.Client != null)
+                        {
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-building"></i> Client
+                            </h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                                            <h6 class="card-title">@(Model.Client?.RaisonSociale ?? "Client supprimé")</h6>
+                        <p class="card-text">
+                            <i class="fas fa-phone text-muted"></i> @(Model.Client?.TelephoneContactPrincipal ?? "N/A")<br>
+                            <i class="fas fa-envelope text-muted"></i> @(Model.Client?.EmailContactPrincipal ?? "N/A")<br>
+                            <i class="fas fa-map-marker-alt text-muted"></i> @(Model.Client?.Adresse ?? "N/A")
+                        </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Activations != null && Model.Activations.Any())
+                {
+                    <div class="mt-4">
+                        <h5 class="text-info mb-3">
+                            <i class="fas fa-map-marker-alt"></i> Activations (@Model.Activations.Count)
+                        </h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Date</th>
+                                        <th>Lieu</th>
+                                        <th>Statut</th>
+                                        <th>Agents</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@activation.Nom</strong>
+                                                @if (!string.IsNullOrEmpty(activation.Description))
+                                                {
+                                                    <br><small class="text-muted">@activation.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-calendar text-muted"></i> 
+                                                @activation.DateActivation.ToString("dd/MM/yyyy")<br>
+                                                <small class="text-muted">
+                                                    @activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @if (activation.Lieu != null)
+                                                {
+                                                    <i class="fas fa-map-marker-alt text-muted"></i> @activation.Lieu.Nom
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                                                             @switch (activation.Statut)
+                                             {
+                                                 case DiversityPub.Models.enums.StatutActivation.Planifiee:
+                                                     <span class="badge bg-warning">Planifiée</span>
+                                                     break;
+                                                 case DiversityPub.Models.enums.StatutActivation.EnCours:
+                                                     <span class="badge bg-success">En Cours</span>
+                                                     break;
+                                                 case DiversityPub.Models.enums.StatutActivation.Suspendue:
+                                                     <span class="badge bg-warning">Suspendue</span>
+                                                     break;
+                                                 case DiversityPub.Models.enums.StatutActivation.Terminee:
+                                                     <span class="badge bg-info">Terminée</span>
+                                                     break;
+                                             }
+                                            </td>
+                                            <td>
+                                                @if (activation.AgentsTerrain != null && activation.AgentsTerrain.Any())
+                                                {
+                                                    @foreach (var agent in activation.AgentsTerrain.Take(2))
+                                                    {
+                                                        <span class="badge bg-secondary me-1">@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</span>
+                                                    }
+                                                    @if (activation.AgentsTerrain.Count > 2)
+                                                    {
+                                                        <span class="badge bg-secondary">+@(activation.AgentsTerrain.Count - 2)</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Aucun agent</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "Activation", new { id = activation.Id })" 
+                                                       class="btn btn-sm btn-outline-info" title="Détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Activation", new { id = activation.Id })" 
+                                                       class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Aucune activation :</strong> Cette campagne n'a pas encore d'activations programmées.
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnValiderCampagne = document.getElementById('btnValiderCampagne');
+            
+            if (btnValiderCampagne) {
+                btnValiderCampagne.addEventListener('click', function() {
+                    const campagneId = this.getAttribute('data-campagne-id');
+                    
+                    if (confirm('Êtes-vous sûr de vouloir valider cette campagne ? Cette action ne peut pas être annulée.')) {
+                        // Désactiver le bouton pour éviter les clics multiples
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validation...';
+                        
+                        fetch(`/Campagne/ValiderCampagne/${campagneId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                location.reload(); // Recharger la page pour voir les changements
+                            } else {
+                                alert('Erreur : ' + data.message);
+                                // Réactiver le bouton
+                                btnValiderCampagne.disabled = false;
+                                btnValiderCampagne.innerHTML = '<i class="fas fa-check-circle"></i> Valider la Campagne';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors de la validation de la campagne.');
+                            // Réactiver le bouton
+                            btnValiderCampagne.disabled = false;
+                            btnValiderCampagne.innerHTML = '<i class="fas fa-check-circle"></i> Valider la Campagne';
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+} 

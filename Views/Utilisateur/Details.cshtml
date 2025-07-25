@@ -1,0 +1,137 @@
+@model DiversityPub.Models.Utilisateur
+@{
+    ViewData["Title"] = "Détails de l'Utilisateur";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user"></i> Détails de l'Utilisateur
+                </h4>
+                <div>
+                    <a href="@Url.Action("Edit", "Utilisateur", new { id = Model.Id })" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="@Url.Action("Index", "Utilisateur")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-info-circle"></i> Informations Générales
+                        </h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nom complet :</strong></td>
+                                <td>@Model.Prenom @Model.Nom</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email :</strong></td>
+                                <td>
+                                    <i class="fas fa-envelope text-muted"></i> @Model.Email
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rôle :</strong></td>
+                                <td>
+                                    @switch (Model.Role)
+                                    {
+                                        case DiversityPub.Models.enums.Role.Admin:
+                                            <span class="badge bg-danger">Administrateur</span>
+                                            break;
+                                        case DiversityPub.Models.enums.Role.ChefProjet:
+                                            <span class="badge bg-warning">Chef de projet</span>
+                                            break;
+                                        case DiversityPub.Models.enums.Role.Client:
+                                            <span class="badge bg-info">Client</span>
+                                            break;
+                                        case DiversityPub.Models.enums.Role.AgentTerrain:
+                                            <span class="badge bg-success">Agent Terrain</span>
+                                            break;
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        @if (Model.Client != null)
+                        {
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-building"></i> Profil Client
+                            </h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Raison sociale :</strong></td>
+                                    <td>@Model.Client.RaisonSociale</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Téléphone :</strong></td>
+                                    <td>
+                                        <i class="fas fa-phone text-muted"></i> @Model.Client.TelephoneContactPrincipal
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Adresse :</strong></td>
+                                    <td>
+                                        <i class="fas fa-map-marker-alt text-muted"></i> @Model.Client.Adresse
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Contact principal :</strong></td>
+                                    <td>@Model.Client.NomContactPrincipal</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email contact :</strong></td>
+                                    <td>
+                                        <i class="fas fa-envelope text-muted"></i> @Model.Client.EmailContactPrincipal
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dirigeant :</strong></td>
+                                    <td>@Model.Client.NomDirigeant</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Registre commerce :</strong></td>
+                                    <td>@Model.Client.RegistreCommerce</td>
+                                </tr>
+                            </table>
+                        }
+                        else if (Model.AgentTerrain != null)
+                        {
+                            <h5 class="text-info mb-3">
+                                <i class="fas fa-user-tie"></i> Profil Agent Terrain
+                            </h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Téléphone :</strong></td>
+                                    <td>
+                                        <i class="fas fa-phone text-muted"></i> @Model.AgentTerrain.Telephone
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email professionnel :</strong></td>
+                                    <td>
+                                        <i class="fas fa-envelope text-muted"></i> @Model.AgentTerrain.Email
+                                    </td>
+                                </tr>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Note :</strong> Cet utilisateur n'a pas de profil spécifique (Admin ou Chef de projet).
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

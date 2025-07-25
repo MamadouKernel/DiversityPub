@@ -1,0 +1,125 @@
+@model DiversityPub.Models.Client
+@{
+    ViewData["Title"] = "Supprimer le Client";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-trash text-danger"></i> Supprimer le Client
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Attention :</strong> Cette action est irréversible. Êtes-vous sûr de vouloir supprimer ce client ?
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="text-primary mb-3">Informations du client</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Raison Sociale</label>
+                                    <p class="form-control-plaintext">@Model.RaisonSociale</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Dirigeant</label>
+                                    <p class="form-control-plaintext">@Model.NomDirigeant</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Adresse</label>
+                            <p class="form-control-plaintext">@Model.Adresse</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Contact Principal</label>
+                                    <p class="form-control-plaintext">@Model.NomContactPrincipal</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <p class="form-control-plaintext">@Model.EmailContactPrincipal</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h5 class="text-primary mb-3">Impact de la suppression</h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Campagnes associées</label>
+                                    <p class="form-control-plaintext">
+                                        <span class="badge bg-@(Model.Campagnes.Any() ? "danger" : "success")">
+                                            @Model.Campagnes.Count campagne(s)
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Compte utilisateur</label>
+                                    <p class="form-control-plaintext">
+                                        <span class="badge bg-warning">@(Model.Utilisateur?.Email ?? "N/A")</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Campagnes.Any())
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Impossible de supprimer ce client :</strong> Il a @Model.Campagnes.Count campagne(s) associée(s). 
+                        Veuillez d'abord supprimer ou transférer ces campagnes.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Cette suppression va également :</strong>
+                        <ul class="mb-0 mt-2">
+                                                            <li>Supprimer le compte utilisateur associé (@(Model.Utilisateur?.Email ?? "N/A"))</li>
+                            <li>Supprimer toutes les données liées à ce client</li>
+                        </ul>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between">
+                    <a href="@Url.Action("Details", "Client", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Annuler
+                    </a>
+                    @if (!Model.Campagnes.Any())
+                    {
+                        <form asp-action="Delete" method="post" style="display: inline;">
+                            <input type="hidden" asp-for="Id" />
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous vraiment sûr de vouloir supprimer ce client ?')">
+                                <i class="fas fa-trash"></i> Confirmer la suppression
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button class="btn btn-danger" disabled>
+                            <i class="fas fa-trash"></i> Suppression impossible
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,113 @@
+@model DiversityPub.Models.Client
+@{
+    ViewData["Title"] = "Modifier le Client";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit"></i> Modifier le Client
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UtilisateurId" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="RaisonSociale" class="form-label">
+                                    <i class="fas fa-building"></i> Raison Sociale *
+                                </label>
+                                <input asp-for="RaisonSociale" class="form-control" required />
+                                <span asp-validation-for="RaisonSociale" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="RegistreCommerce" class="form-label">
+                                    <i class="fas fa-file-contract"></i> Registre de Commerce
+                                </label>
+                                <input asp-for="RegistreCommerce" class="form-control" />
+                                <span asp-validation-for="RegistreCommerce" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Adresse" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Adresse *
+                        </label>
+                        <textarea asp-for="Adresse" class="form-control" rows="2" required 
+                                  placeholder="Adresse complète de l'entreprise..."></textarea>
+                        <span asp-validation-for="Adresse" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="NomDirigeant" class="form-label">
+                                    <i class="fas fa-user-tie"></i> Nom du Dirigeant *
+                                </label>
+                                <input asp-for="NomDirigeant" class="form-control" required />
+                                <span asp-validation-for="NomDirigeant" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="NomContactPrincipal" class="form-label">
+                                    <i class="fas fa-user"></i> Nom du Contact Principal *
+                                </label>
+                                <input asp-for="NomContactPrincipal" class="form-control" required />
+                                <span asp-validation-for="NomContactPrincipal" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="EmailContactPrincipal" class="form-label">
+                                    <i class="fas fa-envelope"></i> Email du Contact *
+                                </label>
+                                <input asp-for="EmailContactPrincipal" type="email" class="form-control" required />
+                                <span asp-validation-for="EmailContactPrincipal" class="text-danger"></span>
+                                <small class="text-muted">Cet email sera mis à jour dans le compte utilisateur</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="TelephoneContactPrincipal" class="form-label">
+                                    <i class="fas fa-phone"></i> Téléphone du Contact *
+                                </label>
+                                <input asp-for="TelephoneContactPrincipal" class="form-control" required />
+                                <span asp-validation-for="TelephoneContactPrincipal" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note :</strong> Les modifications de l'email et du nom du dirigeant seront également appliquées au compte utilisateur associé.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Details", "Client", new { id = Model.Id })" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

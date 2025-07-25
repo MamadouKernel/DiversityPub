@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Importer des Utilisateurs";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-excel"></i> Importer des Utilisateurs
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(ViewBag.Error))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> @ViewBag.Error
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(ViewBag.Success))
+                {
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle"></i> @ViewBag.Success
+                    </div>
+                }
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-upload"></i> Importer un fichier Excel
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form asp-action="Import" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label">
+                                            <i class="fas fa-file"></i> Sélectionner un fichier Excel (.xlsx ou .xls)
+                                        </label>
+                                        <input type="file" class="form-control" id="file" name="file" 
+                                               accept=".xlsx,.xls" required />
+                                        <small class="text-muted">
+                                            Le fichier doit contenir les colonnes : Nom, Prenom, Email, Role
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <a href="@Url.Action("Index", "Utilisateur")" class="btn btn-secondary">
+                                            <i class="fas fa-arrow-left"></i> Retour
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-upload"></i> Importer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-download"></i> Télécharger le template
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">
+                                    Téléchargez le template Excel avec les colonnes requises et des exemples de données.
+                                </p>
+                                <a href="@Url.Action("DownloadTemplate", "Utilisateur")" class="btn btn-success w-100">
+                                    <i class="fas fa-download"></i> Télécharger Template Excel
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle"></i> Instructions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <h6>Colonnes obligatoires :</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success"></i> <strong>Nom :</strong> Nom de famille</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Prenom :</strong> Prénom</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Email :</strong> Adresse email unique</li>
+                                    <li><i class="fas fa-check text-success"></i> <strong>Role :</strong> Admin, ChefProjet, Client, AgentTerrain</li>
+                                </ul>
+                                
+                                <h6>Colonnes optionnelles :</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-info text-info"></i> <strong>MotDePasse :</strong> Mot de passe (défaut: MotDePasse123!)</li>
+                                    <li><i class="fas fa-info text-info"></i> <strong>Telephone :</strong> Numéro de téléphone</li>
+                                    <li><i class="fas fa-info text-info"></i> <strong>Adresse :</strong> Adresse complète (pour les clients)</li>
+                                    <li><i class="fas fa-info text-info"></i> <strong>RaisonSociale :</strong> Nom de l'entreprise (pour les clients)</li>
+                                    <li><i class="fas fa-info text-info"></i> <strong>EmailPro :</strong> Email professionnel (pour les agents terrain)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (ViewBag.ImportResults != null && ViewBag.ImportResults.Count > 0)
+                {
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list"></i> Résultats de l'import
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> 
+                                        <strong>Succès :</strong> @ViewBag.SuccessCount utilisateurs créés
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        <strong>Erreurs :</strong> @ViewBag.ErrorCount erreurs
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Ligne</th>
+                                            <th>Résultat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var result in ViewBag.ImportResults)
+                                        {
+                                            <tr>
+                                                <td>@result</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

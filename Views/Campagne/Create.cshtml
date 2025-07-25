@@ -1,0 +1,171 @@
+@model DiversityPub.Models.Campagne
+@{
+    ViewData["Title"] = "Créer une Campagne";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Créer une Nouvelle Campagne
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (TempData["Debug"] != null)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-bug"></i> Debug: @TempData["Debug"]
+                    </div>
+                }
+                <form asp-action="Create" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Nom" class="form-label">
+                                    <i class="fas fa-bullhorn"></i> Nom de la campagne
+                                </label>
+                                <input asp-for="Nom" class="form-control" required />
+                                <span asp-validation-for="Nom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="ClientId" class="form-label">
+                                    <i class="fas fa-building"></i> Client
+                                </label>
+                                <select name="ClientId" class="form-select" required>
+                                    <option value="">Sélectionner un client</option>
+                                    @if (ViewBag.Clients != null)
+                                    {
+                                        @foreach (var client in ViewBag.Clients)
+                                        {
+                                            <option value="@client.Id">@client.RaisonSociale</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="" disabled>Aucun client disponible</option>
+                                    }
+                                </select>
+                                <small class="text-muted">Debug: <span id="clientIdValue">Non sélectionné</span></small>
+                                @if (ViewBag.Clients == null)
+                                {
+                                    <small class="text-danger">ViewBag.Clients est null</small>
+                                }
+                                else if (ViewBag.Clients.Count == 0)
+                                {
+                                    <small class="text-danger">Aucun client dans ViewBag.Clients</small>
+                                }
+                                else
+                                {
+                                    <small class="text-success">@ViewBag.Clients.Count client(s) disponible(s)</small>
+                                }
+                                <span asp-validation-for="ClientId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3" 
+                                  placeholder="Décrivez les objectifs et le contexte de cette campagne..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateDebut" class="form-label">
+                                    <i class="fas fa-calendar"></i> Date de début
+                                </label>
+                                <input asp-for="DateDebut" type="date" class="form-control" required />
+                                <span asp-validation-for="DateDebut" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateFin" class="form-label">
+                                    <i class="fas fa-calendar-check"></i> Date de fin
+                                </label>
+                                <input asp-for="DateFin" type="date" class="form-control" required />
+                                <span asp-validation-for="DateFin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Objectifs" class="form-label">
+                            <i class="fas fa-target"></i> Objectifs
+                        </label>
+                        <textarea asp-for="Objectifs" class="form-control" rows="3" 
+                                  placeholder="Définissez les objectifs spécifiques de cette campagne..."></textarea>
+                        <span asp-validation-for="Objectifs" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note :</strong> La campagne sera créée avec le statut "En Préparation". 
+                        Vous pourrez le modifier ultérieurement.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Campagne")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Créer la campagne
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Validation des dates
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateDebut = document.getElementById('DateDebut');
+            const dateFin = document.getElementById('DateFin');
+            
+            // Définir la date de début minimale à aujourd'hui
+            const today = new Date().toISOString().split('T')[0];
+            dateDebut.min = today;
+            
+            // Mettre à jour la date de fin minimale quand la date de début change
+            dateDebut.addEventListener('change', function() {
+                dateFin.min = this.value;
+                if (dateFin.value && dateFin.value < this.value) {
+                    dateFin.value = this.value;
+                }
+            });
+            
+            // Validation de la date de fin
+            dateFin.addEventListener('change', function() {
+                if (this.value < dateDebut.value) {
+                    alert('La date de fin ne peut pas être antérieure à la date de début.');
+                    this.value = dateDebut.value;
+                }
+            });
+        });
+        
+        // Debug de la sélection du client
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientSelect = document.querySelector('select[asp-for="ClientId"]');
+            const clientIdValue = document.getElementById('clientIdValue');
+            
+            if (clientSelect) {
+                clientSelect.addEventListener('change', function() {
+                    const selectedValue = this.value;
+                    clientIdValue.textContent = selectedValue || 'Non sélectionné';
+                    console.log('ClientId sélectionné:', selectedValue);
+                });
+            }
+        });
+    </script>
+} 

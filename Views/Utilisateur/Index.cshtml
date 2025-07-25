@@ -1,0 +1,149 @@
+@model IEnumerable<DiversityPub.Models.Utilisateur>
+@{
+    ViewData["Title"] = "Gestion des Utilisateurs";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-users"></i> Gestion des Utilisateurs
+                </h4>
+                <div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Import", "Utilisateur")" class="btn btn-warning me-2">
+                            <i class="fas fa-file-excel"></i> Importer Excel
+                        </a>
+                        <a href="@Url.Action("Create", "Utilisateur")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nouvel Utilisateur
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Profil</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var utilisateur in Model.Where(u => u.Supprimer == 0))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@utilisateur.Prenom @utilisateur.Nom</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-envelope text-muted"></i> @utilisateur.Email
+                                    </td>
+                                    <td>
+                                        @switch (utilisateur.Role)
+                                        {
+                                            case DiversityPub.Models.enums.Role.Admin:
+                                                <span class="badge bg-danger">Admin</span>
+                                                break;
+                                            case DiversityPub.Models.enums.Role.ChefProjet:
+                                                <span class="badge bg-warning">Chef Projet</span>
+                                                break;
+                                            case DiversityPub.Models.enums.Role.Client:
+                                                <span class="badge bg-info">Client</span>
+                                                break;
+                                            case DiversityPub.Models.enums.Role.AgentTerrain:
+                                                <span class="badge bg-success">Agent Terrain</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (utilisateur.Client != null)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="fas fa-building"></i> @utilisateur.Client.RaisonSociale
+                                            </small>
+                                        }
+                                        else if (utilisateur.AgentTerrain != null)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="fas fa-user-tie"></i> Agent Terrain
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (utilisateur.Client != null)
+                                        {
+                                            <small>
+                                                <i class="fas fa-phone"></i> @utilisateur.Client.TelephoneContactPrincipal
+                                            </small>
+                                        }
+                                        else if (utilisateur.AgentTerrain != null)
+                                        {
+                                            <small>
+                                                <i class="fas fa-phone"></i> @utilisateur.AgentTerrain.Telephone
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Details", "Utilisateur", new { id = utilisateur.Id })" 
+                                               class="btn btn-sm btn-outline-info" title="Détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <a href="@Url.Action("Edit", "Utilisateur", new { id = utilisateur.Id })" 
+                                                   class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("Delete", "Utilisateur", new { id = utilisateur.Id })" 
+                                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any(u => u.Supprimer == 0))
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5>Aucun utilisateur trouvé</h5>
+                    <p class="text-muted">Commencez par créer votre premier utilisateur.</p>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Create", "Utilisateur")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Créer un utilisateur
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+} 

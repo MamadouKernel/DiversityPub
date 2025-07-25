@@ -1,0 +1,125 @@
+@model IEnumerable<DiversityPub.Models.Lieu>
+@{
+    ViewData["Title"] = "Gestion des Lieux";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Info"]
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-map-marker-alt"></i> Gestion des Lieux
+                </h4>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Create", "Lieu")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nouveau Lieu
+                    </a>
+                    <a href="@Url.Action("CreateTestLieu", "Lieu")" class="btn btn-success">
+                        <i class="fas fa-magic"></i> Créer un lieu de test
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (!Model.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                        <h5>Aucun lieu trouvé</h5>
+                        <p class="text-muted">Commencez par créer votre premier lieu.</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="@Url.Action("Create", "Lieu")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Créer le premier lieu
+                            </a>
+                            <a href="@Url.Action("CreateTestLieu", "Lieu")" class="btn btn-success">
+                                <i class="fas fa-magic"></i> Créer un lieu de test
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        @foreach (var lieu in Model)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">@lieu.Nom</h6>
+                                        @if (lieu.Activations.Any())
+                                        {
+                                            <span class="badge bg-primary">@lieu.Activations.Count activation(s)</span>
+                                        }
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">
+                                            <i class="fas fa-map-marker-alt text-muted"></i> @lieu.Adresse
+                                        </p>
+                                        
+                                        @if (lieu.Activations.Any())
+                                        {
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar"></i> Activations récentes
+                                                </small>
+                                                <div class="mt-2">
+                                                    @foreach (var activation in lieu.Activations.Take(3))
+                                                    {
+                                                        <span class="badge bg-info me-1">@activation.Nom</span>
+                                                    }
+                                                    @if (lieu.Activations.Count > 3)
+                                                    {
+                                                        <span class="badge bg-secondary">+@(lieu.Activations.Count - 3) autres</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="@Url.Action("Details", "Lieu", new { id = lieu.Id })" 
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                            <a href="@Url.Action("Edit", "Lieu", new { id = lieu.Id })" 
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                            <a href="@Url.Action("Delete", "Lieu", new { id = lieu.Id })" 
+                                               class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i> Supprimer
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

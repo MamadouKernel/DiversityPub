@@ -1,0 +1,154 @@
+@model DiversityPub.Models.Feedback
+@{
+    ViewData["Title"] = "Nouveau Feedback";
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-comment"></i> Nouveau Feedback
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Information :</strong> Vous pouvez laisser un feedback uniquement sur les campagnes terminées.
+                </div>
+                
+                <form asp-action="CreateFeedback" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="CampagneId" class="form-label">
+                                    <i class="fas fa-bullhorn"></i> Campagne
+                                </label>
+                                <select asp-for="CampagneId" class="form-select" required>
+                                    <option value="">Sélectionner une campagne terminée</option>
+                                    @foreach (var campagne in ViewBag.Campagnes)
+                                    {
+                                        <option value="@campagne.Id">
+                                            @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CampagneId" class="text-danger"></span>
+                                <small class="form-text text-muted">Choisissez la campagne sur laquelle vous souhaitez laisser un feedback</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Note" class="form-label">
+                                    <i class="fas fa-star"></i> Note (1-5)
+                                </label>
+                                <select asp-for="Note" class="form-select" required>
+                                    <option value="">Sélectionner une note</option>
+                                    <option value="1">1 - Très insatisfait</option>
+                                    <option value="2">2 - Insatisfait</option>
+                                    <option value="3">3 - Neutre</option>
+                                    <option value="4">4 - Satisfait</option>
+                                    <option value="5">5 - Très satisfait</option>
+                                </select>
+                                <span asp-validation-for="Note" class="text-danger"></span>
+                                <small class="form-text text-muted">Évaluez votre satisfaction globale</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Commentaire" class="form-label">
+                            <i class="fas fa-comment"></i> Commentaire
+                        </label>
+                        <textarea asp-for="Commentaire" class="form-control" rows="5" 
+                                  placeholder="Partagez votre expérience, vos impressions, vos suggestions d'amélioration..."></textarea>
+                        <span asp-validation-for="Commentaire" class="text-danger"></span>
+                        <small class="form-text text-muted">Votre avis détaillé nous aide à améliorer nos services</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour au dashboard
+                        </a>
+                        <div>
+                            <a href="@Url.Action("Feedbacks", "ClientDashboard")" class="btn btn-info">
+                                <i class="fas fa-list"></i> Mes feedbacks
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Envoyer le feedback
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validation personnalisée pour la note
+            const noteSelect = document.getElementById('Note');
+            noteSelect.addEventListener('change', function() {
+                const note = parseInt(this.value);
+                if (note < 1 || note > 5) {
+                    this.setCustomValidity('La note doit être comprise entre 1 et 5');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            
+            // Validation pour la campagne
+            const campagneSelect = document.getElementById('CampagneId');
+            campagneSelect.addEventListener('change', function() {
+                if (!this.value) {
+                    this.setCustomValidity('Veuillez sélectionner une campagne');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #A32D18, #59311F);
+        color: white;
+    }
+    
+    .btn-primary {
+        background-color: #A32D18;
+        border-color: #A32D18;
+    }
+    
+    .btn-primary:hover {
+        background-color: #59311F;
+        border-color: #59311F;
+    }
+    
+    .form-control:focus {
+        border-color: #A32D18;
+        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+    }
+    
+    .form-select:focus {
+        border-color: #A32D18;
+        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+    }
+</style> 

@@ -1,0 +1,151 @@
+@model IEnumerable<DiversityPub.Models.Campagne>
+@{
+    ViewData["Title"] = "Gestion des Campagnes";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Info"]
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-bullhorn"></i> Gestion des Campagnes
+                </h4>
+                <a href="@Url.Action("Create", "Campagne")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle Campagne
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var campagne in Model.OrderByDescending(c => c.DateDebut))
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">@campagne.Nom</h6>
+                                    @switch (campagne.Statut)
+                                    {
+                                        case DiversityPub.Models.enums.StatutCampagne.EnPreparation:
+                                            <span class="badge bg-warning">En Préparation</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.EnCours:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.Terminee:
+                                            <span class="badge bg-info">Terminée</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutCampagne.Annulee:
+                                            <span class="badge bg-danger">Annulée</span>
+                                            break;
+                                    }
+                                </div>
+                                <div class="card-body">
+                                    @if (!string.IsNullOrEmpty(campagne.Description))
+                                    {
+                                        <p class="card-text text-muted">@campagne.Description</p>
+                                    }
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> Début
+                                            </small>
+                                            <br>
+                                            <strong>@campagne.DateDebut.ToString("dd/MM/yyyy")</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-check"></i> Fin
+                                            </small>
+                                            <br>
+                                            <strong class="@(campagne.DateFin <= DateTime.Today.AddDays(7) && campagne.Statut != DiversityPub.Models.enums.StatutCampagne.Terminee && campagne.Statut != DiversityPub.Models.enums.StatutCampagne.Annulee ? "text-danger" : "")">
+                                                @campagne.DateFin.ToString("dd/MM/yyyy")
+                                                @if (campagne.DateFin <= DateTime.Today.AddDays(7) && campagne.Statut != DiversityPub.Models.enums.StatutCampagne.Terminee && campagne.Statut != DiversityPub.Models.enums.StatutCampagne.Annulee)
+                                                {
+                                                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                                                }
+                                            </strong>
+                                        </div>
+                                    </div>
+                                    
+                                    @if (campagne.Client != null)
+                                    {
+                                        <div class="mb-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-building"></i> Client
+                                            </small>
+                                            <br>
+                                            <strong>@(campagne.Client?.RaisonSociale ?? "Client supprimé")</strong>
+                                        </div>
+                                    }
+                                    
+                                    @if (campagne.Activations != null && campagne.Activations.Any())
+                                    {
+                                        <div class="mb-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt"></i> Activations
+                                            </small>
+                                            <br>
+                                            <span class="badge bg-primary">@campagne.Activations.Count</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="@Url.Action("Details", "Campagne", new { id = campagne.Id })" 
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </a>
+                                        <a href="@Url.Action("Edit", "Campagne", new { id = campagne.Id })" 
+                                           class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </a>
+                                        <a href="@Url.Action("Delete", "Campagne", new { id = campagne.Id })" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+                    <h5>Aucune campagne trouvée</h5>
+                    <p class="text-muted">Commencez par créer votre première campagne.</p>
+                    <a href="@Url.Action("Create", "Campagne")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Créer une campagne
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

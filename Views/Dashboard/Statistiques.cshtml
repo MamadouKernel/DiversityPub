@@ -1,0 +1,295 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Statistiques";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Statistiques Détaillées
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Statistiques des Activations par Statut -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tasks"></i> Activations par Statut
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.ActivationsParStatut != null && Model.ActivationsParStatut.Count > 0)
+                                {
+                                    var totalActivations = ((IEnumerable<dynamic>)Model.ActivationsParStatut).Sum(x => (int)x.Count);
+                                    var uniqueStatuts = Model.ActivationsParStatut.Count;
+                                    
+                                    if (uniqueStatuts == 1)
+                                    {
+                                        <div class="alert alert-info mb-3">
+                                            <i class="fas fa-info-circle"></i> 
+                                            <strong>Note :</strong> Toutes vos activations ont le même statut. 
+                                            Les pourcentages n'apparaîtront que lorsque vous aurez des activations avec différents statuts.
+                                        </div>
+                                    }
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Statut</th>
+                                                    <th>Nombre</th>
+                                                    <th>Pourcentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var stat in Model.ActivationsParStatut)
+                                                {
+                                                    var pourcentage = totalActivations > 0 ? ((int)stat.Count * 100.0 / totalActivations) : 0;
+                                                    <tr>
+                                                        <td>
+                                                            @switch (stat.Statut.ToString())
+                                                            {
+                                                                case "Planifiee":
+                                                                    <span class="badge bg-warning">Planifiée</span>
+                                                                    break;
+                                                                case "EnCours":
+                                                                    <span class="badge bg-primary">En Cours</span>
+                                                                    break;
+                                                                case "Terminee":
+                                                                    <span class="badge bg-success">Terminée</span>
+                                                                    break;
+                                                                default:
+                                                                    <span class="badge bg-secondary">@stat.Statut</span>
+                                                                    break;
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            <strong>@((int)stat.Count)</strong>
+                                                            @if (totalActivations > 0)
+                                                            {
+                                                                <small class="text-muted">sur @totalActivations total</small>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (totalActivations > 1)
+                                                            {
+                                                                <span class="text-primary">@pourcentage.ToString("F1")%</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted">N/A</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> Aucune donnée disponible pour les activations.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Évolution des Campagnes -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-bullhorn"></i> Campagnes par Statut
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.EvolutionCampagnes != null && Model.EvolutionCampagnes.Count > 0)
+                                {
+                                    var totalCampagnes = ((IEnumerable<dynamic>)Model.EvolutionCampagnes).Sum(x => (int)x.Count);
+                                    var uniqueStatuts = Model.EvolutionCampagnes.Count;
+                                    
+                                    if (uniqueStatuts == 1)
+                                    {
+                                        <div class="alert alert-info mb-3">
+                                            <i class="fas fa-info-circle"></i> 
+                                            <strong>Note :</strong> Toutes vos campagnes ont le même statut. 
+                                            Les pourcentages n'apparaîtront que lorsque vous aurez des campagnes avec différents statuts.
+                                        </div>
+                                    }
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Statut</th>
+                                                    <th>Nombre</th>
+                                                    <th>Pourcentage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var stat in Model.EvolutionCampagnes)
+                                                {
+                                                    var pourcentage = totalCampagnes > 0 ? ((int)stat.Count * 100.0 / totalCampagnes) : 0;
+                                                    <tr>
+                                                        <td>
+                                                            @switch (stat.Statut.ToString())
+                                                            {
+                                                                case "Planifiee":
+                                                                    <span class="badge bg-warning">Planifiée</span>
+                                                                    break;
+                                                                case "EnCours":
+                                                                    <span class="badge bg-primary">En Cours</span>
+                                                                    break;
+                                                                case "Terminee":
+                                                                    <span class="badge bg-success">Terminée</span>
+                                                                    break;
+                                                                case "Annulee":
+                                                                    <span class="badge bg-danger">Annulée</span>
+                                                                    break;
+                                                                default:
+                                                                    <span class="badge bg-secondary">@stat.Statut</span>
+                                                                    break;
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            <strong>@((int)stat.Count)</strong>
+                                                            @if (totalCampagnes > 0)
+                                                            {
+                                                                <small class="text-muted">sur @totalCampagnes total</small>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (totalCampagnes > 1)
+                                                            {
+                                                                <span class="text-primary">@pourcentage.ToString("F1")%</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted">N/A</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> Aucune donnée disponible pour les campagnes.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Clients -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-building"></i> Top 5 des Clients
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.TopClients != null && Model.TopClients.Count > 0)
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Client</th>
+                                                    <th>Nombre de Campagnes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    var rank = 1;
+                                                }
+                                                @foreach (var client in Model.TopClients)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @if (rank == 1)
+                                                            {
+                                                                <span class="badge bg-warning">🥇</span>
+                                                            }
+                                                            else if (rank == 2)
+                                                            {
+                                                                <span class="badge bg-secondary">🥈</span>
+                                                            }
+                                                            else if (rank == 3)
+                                                            {
+                                                                <span class="badge bg-warning">🥉</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-light text-dark">@rank</span>
+                                                            }
+                                                        </td>
+                                                        <td>@client.RaisonSociale</td>
+                                                        <td>
+                                                            <span class="badge bg-primary">@client.CampagnesCount</span>
+                                                        </td>
+                                                    </tr>
+                                                    rank++;
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> Aucun client avec des campagnes trouvé.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index", "Dashboard")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour au Dashboard
+                            </a>
+                            <div>
+                                <a href="@Url.Action("Index", "Activation")" class="btn btn-primary">
+                                    <i class="fas fa-list"></i> Voir toutes les Activations
+                                </a>
+                                <a href="@Url.Action("Index", "Campagne")" class="btn btn-info">
+                                    <i class="fas fa-bullhorn"></i> Voir toutes les Campagnes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Ici on pourrait ajouter des graphiques avec Chart.js ou autre librairie
+        // Pour l'instant, on utilise des tableaux simples avec Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation des badges pour attirer l'attention
+            const badges = document.querySelectorAll('.badge');
+            badges.forEach(badge => {
+                badge.style.transition = 'all 0.3s ease';
+            });
+        });
+    </script>
+} 

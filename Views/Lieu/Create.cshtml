@@ -1,0 +1,55 @@
+@model DiversityPub.Models.Lieu
+@{
+    ViewData["Title"] = "Créer un Lieu";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Créer un Nouveau Lieu
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label asp-for="Nom" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Nom du lieu
+                        </label>
+                        <input asp-for="Nom" class="form-control" required 
+                               placeholder="Ex: Place du Marché, Centre Commercial, etc." />
+                        <span asp-validation-for="Nom" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Adresse" class="form-label">
+                            <i class="fas fa-location-dot"></i> Adresse complète
+                        </label>
+                        <textarea asp-for="Adresse" class="form-control" rows="3" required
+                                  placeholder="Ex: 123 Avenue de la République, 75001 Paris, France"></textarea>
+                        <span asp-validation-for="Adresse" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note :</strong> Ce lieu pourra être utilisé pour planifier des activations.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Lieu")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Créer le lieu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

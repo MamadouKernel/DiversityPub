@@ -1,0 +1,247 @@
+@model IEnumerable<DiversityPub.Models.DemandeActivation>
+@{
+    ViewData["Title"] = "Demandes d'Activation";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Info"]
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-clipboard-list"></i> Demandes d'Activation
+                </h4>
+                <a href="@Url.Action("Create", "DemandeActivation")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle Demande
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Demande</th>
+                                <th>Campagne</th>
+                                <th>Client</th>
+                                <th>Date d'Activation</th>
+                                <th>Lieu</th>
+                                <th>Statut</th>
+                                <th>Date Demande</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var demande in Model.OrderByDescending(d => d.DateDemande))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@demande.Nom</strong>
+                                        @if (!string.IsNullOrEmpty(demande.Description))
+                                        {
+                                            <br><small class="text-muted">@demande.Description</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (demande.Campagne != null)
+                                        {
+                                            <i class="fas fa-bullhorn text-muted"></i> @demande.Campagne.Nom
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Campagne supprimée</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (demande.Client != null)
+                                        {
+                                            <i class="fas fa-building text-muted"></i> @demande.Client.RaisonSociale
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Client supprimé</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar text-muted"></i> @demande.DateActivation.ToString("dd/MM/yyyy")<br>
+                                        <small class="text-muted">
+                                            @demande.HeureDebut.ToString(@"hh\:mm") - @demande.HeureFin.ToString(@"hh\:mm")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @if (demande.Lieu != null)
+                                        {
+                                            <i class="fas fa-map-marker-alt text-muted"></i> @demande.Lieu.Nom
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Lieu supprimé</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (demande.Statut)
+                                        {
+                                            case DiversityPub.Models.enums.StatutDemande.EnAttente:
+                                                <span class="badge bg-warning">En Attente</span>
+                                                break;
+                                            case DiversityPub.Models.enums.StatutDemande.Approuvee:
+                                                <span class="badge bg-success">Approuvée</span>
+                                                break;
+                                            case DiversityPub.Models.enums.StatutDemande.Refusee:
+                                                <span class="badge bg-danger">Refusée</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> @demande.DateDemande.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Details", "DemandeActivation", new { id = demande.Id })" 
+                                               class="btn btn-sm btn-outline-info" title="Détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (demande.Statut == DiversityPub.Models.enums.StatutDemande.EnAttente && User.IsInRole("Admin") || User.IsInRole("ChefProjet"))
+                                            {
+                                                <button class="btn btn-sm btn-outline-success approuver-btn" 
+                                                        data-demande-id="@demande.Id" title="Approuver">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger refuser-btn" 
+                                                        data-demande-id="@demande.Id" title="Refuser">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                            <a href="@Url.Action("Delete", "DemandeActivation", new { id = demande.Id })" 
+                                               class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <h5>Aucune demande d'activation trouvée</h5>
+                    <p class="text-muted">Commencez par créer votre première demande d'activation.</p>
+                    <a href="@Url.Action("Create", "DemandeActivation")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Créer une demande
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion de l'approbation
+            document.querySelectorAll('.approuver-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const demandeId = this.getAttribute('data-demande-id');
+                    
+                    if (confirm('Êtes-vous sûr de vouloir approuver cette demande ? Une activation sera créée automatiquement.')) {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        fetch(`/DemandeActivation/Approuver/${demandeId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                location.reload();
+                            } else {
+                                alert('Erreur : ' + data.message);
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-check"></i>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors de l\'approbation de la demande.');
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-check"></i>';
+                        });
+                    }
+                });
+            });
+
+            // Gestion du refus
+            document.querySelectorAll('.refuser-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const demandeId = this.getAttribute('data-demande-id');
+                    const motifRefus = prompt('Veuillez indiquer le motif du refus :');
+                    
+                    if (motifRefus !== null) {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        fetch(`/DemandeActivation/Refuser/${demandeId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({ motifRefus: motifRefus })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                location.reload();
+                            } else {
+                                alert('Erreur : ' + data.message);
+                                this.disabled = false;
+                                this.innerHTML = '<i class="fas fa-times"></i>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors du refus de la demande.');
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-times"></i>';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+} 

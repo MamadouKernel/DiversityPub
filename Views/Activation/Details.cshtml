@@ -1,0 +1,204 @@
+@model DiversityPub.Models.Activation
+@{
+    ViewData["Title"] = "Détails de l'Activation";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-map-marker-alt"></i> Détails de l'Activation
+                </h4>
+                <div>
+                    <a href="@Url.Action("Edit", "Activation", new { id = Model.Id })" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="@Url.Action("Index", "Activation")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-info-circle"></i> Informations Générales
+                        </h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nom :</strong></td>
+                                <td>@Model.Nom</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Statut :</strong></td>
+                                <td>
+                                    @switch (Model.Statut)
+                                    {
+                                        case DiversityPub.Models.enums.StatutActivation.Planifiee:
+                                            <span class="badge bg-warning">Planifiée</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutActivation.EnCours:
+                                            <span class="badge bg-success">En Cours</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutActivation.Suspendue:
+                                            <span class="badge bg-warning">Suspendue</span>
+                                            break;
+                                        case DiversityPub.Models.enums.StatutActivation.Terminee:
+                                            <span class="badge bg-info">Terminée</span>
+                                            break;
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date :</strong></td>
+                                <td>
+                                    <i class="fas fa-calendar text-muted"></i> 
+                                    @Model.DateActivation.ToString("dd/MM/yyyy")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Horaires :</strong></td>
+                                <td>
+                                    <i class="fas fa-clock text-muted"></i> 
+                                    @Model.HeureDebut.ToString(@"hh\:mm") - @Model.HeureFin.ToString(@"hh\:mm")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lieu :</strong></td>
+                                <td>
+                                    @if (Model.Lieu != null)
+                                    {
+                                        <i class="fas fa-map-marker-alt text-muted"></i> @Model.Lieu.Nom
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Non défini</span>
+                                    }
+                                </td>
+                            </tr>
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <tr>
+                                    <td><strong>Description :</strong></td>
+                                    <td>@Model.Description</td>
+                                </tr>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Instructions))
+                            {
+                                <tr>
+                                    <td><strong>Instructions :</strong></td>
+                                    <td>@Model.Instructions</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        @if (Model.Campagne != null)
+                        {
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-bullhorn"></i> Campagne
+                            </h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">@Model.Campagne.Nom</h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> 
+                                            @Model.Campagne.DateDebut.ToString("dd/MM/yyyy") - @Model.Campagne.DateFin.ToString("dd/MM/yyyy")
+                                        </small>
+                                    </p>
+                                    @if (Model.Campagne.Client != null)
+                                    {
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                <i class="fas fa-building"></i> @(Model.Campagne.Client?.RaisonSociale ?? "Client supprimé")
+                                            </small>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.AgentsTerrain != null && Model.AgentsTerrain.Any())
+                {
+                    <div class="mt-4">
+                        <h5 class="text-info mb-3">
+                            <i class="fas fa-users"></i> Agents Terrain (@Model.AgentsTerrain.Count)
+                        </h5>
+                        <div class="row">
+                            @foreach (var agent in Model.AgentsTerrain)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <div class="avatar mb-2">
+                                                <i class="fas fa-user-tie fa-2x text-primary"></i>
+                                            </div>
+                                            <h6 class="card-title">@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</h6>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-phone"></i> @agent.Telephone<br>
+                                                    <i class="fas fa-envelope"></i> @agent.Email
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Aucun agent :</strong> Cette activation n'a pas encore d'agents assignés.
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
+                {
+                    <div class="mt-4">
+                        <h5 class="text-success mb-3">
+                            <i class="fas fa-check-circle"></i> Activation Terminée
+                        </h5>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Félicitations !</strong> Cette activation a été menée à bien.
+                        </div>
+                    </div>
+                }
+                else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.EnCours)
+                {
+                    <div class="mt-4">
+                        <h5 class="text-warning mb-3">
+                            <i class="fas fa-play-circle"></i> Activation en Cours
+                        </h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock"></i>
+                            <strong>En cours :</strong> Cette activation est actuellement en cours d'exécution.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-4">
+                        <h5 class="text-info mb-3">
+                            <i class="fas fa-calendar-check"></i> Activation Planifiée
+                        </h5>
+                        <div class="alert alert-info">
+                            <i class="fas fa-calendar"></i>
+                            <strong>Planifiée :</strong> Cette activation est programmée pour le @Model.DateActivation.ToString("dd/MM/yyyy").
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 

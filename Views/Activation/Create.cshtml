@@ -1,0 +1,319 @@
+@model DiversityPub.Models.Activation
+@{
+    ViewData["Title"] = "Créer une Activation";
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Info"]
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Créer une Nouvelle Activation
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Nom" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Nom de l'activation
+                                </label>
+                                <input asp-for="Nom" class="form-control" required />
+                                <span asp-validation-for="Nom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                                                <div class="mb-3">
+                        <label asp-for="CampagneId" class="form-label">
+                            <i class="fas fa-bullhorn"></i> Campagne
+                        </label>
+                        <select asp-for="CampagneId" class="form-select" required id="CampagneId">
+                            <option value="">Sélectionner une campagne</option>
+                            @foreach (var campagne in ViewBag.Campagnes)
+                            {
+                                <option value="@campagne.Id" 
+                                        data-date-debut="@campagne.DateDebut.ToString("yyyy-MM-dd")" 
+                                        data-date-fin="@campagne.DateFin.ToString("yyyy-MM-dd")">
+                                    @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="CampagneId" class="text-danger"></span>
+                        <div id="campagne-date-info" class="alert alert-info mt-2" style="display: none;"></div>
+                    </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3" 
+                                  placeholder="Décrivez les objectifs de cette activation..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateActivation" class="form-label">
+                                    <i class="fas fa-calendar"></i> Date d'activation
+                                </label>
+                                <input asp-for="DateActivation" type="date" class="form-control" required />
+                                <span asp-validation-for="DateActivation" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LieuId" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Lieu
+                                </label>
+                                <select asp-for="LieuId" class="form-select" required>
+                                    <option value="">Sélectionner un lieu</option>
+                                    @foreach (var lieu in ViewBag.Lieux)
+                                    {
+                                        <option value="@lieu.Id">@lieu.Nom</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="LieuId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="HeureDebut" class="form-label">
+                                    <i class="fas fa-clock"></i> Heure de début
+                                </label>
+                                <input asp-for="HeureDebut" type="time" class="form-control" required />
+                                <span asp-validation-for="HeureDebut" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="HeureFin" class="form-label">
+                                    <i class="fas fa-clock"></i> Heure de fin
+                                </label>
+                                <input asp-for="HeureFin" type="time" class="form-control" required />
+                                <span asp-validation-for="HeureFin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Instructions" class="form-label">
+                            <i class="fas fa-list-check"></i> Instructions
+                        </label>
+                        <textarea asp-for="Instructions" class="form-control" rows="4" 
+                                  placeholder="Donnez les instructions détaillées pour cette activation..."></textarea>
+                        <span asp-validation-for="Instructions" class="text-danger"></span>
+                    </div>
+
+                                         <div class="mb-3">
+                         <label class="form-label">
+                             <i class="fas fa-users"></i> Agents Terrain Disponibles
+                         </label>
+                                                   <div id="agents-container">
+                              <div class="alert alert-info">
+                                  <i class="fas fa-info-circle"></i> Veuillez sélectionner une date d'activation pour voir les agents disponibles.
+                              </div>
+                          </div>
+                         <div id="agent-conflict-warning" class="alert alert-warning mt-2" style="display: none;">
+                             <i class="fas fa-exclamation-triangle"></i> 
+                             <span id="conflict-message"></span>
+                         </div>
+                     </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note :</strong> L'activation sera créée avec le statut "Planifiée". 
+                        Vous pourrez le modifier ultérieurement.
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "Activation")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Créer l'activation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Validation des heures et de la date d'activation
+        document.addEventListener('DOMContentLoaded', function() {
+            const heureDebut = document.getElementById('HeureDebut');
+            const heureFin = document.getElementById('HeureFin');
+            const dateActivation = document.getElementById('DateActivation');
+            const campagneSelect = document.getElementById('CampagneId');
+            
+            // Définir la date minimale à aujourd'hui
+            const today = new Date().toISOString().split('T')[0];
+            dateActivation.min = today;
+            
+            // Validation de l'heure de fin
+            heureFin.addEventListener('change', function() {
+                if (heureDebut.value && this.value && this.value <= heureDebut.value) {
+                    alert('L\'heure de fin doit être postérieure à l\'heure de début.');
+                    this.value = '';
+                }
+            });
+            
+            // Validation de l'heure de début
+            heureDebut.addEventListener('change', function() {
+                if (heureFin.value && this.value && this.value >= heureFin.value) {
+                    alert('L\'heure de début doit être antérieure à l\'heure de fin.');
+                    heureFin.value = '';
+                }
+            });
+            
+                         // Validation de la date d'activation par rapport à la campagne
+             campagneSelect.addEventListener('change', function() {
+                 const selectedOption = this.options[this.selectedIndex];
+                 if (selectedOption && selectedOption.dataset.dateDebut && selectedOption.dataset.dateFin) {
+                     const dateDebut = selectedOption.dataset.dateDebut;
+                     const dateFin = selectedOption.dataset.dateFin;
+                     
+                     dateActivation.min = dateDebut;
+                     dateActivation.max = dateFin;
+                     
+                     // Afficher un message informatif
+                     const infoDiv = document.getElementById('campagne-date-info');
+                     if (infoDiv) {
+                         infoDiv.innerHTML = `<i class="fas fa-info-circle"></i> La date d'activation doit être comprise entre ${dateDebut} et ${dateFin}`;
+                         infoDiv.style.display = 'block';
+                     }
+                 }
+             });
+             
+                           // Fonction pour mettre à jour la liste des agents disponibles
+              async function updateAgentsDisponibles(date) {
+                  try {
+                      const response = await fetch(`/Activation/GetAgentsDisponibles?date=${date.toISOString().split('T')[0]}`);
+                      const data = await response.json();
+                      
+                      const agentsContainer = document.getElementById('agents-container');
+                      
+                      if (data.success) {
+                          if (data.agents.length > 0) {
+                              let html = '<div class="row">';
+                              data.agents.forEach(agent => {
+                                  html += `
+                                      <div class="col-md-4 mb-2">
+                                          <div class="form-check">
+                                              <input class="form-check-input agent-checkbox" type="checkbox" name="agentIds" 
+                                                     value="${agent.Id}" id="agent_${agent.Id}" data-agent-name="${agent.Nom}" />
+                                              <label class="form-check-label" for="agent_${agent.Id}">
+                                                  ${agent.Nom}
+                                              </label>
+                                          </div>
+                                      </div>
+                                  `;
+                              });
+                              html += '</div>';
+                              html += '<small class="text-muted">Sélectionnez les agents disponibles qui participeront à cette activation (optionnel)</small>';
+                              
+                              agentsContainer.innerHTML = html;
+                              
+                              // Réattacher les événements aux nouveaux checkboxes
+                              const newAgentCheckboxes = document.querySelectorAll('.agent-checkbox');
+                              newAgentCheckboxes.forEach(checkbox => {
+                                  checkbox.addEventListener('change', checkAgentConflicts);
+                              });
+                          } else {
+                              agentsContainer.innerHTML = `
+                                  <div class="alert alert-warning">
+                                      <i class="fas fa-exclamation-triangle"></i> Aucun agent disponible pour cette date. 
+                                      Tous les agents sont déjà affectés à d'autres activations.
+                                  </div>
+                              `;
+                          }
+                      } else {
+                          console.error('Erreur lors de la récupération des agents:', data.message);
+                      }
+                  } catch (error) {
+                      console.error('Erreur lors de la mise à jour des agents:', error);
+                  }
+              }
+              
+              // Validation des agents terrain - vérifier les conflits
+              const agentCheckboxes = document.querySelectorAll('.agent-checkbox');
+              const conflictWarning = document.getElementById('agent-conflict-warning');
+              const conflictMessage = document.getElementById('conflict-message');
+              
+              function checkAgentConflicts() {
+                  const selectedAgents = Array.from(agentCheckboxes)
+                      .filter(cb => cb.checked)
+                      .map(cb => cb.dataset.agentName);
+                  
+                  if (selectedAgents.length > 0) {
+                      // Note: Cette validation côté client est basique
+                      // La validation complète se fait côté serveur
+                      conflictWarning.style.display = 'block';
+                      conflictMessage.textContent = `Agents sélectionnés: ${selectedAgents.join(', ')}. Vérifiez qu'ils ne sont pas déjà affectés à d'autres activations.`;
+                  } else {
+                      conflictWarning.style.display = 'none';
+                  }
+              }
+              
+              agentCheckboxes.forEach(checkbox => {
+                  checkbox.addEventListener('change', checkAgentConflicts);
+              });
+              
+                             // Mettre à jour les agents quand la date change
+               dateActivation.addEventListener('change', function() {
+                   if (this.value) {
+                       updateAgentsDisponibles(new Date(this.value));
+                   } else {
+                       // Afficher le message initial si aucune date n'est sélectionnée
+                       const agentsContainer = document.getElementById('agents-container');
+                       agentsContainer.innerHTML = `
+                           <div class="alert alert-info">
+                               <i class="fas fa-info-circle"></i> Veuillez sélectionner une date d'activation pour voir les agents disponibles.
+                           </div>
+                       `;
+                   }
+               });
+               
+               // Mettre à jour les agents au chargement si une date est déjà sélectionnée
+               if (dateActivation.value) {
+                   updateAgentsDisponibles(new Date(dateActivation.value));
+               } else {
+                   // Afficher le message initial si aucune date n'est sélectionnée
+                   const agentsContainer = document.getElementById('agents-container');
+                   agentsContainer.innerHTML = `
+                       <div class="alert alert-info">
+                           <i class="fas fa-info-circle"></i> Veuillez sélectionner une date d'activation pour voir les agents disponibles.
+                       </div>
+                   `;
+               }
+         });
+    </script>
+} 

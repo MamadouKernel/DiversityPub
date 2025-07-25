@@ -1,0 +1,182 @@
+@model DiversityPub.Models.DemandeActivation
+@{
+    ViewData["Title"] = "Nouvelle Demande d'Activation";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus"></i> Nouvelle Demande d'Activation
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Nom" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Nom de l'activation
+                                </label>
+                                <input asp-for="Nom" class="form-control" required />
+                                <span asp-validation-for="Nom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="CampagneId" class="form-label">
+                                    <i class="fas fa-bullhorn"></i> Campagne
+                                </label>
+                                <select asp-for="CampagneId" class="form-select" required id="CampagneId">
+                                    <option value="">Sélectionner une campagne</option>
+                                    @foreach (var campagne in ViewBag.Campagnes)
+                                    {
+                                        <option value="@campagne.Id" 
+                                                data-date-debut="@campagne.DateDebut.ToString("yyyy-MM-dd")" 
+                                                data-date-fin="@campagne.DateFin.ToString("yyyy-MM-dd")">
+                                            @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CampagneId" class="text-danger"></span>
+                                <div id="campagne-date-info" class="alert alert-info mt-2" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            <i class="fas fa-align-left"></i> Description
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="3" 
+                                  placeholder="Décrivez les objectifs de cette activation..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DateActivation" class="form-label">
+                                    <i class="fas fa-calendar"></i> Date d'activation
+                                </label>
+                                <input asp-for="DateActivation" type="date" class="form-control" required />
+                                <span asp-validation-for="DateActivation" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LieuId" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Lieu
+                                </label>
+                                <select asp-for="LieuId" class="form-select" required>
+                                    <option value="">Sélectionner un lieu</option>
+                                    @foreach (var lieu in ViewBag.Lieux)
+                                    {
+                                        <option value="@lieu.Id">@lieu.Nom</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="LieuId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="HeureDebut" class="form-label">
+                                    <i class="fas fa-clock"></i> Heure de début
+                                </label>
+                                <input asp-for="HeureDebut" type="time" class="form-control" required />
+                                <span asp-validation-for="HeureDebut" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="HeureFin" class="form-label">
+                                    <i class="fas fa-clock"></i> Heure de fin
+                                </label>
+                                <input asp-for="HeureFin" type="time" class="form-control" required />
+                                <span asp-validation-for="HeureFin" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Instructions" class="form-label">
+                            <i class="fas fa-list-check"></i> Instructions
+                        </label>
+                        <textarea asp-for="Instructions" class="form-control" rows="4" 
+                                  placeholder="Donnez les instructions détaillées pour cette activation..."></textarea>
+                        <span asp-validation-for="Instructions" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Index", "DemandeActivation")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Soumettre la demande
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const heureDebut = document.getElementById('HeureDebut');
+            const heureFin = document.getElementById('HeureFin');
+            const dateActivation = document.getElementById('DateActivation');
+            const campagneSelect = document.getElementById('CampagneId');
+            
+            // Définir la date minimale à aujourd'hui
+            const today = new Date().toISOString().split('T')[0];
+            dateActivation.min = today;
+            
+            // Validation de l'heure de fin
+            heureFin.addEventListener('change', function() {
+                if (heureDebut.value && this.value && this.value <= heureDebut.value) {
+                    alert('L\'heure de fin doit être postérieure à l\'heure de début.');
+                    this.value = '';
+                }
+            });
+            
+            // Validation de l'heure de début
+            heureDebut.addEventListener('change', function() {
+                if (heureFin.value && this.value && this.value >= heureFin.value) {
+                    alert('L\'heure de début doit être antérieure à l\'heure de fin.');
+                    heureFin.value = '';
+                }
+            });
+            
+            // Validation de la date d'activation par rapport à la campagne
+            campagneSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.dataset.dateDebut && selectedOption.dataset.dateFin) {
+                    const dateDebut = selectedOption.dataset.dateDebut;
+                    const dateFin = selectedOption.dataset.dateFin;
+                    
+                    dateActivation.min = dateDebut;
+                    dateActivation.max = dateFin;
+                    
+                    // Afficher un message informatif
+                    const infoDiv = document.getElementById('campagne-date-info');
+                    if (infoDiv) {
+                        infoDiv.innerHTML = `<i class="fas fa-info-circle"></i> La date d'activation doit être comprise entre ${dateDebut} et ${dateFin}`;
+                        infoDiv.style.display = 'block';
+                    }
+                }
+            });
+            
+            // Déclencher la validation au chargement si une campagne est déjà sélectionnée
+            if (campagneSelect.value) {
+                campagneSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+} 

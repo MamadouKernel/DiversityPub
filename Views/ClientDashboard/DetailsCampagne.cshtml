@@ -1,0 +1,270 @@
+@model DiversityPub.Models.Campagne
+@{
+    ViewData["Title"] = "Détails de la Campagne";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-bullhorn"></i> Détails de la Campagne : @Model.Nom
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-info-circle"></i> Informations Générales
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nom :</label>
+                            <p class="mb-0">@Model.Nom</p>
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description :</label>
+                                <p class="mb-0">@Model.Description</p>
+                            </div>
+                        }
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Période :</label>
+                            <p class="mb-0">
+                                Du @Model.DateDebut.ToString("dd/MM/yyyy") au @Model.DateFin.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Statut :</label>
+                            <span class="badge bg-@(Model.Statut switch {
+                                DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
+                                DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
+                                DiversityPub.Models.enums.StatutCampagne.Terminee => "info",
+                                DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
+                                _ => "secondary"
+                            })">@Model.Statut</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-chart-bar"></i> Statistiques
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-primary">@Model.Activations?.Count ?? 0</h4>
+                                    <small class="text-muted">Activations</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h4 class="text-success">@(Model.Feedbacks?.Count ?? 0)</h4>
+                                    <small class="text-muted">Feedbacks</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (Model.Feedbacks?.Any() == true)
+                        {
+                            <div class="mt-3">
+                                <label class="form-label fw-bold">Note moyenne :</label>
+                                <div class="d-flex align-items-center">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Model.Feedbacks.Average(f => f.Note))
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-muted"></i>
+                                        }
+                                    }
+                                    <span class="ms-2 badge bg-primary">@Model.Feedbacks.Average(f => f.Note).ToString("F1")/5</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <!-- Activations -->
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-map-marker-alt"></i> Activations (@Model.Activations?.Count ?? 0)
+                </h5>
+                
+                @if (Model.Activations?.Any() == true)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Date</th>
+                                    <th>Horaires</th>
+                                    <th>Lieu</th>
+                                    <th>Agents</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@activation.Nom</strong>
+                                            @if (!string.IsNullOrEmpty(activation.Description))
+                                            {
+                                                <br><small class="text-muted">@activation.Description</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@activation.DateActivation.ToString("dd/MM/yyyy")</small>
+                                        </td>
+                                        <td>
+                                            <small>@activation.HeureDebut.ToString("HH:mm") - @activation.HeureFin.ToString("HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@activation.Lieu?.Nom</span>
+                                        </td>
+                                        <td>
+                                            @if (activation.AgentsTerrain?.Any() == true)
+                                            {
+                                                <span class="badge bg-success">@activation.AgentsTerrain.Count agent(s)</span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    @string.Join(", ", activation.AgentsTerrain.Select(at => $"{at.Utilisateur.Prenom} {at.Utilisateur.Nom}"))
+                                                </small>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Aucun agent</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@(activation.Statut switch {
+                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
+                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
+                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "warning",
+                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
+                                                _ => "secondary"
+                                            })">@activation.Statut</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Aucune activation trouvée pour cette campagne.
+                    </div>
+                }
+                
+                <hr class="my-4">
+                
+                <!-- Feedbacks -->
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-comments"></i> Feedbacks (@Model.Feedbacks?.Count ?? 0)
+                </h5>
+                
+                @if (Model.Feedbacks?.Any() == true)
+                {
+                    @foreach (var feedback in Model.Feedbacks)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= feedback.Note)
+                                                {
+                                                    <i class="fas fa-star text-warning"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star text-muted"></i>
+                                                }
+                                            }
+                                            <span class="ms-2 badge bg-primary">@feedback.Note/5</span>
+                                            <small class="text-muted ms-3">@feedback.DateFeedback.ToString("dd/MM/yyyy à HH:mm")</small>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(feedback.Commentaire))
+                                        {
+                                            <p class="mb-0">@feedback.Commentaire</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="mb-0 text-muted">Aucun commentaire</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i> Aucun feedback trouvé pour cette campagne.
+                        @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                        {
+                            <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-sm btn-success ms-2">
+                                <i class="fas fa-plus"></i> Laisser un feedback
+                            </a>
+                        }
+                    </div>
+                }
+                
+                <hr class="my-4">
+                
+                <div class="d-flex justify-content-between">
+                    <a href="@Url.Action("Campagnes", "ClientDashboard")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour aux campagnes
+                    </a>
+                    <div>
+                        @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !Model.Feedbacks?.Any() == true)
+                        {
+                            <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-success">
+                                <i class="fas fa-comment"></i> Laisser un feedback
+                            </a>
+                        }
+                        <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #A32D18, #59311F);
+        color: white;
+    }
+    
+    .text-primary {
+        color: #A32D18 !important;
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+</style> 

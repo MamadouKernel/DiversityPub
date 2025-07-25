@@ -1,0 +1,319 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Dashboard Client";
+    var client = Model.Client;
+    var campagnes = Model.Campagnes;
+    var activations = Model.Activations;
+    var feedbacks = Model.Feedbacks;
+}
+
+<div class="row">
+    <div class="col-12">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
+            </div>
+        }
+        
+        <!-- En-tête du client -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-building"></i> Bienvenue, @client.RaisonSociale
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Contact principal :</strong> @client.NomContactPrincipal</p>
+                        <p><strong>Email :</strong> @client.EmailContactPrincipal</p>
+                        <p><strong>Téléphone :</strong> @client.TelephoneContactPrincipal</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Adresse :</strong> @client.Adresse</p>
+                        <p><strong>Registre de commerce :</strong> @client.RegistreCommerce</p>
+                        <p><strong>Dirigeant :</strong> @client.NomDirigeant</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="display-6 text-primary mb-2">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h3 class="card-title">@((campagnes as IEnumerable<DiversityPub.Models.Campagne>).Count())</h3>
+                        <p class="card-text">Campagnes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="display-6 text-success mb-2">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3 class="card-title">@((activations as IEnumerable<DiversityPub.Models.Activation>).Count())</h3>
+                        <p class="card-text">Activations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="display-6 text-warning mb-2">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="card-title">@((feedbacks as IEnumerable<DiversityPub.Models.Feedback>).Count())</h3>
+                        <p class="card-text">Feedbacks</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="display-6 text-info mb-2">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3 class="card-title">
+                            @if ((feedbacks as IEnumerable<DiversityPub.Models.Feedback>).Any())
+                            {
+                                @((feedbacks as IEnumerable<DiversityPub.Models.Feedback>).Average(f => f.Note).ToString("F1"))
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </h3>
+                        <p class="card-text">Note moyenne</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campagnes récentes -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bullhorn"></i> Campagnes Récentes
+                        </h5>
+                        <a href="@Url.Action("Campagnes", "ClientDashboard")" class="btn btn-sm btn-outline-primary">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if ((campagnes as IEnumerable<DiversityPub.Models.Campagne>).Any())
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var campagne in (campagnes as IEnumerable<DiversityPub.Models.Campagne>).Take(5))
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@campagne.Nom</h6>
+                                            <small class="text-muted">
+                                                @campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy")
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-@(campagne.Statut switch {
+                                            DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
+                                            DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
+                                            DiversityPub.Models.enums.StatutCampagne.Terminee => "info",
+                                            DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
+                                            _ => "secondary"
+                                        })">@campagne.Statut</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">Aucune campagne trouvée</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activations récentes -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-map-marker-alt"></i> Activations Récentes
+                        </h5>
+                        <a href="@Url.Action("Activations", "ClientDashboard")" class="btn btn-sm btn-outline-primary">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if ((activations as IEnumerable<DiversityPub.Models.Activation>).Any())
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var activation in (activations as IEnumerable<DiversityPub.Models.Activation>).Take(5))
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@activation.Nom</h6>
+                                            <small class="text-muted">
+                                                @activation.DateActivation.ToString("dd/MM/yyyy") - @activation.Lieu?.Nom
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-@(activation.Statut switch {
+                                            DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
+                                            DiversityPub.Models.enums.StatutActivation.EnCours => "success",
+                                            DiversityPub.Models.enums.StatutActivation.Suspendue => "warning",
+                                            DiversityPub.Models.enums.StatutActivation.Terminee => "info",
+                                            _ => "secondary"
+                                        })">@activation.Statut</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">Aucune activation trouvée</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedbacks récents -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments"></i> Feedbacks Récents
+                        </h5>
+                        <div>
+                            <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-sm btn-success me-2">
+                                <i class="fas fa-plus"></i> Nouveau Feedback
+                            </a>
+                            <a href="@Url.Action("Feedbacks", "ClientDashboard")" class="btn btn-sm btn-outline-primary">
+                                Voir tout
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if ((feedbacks as IEnumerable<DiversityPub.Models.Feedback>).Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Campagne</th>
+                                            <th>Note</th>
+                                            <th>Commentaire</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var feedback in (feedbacks as IEnumerable<DiversityPub.Models.Feedback>).Take(5))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="badge bg-info">@feedback.Campagne?.Nom</span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            if (i <= feedback.Note)
+                                                            {
+                                                                <i class="fas fa-star text-warning"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="far fa-star text-muted"></i>
+                                                            }
+                                                        }
+                                                        <span class="ms-2">@feedback.Note/5</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(feedback.Commentaire))
+                                                    {
+                                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@feedback.Commentaire">
+                                                            @feedback.Commentaire
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Aucun commentaire</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">@feedback.DateFeedback.ToString("dd/MM/yyyy")</small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucun feedback trouvé</h5>
+                                <p class="text-muted">Vous n'avez pas encore laissé de feedback sur vos campagnes.</p>
+                                <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Laisser un feedback
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #A32D18, #59311F);
+        color: white;
+    }
+    
+    .text-primary {
+        color: #A32D18 !important;
+    }
+    
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+    }
+    
+    .list-group-item:first-child {
+        border-top: none;
+    }
+    
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+</style> 
