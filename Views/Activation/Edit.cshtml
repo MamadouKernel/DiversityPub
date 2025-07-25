@@ -131,39 +131,7 @@
                         <span asp-validation-for="Instructions" class="text-danger"></span>
                     </div>
 
-                                         <div class="mb-3">
-                         <label class="form-label">
-                             <i class="fas fa-users"></i> Agents Terrain Disponibles
-                         </label>
-                         <div id="agents-container">
-                             @if (ViewBag.AgentsTerrain != null && ((IEnumerable<DiversityPub.Models.AgentTerrain>)ViewBag.AgentsTerrain).Any())
-                             {
-                                 <div class="row">
-                                     @foreach (var agent in ViewBag.AgentsTerrain)
-                                     {
-                                         var isSelected = Model.AgentsTerrain?.Any(at => at.Id == agent.Id) ?? false;
-                                         <div class="col-md-4 mb-2">
-                                             <div class="form-check">
-                                                 <input class="form-check-input agent-checkbox" type="checkbox" name="agentIds" 
-                                                        value="@agent.Id" id="agent_@agent.Id" @(isSelected ? "checked" : "") data-agent-name="@agent.Utilisateur.Prenom @agent.Utilisateur.Nom" />
-                                                 <label class="form-check-label" for="agent_@agent.Id">
-                                                     @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                 </label>
-                                             </div>
-                                         </div>
-                                     }
-                                 </div>
-                                 <small class="text-muted">Sélectionnez les agents disponibles qui participeront à cette activation (optionnel)</small>
-                             }
-                             else
-                             {
-                                 <div class="alert alert-info">
-                                     <i class="fas fa-info-circle"></i> Aucun agent terrain disponible pour le moment. 
-                                     Vous pouvez modifier l'activation sans agent et en ajouter plus tard.
-                                 </div>
-                             }
-                         </div>
-                     </div>
+                                                             
 
                     <div class="mb-3">
                         <label asp-for="Statut" class="form-label">
@@ -249,82 +217,7 @@
                 }
             });
             
-                         // Fonction pour mettre à jour la liste des agents disponibles
-             async function updateAgentsDisponibles(date) {
-                 try {
-                     const activationId = '@Model.Id';
-                     const response = await fetch(`/Activation/GetAgentsDisponibles?date=${date.toISOString().split('T')[0]}&activationId=${activationId}`);
-                     const data = await response.json();
-                     
-                     const agentsContainer = document.getElementById('agents-container');
-                     
-                     if (data.success) {
-                         if (data.agents.length > 0) {
-                             let html = '<div class="row">';
-                             data.agents.forEach(agent => {
-                                 // Vérifier si l'agent était déjà sélectionné
-                                 const wasSelected = document.querySelector(`input[value="${agent.Id}"]`)?.checked || false;
-                                 const checkedAttr = wasSelected ? 'checked' : '';
-                                 
-                                 html += `
-                                     <div class="col-md-4 mb-2">
-                                         <div class="form-check">
-                                             <input class="form-check-input agent-checkbox" type="checkbox" name="agentIds" 
-                                                    value="${agent.Id}" id="agent_${agent.Id}" ${checkedAttr} data-agent-name="${agent.Nom}" />
-                                             <label class="form-check-label" for="agent_${agent.Id}">
-                                                 ${agent.Nom}
-                                             </label>
-                                         </div>
-                                     </div>
-                                 `;
-                             });
-                             html += '</div>';
-                             html += '<small class="text-muted">Sélectionnez les agents disponibles qui participeront à cette activation (optionnel)</small>';
-                             
-                             agentsContainer.innerHTML = html;
-                         } else {
-                             agentsContainer.innerHTML = `
-                                 <div class="alert alert-warning">
-                                     <i class="fas fa-exclamation-triangle"></i> Aucun agent disponible pour cette date. 
-                                     Tous les agents sont déjà affectés à d'autres activations.
-                                 </div>
-                             `;
-                         }
-                     } else {
-                         console.error('Erreur lors de la récupération des agents:', data.message);
-                     }
-                 } catch (error) {
-                     console.error('Erreur lors de la mise à jour des agents:', error);
-                 }
-             }
-             
-                           // Mettre à jour les agents quand la date change
-              dateActivation.addEventListener('change', function() {
-                  if (this.value) {
-                      updateAgentsDisponibles(new Date(this.value));
-                  } else {
-                      // Afficher le message initial si aucune date n'est sélectionnée
-                      const agentsContainer = document.getElementById('agents-container');
-                      agentsContainer.innerHTML = `
-                          <div class="alert alert-info">
-                              <i class="fas fa-info-circle"></i> Veuillez sélectionner une date d'activation pour voir les agents disponibles.
-                          </div>
-                      `;
-                  }
-              });
-              
-              // Mettre à jour les agents au chargement si une date est déjà sélectionnée
-              if (dateActivation.value) {
-                  updateAgentsDisponibles(new Date(dateActivation.value));
-              } else {
-                  // Afficher le message initial si aucune date n'est sélectionnée
-                  const agentsContainer = document.getElementById('agents-container');
-                  agentsContainer.innerHTML = `
-                      <div class="alert alert-info">
-                          <i class="fas fa-info-circle"></i> Veuillez sélectionner une date d'activation pour voir les agents disponibles.
-                      </div>
-                  `;
-              }
+                         
              
              // Déclencher la validation au chargement si une campagne est déjà sélectionnée
              if (campagneSelect.value) {
@@ -378,20 +271,7 @@
                      statutWarning.style.display = 'none';
                  }
              
-                 // Validation des agents terrain pour le statut "En Cours"
-                 const agentCheckboxes = document.querySelectorAll('.agent-checkbox');
-                 const selectedAgents = Array.from(agentCheckboxes).filter(cb => cb.checked);
                  
-                 if (newStatut === '@DiversityPub.Models.enums.StatutActivation.EnCours' && selectedAgents.length === 0) {
-                     agentsWarningText.textContent = 'Impossible de démarrer une activation sans agent terrain. Veuillez assigner au moins un agent.';
-                     agentsWarning.style.display = 'block';
-                     
-                     // Remettre l'ancienne valeur
-                     this.value = currentStatut;
-                     return false;
-                 } else {
-                     agentsWarning.style.display = 'none';
-                 }
              });
         });
     </script>

@@ -1,0 +1,150 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using DiversityPub.Data;
+using DiversityPub.Models;
+using DiversityPub.Models.enums;
+using Microsoft.AspNetCore.Authorization;
+
+namespace DiversityPub.Controllers
+{
+    [Authorize(Roles = "Admin,ChefProjet")]
+    public class AssignationController : Controller
+    {
+        private readonly DiversityPubDbContext _context;
+
+        public AssignationController(DiversityPubDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: Assignation
+        public async Task<IActionResult> Index()
+        {
+            var activations = await _context.Activations
+                .Include(a => a.Campagne)
+                .Include(a => a.Lieu)
+                .Include(a => a.AgentsTerrain)
+                    .ThenInclude(at => at.Utilisateur)
+                .Where(a => a.Statut != StatutActivation.Terminee)
+                .OrderByDescending(a => a.DateActivation)
+                .ToListAsync();
+
+            return View(activations);
+        }
+
+        // GET: Assignation/Edit/5
+        public async Task<IActionResult> Edit(Guid? id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var activation = await _context.Activations
+                .Include(a => a.Campagne)
+                .Include(a => a.Lieu)
+                .Include(a => a.AgentsTerrain)
+                    .ThenInclude(at => at.Utilisateur)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (activation == null)
+                return NotFound();
+
+            // Charger tous les agents terrain avec leurs utilisateurs
+            var tousLesAgents = await _context.AgentsTerrain
+                .Include(at => at.Utilisateur)
+                .ToListAsync();
+
+            ViewBag.AgentsTerrain = tousLesAgents;
+            return View(activation);
+        }
+
+        // POST: Assignation/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, List<Guid> agentIds)
+        {
+            var activation = await _context.Activations
+                .Include(a => a.AgentsTerrain)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (activation == null)
+                return NotFound();
+
+            // Validation : Une activation ne peut pas démarrer sans agent terrain
+            if (activation.Statut == StatutActivation.EnCours)
+            {
+                var hasAgents = agentIds != null && agentIds.Any();
+                if (!hasAgents)
+                {
+                    TempData["Error"] = "❌ Impossible de démarrer une activation sans agent terrain. Veuillez assigner au moins un agent.";
+                    return RedirectToAction(nameof(Edit), new { id });
+                }
+            }
+
+            // Validation des agents terrain - vérifier qu'ils ne sont pas déjà affectés à d'autres activations non terminées
+            if (agentIds != null && agentIds.Any())
+            {
+                var agentsEnConflit = new List<string>();
+                
+                foreach (var agentId in agentIds)
+                {
+                    // Vérifier si l'agent est déjà affecté à une activation non terminée à la même date (exclure l'activation actuelle)
+                    var activationsConflitantes = await _context.Activations
+                        .Include(a => a.AgentsTerrain)
+                        .Where(a => a.Id != id // Exclure l'activation en cours de modification
+                                   && a.DateActivation == activation.DateActivation 
+                                   && a.Statut != StatutActivation.Terminee
+                                   && a.AgentsTerrain.Any(at => at.Id == agentId))
+                        .ToListAsync();
+
+                    if (activationsConflitantes.Any())
+                    {
+                        var agent = await _context.AgentsTerrain
+                            .Include(at => at.Utilisateur)
+                            .FirstOrDefaultAsync(at => at.Id == agentId);
+                        
+                        if (agent != null)
+                        {
+                            var nomAgent = $"{agent.Utilisateur.Prenom} {agent.Utilisateur.Nom}";
+                            var activations = string.Join(", ", activationsConflitantes.Select(a => a.Nom));
+                            agentsEnConflit.Add($"{nomAgent} (déjà affecté à: {activations})");
+                        }
+                    }
+                }
+
+                if (agentsEnConflit.Any())
+                {
+                    TempData["Error"] = $"❌ Les agents suivants ne peuvent pas être affectés car ils sont déjà engagés dans d'autres activations non terminées: {string.Join("; ", agentsEnConflit)}";
+                    return RedirectToAction(nameof(Edit), new { id });
+                }
+            }
+
+            try
+            {
+                // Mettre à jour les agents terrain
+                if (agentIds != null && agentIds.Any())
+                {
+                    var agents = await _context.AgentsTerrain
+                        .Where(at => agentIds.Contains(at.Id))
+                        .ToListAsync();
+                    
+                    activation.AgentsTerrain = agents;
+                }
+                else
+                {
+                    activation.AgentsTerrain.Clear();
+                }
+
+                _context.Update(activation);
+                await _context.SaveChangesAsync();
+                
+                TempData["Success"] = "✅ Assignation des agents mise à jour avec succès !";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"❌ Erreur lors de la mise à jour de l'assignation: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+    }
+} 
