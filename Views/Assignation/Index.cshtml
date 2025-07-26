@@ -3,90 +3,117 @@
     ViewData["Title"] = "Assignation des Agents";
 }
 
-<div class="row">
-    <div class="col-12">
-
-        
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-users"></i> Assignation des Agents aux Activations
-                </h4>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header simple -->
+            <div class="header">
+                <h1>Assignation des Agents</h1>
+                <a href="@Url.Action("Index", "Dashboard")" class="btn-retour">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
             </div>
-            <div class="card-body">
+
+            <!-- Messages simples -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="message success">
+                    <i class="fas fa-check"></i>
+                    <span>@TempData["Success"]</span>
+                </div>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="message error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>@TempData["Error"]</span>
+                </div>
+            }
+            
+            @if (TempData["Warning"] != null)
+            {
+                <div class="message warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>@TempData["Warning"]</span>
+                </div>
+            }
+
+            <!-- Liste simple -->
+            <div class="liste">
                 @if (!Model.Any())
                 {
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Aucune activation non terminée trouvée.
+                    <div class="vide">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Aucune activation à assigner</h3>
+                        <a href="@Url.Action("Index", "Activation")" class="btn">
+                            <i class="fas fa-plus"></i> Créer une Activation
+                        </a>
                     </div>
                 }
                 else
                 {
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Activation</th>
-                                    <th>Campagne</th>
-                                    <th>Lieu</th>
-                                    <th>Date</th>
-                                    <th>Statut</th>
-                                    <th>Agents Assignés</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var activation in Model)
-                                {
-                                    <tr>
-                                        <td>
-                                            <strong>@activation.Nom</strong>
-                                            @if (!string.IsNullOrEmpty(activation.Description))
+                    <div class="cartes">
+                        @foreach (var activation in Model)
+                        {
+                            <div class="carte">
+                                <div class="titre">
+                                    <h3>@activation.Nom</h3>
+                                    <span class="statut @(activation.Statut.ToString().ToLower())">
+                                        @activation.Statut
+                                    </span>
+                                </div>
+                                
+                                <div class="infos">
+                                    <div class="info">
+                                        <i class="fas fa-bullhorn"></i>
+                                        <span>@(activation.Campagne?.Nom ?? "Non définie")</span>
+                                    </div>
+                                    
+                                    <div class="info">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>@(activation.Lieu?.Nom ?? "Non défini")</span>
+                                    </div>
+                                    
+                                    <div class="info">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>@activation.DateActivation.ToString("dd/MM/yyyy")</span>
+                                        <small>@activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="equipe">
+                                    <h4>Équipe (@activation.AgentsTerrain.Count)</h4>
+                                    @if (activation.AgentsTerrain.Any())
+                                    {
+                                        <div class="membres">
+                                            @foreach (var agent in activation.AgentsTerrain)
                                             {
-                                                <br><small class="text-muted">@activation.Description</small>
-                                            }
-                                        </td>
-                                        <td>@activation.Campagne?.Nom</td>
-                                        <td>@activation.Lieu?.Nom</td>
-                                        <td>@activation.DateActivation.ToString("dd/MM/yyyy")</td>
-                                        <td>
-                                            <span class="badge bg-@(activation.Statut switch {
-                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
-                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
-                                                _ => "secondary"
-                                            })">@activation.Statut</span>
-                                        </td>
-                                        <td>
-                                            @if (activation.AgentsTerrain.Any())
-                                            {
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach (var agent in activation.AgentsTerrain)
+                                                var isResponsable = activation.ResponsableId == agent.Id;
+                                                <div class="membre @(isResponsable ? "responsable" : "")">
+                                                    <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i>
+                                                    <span>@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</span>
+                                                    @if (isResponsable)
                                                     {
-                                                        <span class="badge bg-primary">
-                                                            <i class="fas fa-user"></i> @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                        </span>
+                                                        <span class="label">Responsable</span>
                                                     }
                                                 </div>
                                             }
-                                            else
-                                            {
-                                                <span class="text-muted">
-                                                    <i class="fas fa-exclamation-triangle"></i> Aucun agent assigné
-                                                </span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <a href="@Url.Action("Edit", "Assignation", new { id = activation.Id })" 
-                                               class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i> Assigner
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p>Aucun agent assigné</p>
+                                    }
+                                </div>
+                                
+                                <div class="action">
+                                    <a href="@Url.Action("Edit", "Assignation", new { id = activation.Id })" class="btn">
+                                        <i class="fas fa-edit"></i> Assigner
+                                    </a>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>
@@ -95,10 +122,264 @@
 </div>
 
 <style>
-    .badge {
-        font-size: 0.75em;
+    /* Couleurs simples */
+    :root {
+        --rouge: #A32D18;
+        --jaune: #EDAC00;
+        --marron: #59311F;
+        --marron-clair: #A26D55;
+        --blanc: #ffffff;
+        --gris: #f8f9fa;
+        --texte: #333333;
     }
-    .table td {
-        vertical-align: middle;
+
+    /* Base simple */
+    body {
+        background: var(--gris);
+        font-family: Arial, sans-serif;
+        color: var(--texte);
+    }
+
+    /* Header simple */
+    .header {
+        background: var(--rouge);
+        color: var(--blanc);
+        padding: 1rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .btn-retour {
+        background: var(--blanc);
+        color: var(--rouge);
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Messages simples */
+    .message {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .success {
+        background: #28a745;
+        color: var(--blanc);
+    }
+
+    .error {
+        background: var(--rouge);
+        color: var(--blanc);
+    }
+
+    .warning {
+        background: var(--jaune);
+        color: var(--marron);
+    }
+
+    /* Liste simple */
+    .liste {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .vide {
+        text-align: center;
+        padding: 3rem;
+        background: var(--blanc);
+        border-radius: 10px;
+    }
+
+    .vide i {
+        font-size: 3rem;
+        color: var(--marron-clair);
+        margin-bottom: 1rem;
+    }
+
+    .vide h3 {
+        color: var(--marron);
+        margin-bottom: 1rem;
+    }
+
+    /* Grille simple */
+    .cartes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1rem;
+    }
+
+    /* Carte simple */
+    .carte {
+        background: var(--blanc);
+        border-radius: 10px;
+        padding: 1.5rem;
+        border: 1px solid #ddd;
+    }
+
+    .titre {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .titre h3 {
+        margin: 0;
+        color: var(--marron);
+        font-size: 1.3rem;
+    }
+
+    .statut {
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .statut.planifiee {
+        background: var(--jaune);
+        color: var(--marron);
+    }
+
+    .statut.encours {
+        background: #28a745;
+        color: var(--blanc);
+    }
+
+    .statut.suspendue {
+        background: #ffc107;
+        color: var(--marron);
+    }
+
+    .statut.terminee {
+        background: #6c757d;
+        color: var(--blanc);
+    }
+
+    /* Infos simples */
+    .infos {
+        margin-bottom: 1.5rem;
+    }
+
+    .info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--texte);
+    }
+
+    .info i {
+        color: var(--rouge);
+        width: 16px;
+    }
+
+    .info small {
+        color: #666;
+        margin-left: auto;
+    }
+
+    /* Équipe simple */
+    .equipe h4 {
+        color: var(--marron);
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+    }
+
+    .membres {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .membre {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--gris);
+        border-radius: 5px;
+    }
+
+    .membre.responsable {
+        background: var(--jaune);
+        border: 1px solid var(--jaune);
+    }
+
+    .membre i {
+        color: var(--rouge);
+    }
+
+    .membre.responsable i {
+        color: var(--marron);
+    }
+
+    .label {
+        background: var(--marron);
+        color: var(--blanc);
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        margin-left: auto;
+    }
+
+    /* Action simple */
+    .action {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .btn {
+        background: var(--rouge);
+        color: var(--blanc);
+        padding: 0.7rem 1.5rem;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .btn:hover {
+        background: var(--marron);
+        color: var(--blanc);
+    }
+
+    /* Responsive simple */
+    @@media (max-width: 768px) {
+        .cartes {
+            grid-template-columns: 1fr;
+        }
+        
+        .header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
     }
 </style> 

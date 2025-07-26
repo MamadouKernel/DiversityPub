@@ -129,16 +129,25 @@
                         <h5 class="text-info mb-3">
                             <i class="fas fa-users"></i> Agents Terrain (@Model.AgentsTerrain.Count)
                         </h5>
+                        
+
                         <div class="row">
                             @foreach (var agent in Model.AgentsTerrain)
                             {
+                                var isResponsable = Model.ResponsableId == agent.Id;
                                 <div class="col-md-4 mb-3">
-                                    <div class="card">
+                                    <div class="card @(isResponsable ? "border-warning" : "")" style="@(isResponsable ? "box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); background-color: #fff3cd;" : "")">
                                         <div class="card-body text-center">
                                             <div class="avatar mb-2">
-                                                <i class="fas fa-user-tie fa-2x text-primary"></i>
+                                                <i class="fas @(isResponsable ? "fa-crown fa-2x text-warning" : "fa-user-tie fa-2x text-primary")"></i>
                                             </div>
-                                            <h6 class="card-title">@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</h6>
+                                            <h6 class="card-title @(isResponsable ? "text-warning fw-bold" : "")">
+                                                @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
+                                                @if (isResponsable)
+                                                {
+                                                    <br><small class="badge bg-warning text-dark fw-bold">👑 RESPONSABLE</small>
+                                                }
+                                            </h6>
                                             <p class="card-text">
                                                 <small class="text-muted">
                                                     <i class="fas fa-phone"></i> @agent.Telephone<br>
@@ -201,4 +210,18 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<style>
+    .card.border-warning {
+        border-width: 3px !important;
+        border-color: #ffc107 !important;
+    }
+    .badge.bg-warning {
+        font-size: 0.8em;
+        padding: 0.5em 0.8em;
+    }
+    .card-title.text-warning {
+        color: #856404 !important;
+    }
+</style> 

@@ -20,5 +20,9 @@ namespace DiversityPub.Models
         public Lieu? Lieu { get; set; }
 
         public ICollection<AgentTerrain> AgentsTerrain { get; set; } = new List<AgentTerrain>();
+        
+        // Responsable de l'activation (optionnel)
+        public Guid? ResponsableId { get; set; }
+        public AgentTerrain? Responsable { get; set; }
     }
 } 

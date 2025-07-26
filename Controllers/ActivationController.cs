@@ -29,6 +29,8 @@ namespace DiversityPub.Controllers
                 .Include(a => a.Lieu)
                 .Include(a => a.AgentsTerrain)
                     .ThenInclude(at => at.Utilisateur)
+                .Include(a => a.Responsable)
+                    .ThenInclude(r => r.Utilisateur)
                 .OrderByDescending(a => a.DateActivation)
                 .ToListAsync();
             
@@ -47,6 +49,8 @@ namespace DiversityPub.Controllers
                 .Include(a => a.Lieu)
                 .Include(a => a.AgentsTerrain)
                     .ThenInclude(at => at.Utilisateur)
+                .Include(a => a.Responsable)
+                    .ThenInclude(r => r.Utilisateur)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (activation == null)

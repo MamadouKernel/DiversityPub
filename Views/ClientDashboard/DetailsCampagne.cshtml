@@ -58,7 +58,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-primary">@Model.Activations?.Count ?? 0</h4>
+                                    <h4 class="text-primary">@(Model.Activations?.Count ?? 0)</h4>
                                     <small class="text-muted">Activations</small>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                 
                 <!-- Activations -->
                 <h5 class="text-primary mb-3">
-                    <i class="fas fa-map-marker-alt"></i> Activations (@Model.Activations?.Count ?? 0)
+                    <i class="fas fa-map-marker-alt"></i> Activations (@(Model.Activations?.Count ?? 0))
                 </h5>
                 
                 @if (Model.Activations?.Any() == true)
@@ -129,7 +129,14 @@
                                             <small class="text-muted">@activation.DateActivation.ToString("dd/MM/yyyy")</small>
                                         </td>
                                         <td>
-                                            <small>@activation.HeureDebut.ToString("HH:mm") - @activation.HeureFin.ToString("HH:mm")</small>
+                                            @{
+                                                var heureDebut = activation.HeureDebut.ToString(@"hh\:mm");
+                                                var heureFin = activation.HeureFin.ToString(@"hh\:mm");
+                                            }
+                                            <small>
+                                                <i class="fas fa-clock text-primary"></i>
+                                                @heureDebut - @heureFin
+                                            </small>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary">@activation.Lieu?.Nom</span>
@@ -139,9 +146,20 @@
                                             {
                                                 <span class="badge bg-success">@activation.AgentsTerrain.Count agent(s)</span>
                                                 <br>
-                                                <small class="text-muted">
-                                                    @string.Join(", ", activation.AgentsTerrain.Select(at => $"{at.Utilisateur.Prenom} {at.Utilisateur.Nom}"))
-                                                </small>
+                                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                                    @foreach (var agent in activation.AgentsTerrain)
+                                                    {
+                                                        var isResponsable = activation.ResponsableId == agent.Id;
+                                                        <span class="badge @(isResponsable ? "bg-warning" : "bg-secondary")" style="font-size: 0.7rem;">
+                                                            <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i> 
+                                                            @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
+                                                            @if (isResponsable)
+                                                            {
+                                                                <small class="ms-1">(Responsable)</small>
+                                                            }
+                                                        </span>
+                                                    }
+                                                </div>
                                             }
                                             else
                                             {
@@ -174,7 +192,7 @@
                 
                 <!-- Feedbacks -->
                 <h5 class="text-primary mb-3">
-                    <i class="fas fa-comments"></i> Feedbacks (@Model.Feedbacks?.Count ?? 0)
+                    <i class="fas fa-comments"></i> Feedbacks (@(Model.Feedbacks?.Count ?? 0))
                 </h5>
                 
                 @if (Model.Feedbacks?.Any() == true)

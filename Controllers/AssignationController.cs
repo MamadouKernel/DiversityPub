@@ -25,6 +25,8 @@ namespace DiversityPub.Controllers
                 .Include(a => a.Lieu)
                 .Include(a => a.AgentsTerrain)
                     .ThenInclude(at => at.Utilisateur)
+                .Include(a => a.Responsable)
+                    .ThenInclude(r => r.Utilisateur)
                 .Where(a => a.Statut != StatutActivation.Terminee)
                 .OrderByDescending(a => a.DateActivation)
                 .ToListAsync();
@@ -43,6 +45,8 @@ namespace DiversityPub.Controllers
                 .Include(a => a.Lieu)
                 .Include(a => a.AgentsTerrain)
                     .ThenInclude(at => at.Utilisateur)
+                .Include(a => a.Responsable)
+                    .ThenInclude(r => r.Utilisateur)
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (activation == null)
@@ -60,7 +64,7 @@ namespace DiversityPub.Controllers
         // POST: Assignation/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, List<Guid> agentIds)
+        public async Task<IActionResult> Edit(Guid id, List<Guid> agentIds, Guid? responsableId)
         {
             var activation = await _context.Activations
                 .Include(a => a.AgentsTerrain)
@@ -128,16 +132,47 @@ namespace DiversityPub.Controllers
                         .ToListAsync();
                     
                     activation.AgentsTerrain = agents;
+                    
+                    // Gérer le responsable
+                    if (responsableId.HasValue)
+                    {
+                        // Vérifier que le responsable est bien parmi les agents sélectionnés
+                        if (agentIds.Contains(responsableId.Value))
+                        {
+                            activation.ResponsableId = responsableId.Value;
+                        }
+                        else
+                        {
+                            TempData["Warning"] = "⚠️ Le responsable doit être sélectionné parmi les agents assignés.";
+                            activation.ResponsableId = null;
+                        }
+                    }
+                    else
+                    {
+                        activation.ResponsableId = null;
+                    }
                 }
                 else
                 {
                     activation.AgentsTerrain.Clear();
+                    activation.ResponsableId = null; // Pas de responsable si aucun agent
                 }
 
                 _context.Update(activation);
                 await _context.SaveChangesAsync();
                 
-                TempData["Success"] = "✅ Assignation des agents mise à jour avec succès !";
+                var message = "✅ Assignation des agents mise à jour avec succès !";
+                if (responsableId.HasValue && agentIds.Contains(responsableId.Value))
+                {
+                    var responsable = await _context.AgentsTerrain
+                        .Include(at => at.Utilisateur)
+                        .FirstOrDefaultAsync(at => at.Id == responsableId.Value);
+                    if (responsable != null)
+                    {
+                        message += $" Responsable désigné : {responsable.Utilisateur.Prenom} {responsable.Utilisateur.Nom}";
+                    }
+                }
+                TempData["Success"] = message;
             }
             catch (Exception ex)
             {

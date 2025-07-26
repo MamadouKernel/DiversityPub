@@ -84,7 +84,14 @@
                                             })">@item.Statut</span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">@item.Activations?.Count ?? 0 activation(s)</span>
+                                            @{
+                                                var activationCount = item.Activations?.Count ?? 0;
+                                                var badgeClass = activationCount > 0 ? "bg-success" : "bg-secondary";
+                                            }
+                                            <span class="badge @badgeClass">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                @activationCount activation(s)
+                                            </span>
                                         </td>
                                         <td>
                                             @if (item.Feedbacks?.Any() == true)

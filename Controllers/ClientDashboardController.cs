@@ -48,6 +48,8 @@ namespace DiversityPub.Controllers
                         .Include(a => a.Lieu)
                         .Include(a => a.AgentsTerrain)
                             .ThenInclude(at => at.Utilisateur)
+                        .Include(a => a.Responsable)
+                            .ThenInclude(r => r.Utilisateur)
                         .Where(a => a.Campagne.ClientId == clientId)
                         .OrderByDescending(a => a.DateActivation)
                         .ToListAsync(),
@@ -82,6 +84,8 @@ namespace DiversityPub.Controllers
                 }
 
                 var campagnes = await _context.Campagnes
+                    .Include(c => c.Activations)
+                    .Include(c => c.Feedbacks)
                     .Where(c => c.ClientId == utilisateur.Client.Id)
                     .OrderByDescending(c => c.DateDebut)
                     .ToListAsync();
@@ -123,6 +127,8 @@ namespace DiversityPub.Controllers
                     .Include(a => a.Lieu)
                     .Include(a => a.AgentsTerrain)
                         .ThenInclude(at => at.Utilisateur)
+                    .Include(a => a.Responsable)
+                        .ThenInclude(r => r.Utilisateur)
                     .Where(a => a.Campagne.ClientId == utilisateur.Client.Id)
                     .OrderByDescending(a => a.DateActivation)
                     .ToListAsync();
@@ -323,6 +329,9 @@ namespace DiversityPub.Controllers
                     .Include(c => c.Activations)
                         .ThenInclude(a => a.AgentsTerrain)
                             .ThenInclude(at => at.Utilisateur)
+                    .Include(c => c.Activations)
+                        .ThenInclude(a => a.Responsable)
+                            .ThenInclude(r => r.Utilisateur)
                     .Include(c => c.Feedbacks)
                     .FirstOrDefaultAsync(c => c.Id == id && c.ClientId == utilisateur.Client.Id);
 

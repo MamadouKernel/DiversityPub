@@ -90,14 +90,24 @@
                                                 <i class="fas fa-users"></i> Agents (@activation.AgentsTerrain.Count)
                                             </small>
                                             <br>
-                                            @foreach (var agent in activation.AgentsTerrain.Take(2))
-                                            {
-                                                <span class="badge bg-secondary me-1">@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</span>
-                                            }
-                                            @if (activation.AgentsTerrain.Count > 2)
-                                            {
-                                                <span class="badge bg-secondary">+@(activation.AgentsTerrain.Count - 2)</span>
-                                            }
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var agent in activation.AgentsTerrain.Take(3))
+                                                {
+                                                    var isResponsable = activation.ResponsableId == agent.Id;
+                                                    <span class="badge @(isResponsable ? "bg-warning" : "bg-secondary")" style="font-size: 0.75rem;">
+                                                        <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i> 
+                                                        @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
+                                                        @if (isResponsable)
+                                                        {
+                                                            <small class="ms-1">(Responsable)</small>
+                                                        }
+                                                    </span>
+                                                }
+                                                @if (activation.AgentsTerrain.Count > 3)
+                                                {
+                                                    <span class="badge bg-secondary">+@(activation.AgentsTerrain.Count - 3)</span>
+                                                }
+                                            </div>
                                         </div>
                                     }
                                 </div>

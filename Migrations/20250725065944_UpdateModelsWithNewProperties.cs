@@ -49,6 +49,12 @@ namespace DiversityPub.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.AddColumn<Guid>(
+                name: "ResponsableId",
+                table: "Activations",
+                type: "uniqueidentifier",
+                nullable: true);
+
             migrationBuilder.UpdateData(
                 table: "Utilisateurs",
                 keyColumn: "Id",
@@ -82,6 +88,10 @@ namespace DiversityPub.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Nom",
+                table: "Activations");
+
+            migrationBuilder.DropColumn(
+                name: "ResponsableId",
                 table: "Activations");
 
             migrationBuilder.UpdateData(

@@ -102,6 +102,14 @@ namespace DiversityPub.Data
                 .HasForeignKey(a => a.LieuId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // ✅ Configuration de la relation Responsable
+            modelBuilder.Entity<Activation>()
+                .HasOne(a => a.Responsable)
+                .WithMany()
+                .HasForeignKey(a => a.ResponsableId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false); // Le responsable est optionnel
+
             modelBuilder.Entity<Feedback>()
                 .HasOne(f => f.Campagne)
                 .WithMany(c => c.Feedbacks)
