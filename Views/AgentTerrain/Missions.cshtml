@@ -1,0 +1,1003 @@
+@using DiversityPub.Models.enums
+@model DiversityPub.Models.AgentTerrain
+@{
+    ViewData["Title"] = "Tablette Agent Terrain";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DiversityPub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #A32D18;
+            --secondary: #EDAC00;
+            --dark: #59311F;
+            --light: #A26D55;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .tablet-container {
+            max-width: 1024px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #8a1f0f 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .main-content {
+            padding: 1rem;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .bg-location { background: var(--primary); }
+        .bg-activation { background: #28a745; }
+        .bg-media { background: #17a2b8; }
+        .bg-incident { background: #dc3545; }
+
+        .activation-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--secondary);
+            transition: all 0.3s ease;
+        }
+
+        .activation-item.active {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .activation-item.completed {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .activation-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-tablet {
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-start {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-finish {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .btn-media {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-incident {
+            background: #dc3545;
+            color: white;
+        }
+
+        .position-display {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .position-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .media-item {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .media-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .media-info {
+            padding: 0.5rem;
+            background: white;
+        }
+
+        .incident-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .incident-item {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #dc3545;
+        }
+
+        .modal-tablet .modal-dialog {
+            max-width: 600px;
+        }
+
+        .form-control-tablet {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .form-control-tablet:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            background: #8a1f0f;
+        }
+
+        @@media (max-width: 768px) {
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .position-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="agent-info">
+                    <div class="agent-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">@Model.Utilisateur.Prenom @Model.Utilisateur.Nom</h4>
+                        <small>Agent Terrain</small>
+                    </div>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="text-end">
+                    <div id="current-time" class="h5 mb-0"></div>
+                    <small id="current-date"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Action Grid -->
+            <div class="action-grid">
+                <!-- Position GPS -->
+                <div class="action-card">
+                    <div class="action-header">
+                        <div class="action-icon bg-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Ma Position</h5>
+                            <small class="text-muted">Géolocalisation en temps réel</small>
+                        </div>
+                    </div>
+                    
+                    <div class="position-display">
+                        <div class="position-info">
+                            <div class="info-item">
+                                <i class="fas fa-location-arrow text-primary"></i>
+                                <span>Lat: <span id="latitude">--</span></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-location-arrow text-primary"></i>
+                                <span>Lng: <span id="longitude">--</span></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-clock text-info"></i>
+                                <span>Mise à jour: <span id="lastUpdate">--</span></span>
+                            </div>
+                        </div>
+                        <button id="updatePosition" class="btn btn-primary w-100">
+                            <i class="fas fa-sync-alt"></i> Mettre à jour
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activations -->
+                <div class="action-card">
+                    <div class="action-header">
+                        <div class="action-icon bg-activation">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Mes Activations</h5>
+                            <small class="text-muted">@Model.Activations.Count() assignée(s)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="activation-list">
+                        @if (!Model.Activations.Any())
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Aucune activation</h6>
+                                <p class="text-muted mb-0">Aucune activation assignée pour le moment.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
+                            {
+                                <div class="activation-item @(activation.Statut.ToString().ToLower())" data-activation-id="@activation.Id">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">@activation.Nom</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> @activation.DateActivation.ToString("dd/MM/yyyy")
+                                                <br>
+                                                <i class="fas fa-clock"></i> @activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")
+                                                <br>
+                                                <i class="fas fa-map-marker-alt"></i> @(activation.Lieu?.Nom ?? "Lieu non défini")
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-@(activation.Statut == StatutActivation.Planifiee ? "warning" : 
+                                                          activation.Statut == StatutActivation.EnCours ? "success" : "info")">
+                                            @GetStatusDisplayName(activation.Statut)
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="activation-actions">
+                                        @if (activation.Statut == StatutActivation.Planifiee)
+                                        {
+                                            <button class="btn-tablet btn-start start-activation" data-activation-id="@activation.Id">
+                                                <i class="fas fa-play"></i> Démarrer
+                                            </button>
+                                        }
+                                        else if (activation.Statut == StatutActivation.EnCours)
+                                        {
+                                            <button class="btn-tablet btn-finish finish-activation" data-activation-id="@activation.Id">
+                                                <i class="fas fa-check"></i> Terminer
+                                            </button>
+                                            <button class="btn-tablet btn-media upload-media" data-activation-id="@activation.Id">
+                                                <i class="fas fa-camera"></i> Média
+                                            </button>
+                                            <button class="btn-tablet btn-incident create-incident" data-activation-id="@activation.Id">
+                                                <i class="fas fa-exclamation-triangle"></i> Incident
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Médias -->
+                <div class="action-card">
+                    <div class="action-header">
+                        <div class="action-icon bg-media">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Mes Médias</h5>
+                            <small class="text-muted">@Model.Medias.Count() fichier(s)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="media-gallery">
+                        @if (!Model.Medias.Any())
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Aucun média</h6>
+                                <p class="text-muted mb-0">Aucun média uploadé pour le moment.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var media in Model.Medias.OrderByDescending(m => m.DateUpload).Take(6))
+                            {
+                                <div class="media-item">
+                                    @if (media.Type == TypeMedia.Photo)
+                                    {
+                                        <img src="@media.Url" alt="@media.Description" class="media-preview" />
+                                    }
+                                    else if (media.Type == TypeMedia.Video)
+                                    {
+                                        <video class="media-preview" muted>
+                                            <source src="@media.Url" type="video/mp4">
+                                        </video>
+                                    }
+                                    else
+                                    {
+                                        <div class="media-preview d-flex align-items-center justify-content-center bg-light">
+                                            <i class="fas fa-file fa-2x text-muted"></i>
+                                        </div>
+                                    }
+                                    <div class="media-info">
+                                        <small class="text-muted">@media.DateUpload.ToString("dd/MM HH:mm")</small>
+                                        @if (!string.IsNullOrEmpty(media.Description))
+                                        {
+                                            <p class="mb-0 small">@media.Description</p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Incidents -->
+                <div class="action-card">
+                    <div class="action-header">
+                        <div class="action-icon bg-incident">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Mes Incidents</h5>
+                            <small class="text-muted">@Model.Incidents.Count() signalé(s)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="incident-list">
+                        @if (!Model.Incidents.Any())
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Aucun incident</h6>
+                                <p class="text-muted mb-0">Aucun incident signalé pour le moment.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var incident in Model.Incidents.OrderByDescending(i => i.DateCreation).Take(3))
+                            {
+                                <div class="incident-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">@incident.Titre</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> @incident.DateCreation.ToString("dd/MM HH:mm")
+                                                <br>
+                                                <i class="fas fa-info-circle"></i> @incident.Statut
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-@GetIncidentBadgeClass(incident.Priorite)">
+                                            @incident.Priorite
+                                        </span>
+                                    </div>
+                                    <p class="mb-0 small mt-2">@incident.Description</p>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="floating-action" id="quickAction" title="Action rapide">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Modal Upload Média -->
+    <div class="modal fade modal-tablet" id="uploadMediaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-camera text-info"></i> Ajouter un média
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadMediaForm">
+                        <input type="hidden" id="mediaActivationId" />
+                        <div class="mb-3">
+                            <label for="mediaType" class="form-label">Type de média</label>
+                            <select id="mediaType" class="form-select form-control-tablet" required>
+                                <option value="">Sélectionner un type</option>
+                                <option value="Photo">Photo</option>
+                                <option value="Video">Vidéo</option>
+                                <option value="Document">Document</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="mediaUrl" class="form-label">URL du média</label>
+                            <input type="url" id="mediaUrl" class="form-control form-control-tablet" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="mediaDescription" class="form-label">Description</label>
+                            <textarea id="mediaDescription" class="form-control form-control-tablet" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveMedia">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Créer Incident -->
+    <div class="modal fade modal-tablet" id="createIncidentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger"></i> Signaler un incident
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createIncidentForm">
+                        <input type="hidden" id="incidentActivationId" />
+                        <div class="mb-3">
+                            <label for="incidentTitre" class="form-label">Titre</label>
+                            <input type="text" id="incidentTitre" class="form-control form-control-tablet" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="incidentDescription" class="form-label">Description</label>
+                            <textarea id="incidentDescription" class="form-control form-control-tablet" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="incidentPriorite" class="form-label">Priorité</label>
+                            <select id="incidentPriorite" class="form-select form-control-tablet" required>
+                                <option value="">Sélectionner une priorité</option>
+                                <option value="Basse">Basse</option>
+                                <option value="Normale">Normale</option>
+                                <option value="Haute">Haute</option>
+                                <option value="Critique">Critique</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="saveIncident">
+                        <i class="fas fa-exclamation-triangle"></i> Signaler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let currentPosition = null;
+        let watchId = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePosition();
+            setupEventListeners();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+
+        // Mise à jour de l'heure et date
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Initialisation de la géolocalisation
+        function initializePosition() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        updatePositionDisplay(position);
+                        currentPosition = position;
+                    },
+                    function(error) {
+                        console.error('Erreur de géolocalisation:', error);
+                        showMessage('Impossible d\'obtenir votre position', 'error');
+                    }
+                );
+
+                watchId = navigator.geolocation.watchPosition(
+                    function(position) {
+                        updatePositionDisplay(position);
+                        currentPosition = position;
+                    },
+                    function(error) {
+                        console.error('Erreur de surveillance GPS:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 30000
+                    }
+                );
+            } else {
+                showMessage('La géolocalisation n\'est pas supportée', 'error');
+            }
+        }
+
+        // Mise à jour de l'affichage de la position
+        function updatePositionDisplay(position) {
+            document.getElementById('latitude').textContent = position.coords.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = position.coords.longitude.toFixed(6);
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('fr-FR');
+        }
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Bouton de mise à jour de position
+            document.getElementById('updatePosition').addEventListener('click', function() {
+                if (currentPosition) {
+                    updatePositionOnServer(currentPosition);
+                } else {
+                    showMessage('Position non disponible', 'error');
+                }
+            });
+
+            // Boutons de démarrage d'activation
+            document.querySelectorAll('.start-activation').forEach(button => {
+                button.addEventListener('click', function() {
+                    const activationId = this.dataset.activationId;
+                    startActivation(activationId);
+                });
+            });
+
+            // Boutons de fin d'activation
+            document.querySelectorAll('.finish-activation').forEach(button => {
+                button.addEventListener('click', function() {
+                    const activationId = this.dataset.activationId;
+                    finishActivation(activationId);
+                });
+            });
+
+            // Boutons d'upload de média
+            document.querySelectorAll('.upload-media').forEach(button => {
+                button.addEventListener('click', function() {
+                    const activationId = this.dataset.activationId;
+                    openUploadMediaModal(activationId);
+                });
+            });
+
+            // Boutons de création d'incident
+            document.querySelectorAll('.create-incident').forEach(button => {
+                button.addEventListener('click', function() {
+                    const activationId = this.dataset.activationId;
+                    openCreateIncidentModal(activationId);
+                });
+            });
+
+            // Sauvegarde de média
+            document.getElementById('saveMedia').addEventListener('click', function() {
+                saveMedia();
+            });
+
+            // Sauvegarde d'incident
+            document.getElementById('saveIncident').addEventListener('click', function() {
+                saveIncident();
+            });
+
+            // Bouton d'action rapide
+            document.getElementById('quickAction').addEventListener('click', function() {
+                const activeActivations = document.querySelectorAll('.activation-item.encours');
+                if (activeActivations.length > 0) {
+                    const firstActive = activeActivations[0];
+                    const activationId = firstActive.dataset.activationId;
+                    openUploadMediaModal(activationId);
+                } else {
+                    showMessage('Aucune activation en cours', 'info');
+                }
+            });
+        }
+
+        // Mise à jour de la position sur le serveur
+        async function updatePositionOnServer(position) {
+            try {
+                const response = await fetch('/AgentTerrain/UpdatePosition', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        precision: position.coords.accuracy
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de la position:', error);
+                showMessage('Erreur lors de la mise à jour de la position', 'error');
+            }
+        }
+
+        // Démarrage d'une activation
+        async function startActivation(activationId) {
+            try {
+                const response = await fetch('/AgentTerrain/StartMission', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(activationId)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors du démarrage de l\'activation:', error);
+                showMessage('Erreur lors du démarrage de l\'activation', 'error');
+            }
+        }
+
+        // Fin d'une activation
+        async function finishActivation(activationId) {
+            try {
+                const response = await fetch('/AgentTerrain/FinishMission', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify(activationId)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la fin de l\'activation:', error);
+                showMessage('Erreur lors de la fin de l\'activation', 'error');
+            }
+        }
+
+        // Ouverture du modal d'upload de média
+        function openUploadMediaModal(activationId) {
+            document.getElementById('mediaActivationId').value = activationId;
+            const modal = new bootstrap.Modal(document.getElementById('uploadMediaModal'));
+            modal.show();
+        }
+
+        // Sauvegarde d'un média
+        async function saveMedia() {
+            const activationId = document.getElementById('mediaActivationId').value;
+            const type = document.getElementById('mediaType').value;
+            const url = document.getElementById('mediaUrl').value;
+            const description = document.getElementById('mediaDescription').value;
+
+            if (!type || !url) {
+                showMessage('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/AgentTerrain/UploadMedia', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({
+                        activationId: activationId,
+                        type: type,
+                        url: url,
+                        description: description
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('uploadMediaModal')).hide();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'upload du média:', error);
+                showMessage('Erreur lors de l\'upload du média', 'error');
+            }
+        }
+
+        // Ouverture du modal de création d'incident
+        function openCreateIncidentModal(activationId) {
+            document.getElementById('incidentActivationId').value = activationId;
+            const modal = new bootstrap.Modal(document.getElementById('createIncidentModal'));
+            modal.show();
+        }
+
+        // Sauvegarde d'un incident
+        async function saveIncident() {
+            const activationId = document.getElementById('incidentActivationId').value;
+            const titre = document.getElementById('incidentTitre').value;
+            const description = document.getElementById('incidentDescription').value;
+            const priorite = document.getElementById('incidentPriorite').value;
+
+            if (!titre || !description || !priorite) {
+                showMessage('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/AgentTerrain/CreateIncident', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({
+                        activationId: activationId,
+                        titre: titre,
+                        description: description,
+                        priorite: priorite
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('createIncidentModal')).hide();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la création de l\'incident:', error);
+                showMessage('Erreur lors de la création de l\'incident', 'error');
+            }
+        }
+
+        // Affichage de messages
+        function showMessage(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 
+                             type === 'error' ? 'alert-danger' : 
+                             type === 'info' ? 'alert-info' : 'alert-warning';
+            
+            const icon = type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-triangle' : 
+                        type === 'info' ? 'info-circle' : 'exclamation-triangle';
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${icon}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Nettoyage à la fermeture
+        window.addEventListener('beforeunload', function() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+        });
+    </script>
+</body>
+</html>
+
+@functions {
+    public string GetStatusDisplayName(StatutActivation statut)
+    {
+        return statut switch
+        {
+            StatutActivation.Planifiee => "Planifiée",
+            StatutActivation.EnCours => "En Cours",
+            StatutActivation.Suspendue => "Suspendue",
+            StatutActivation.Terminee => "Terminée",
+            _ => statut.ToString()
+        };
+    }
+
+    public string GetIncidentBadgeClass(string priorite)
+    {
+        return priorite switch
+        {
+            "Basse" => "info",
+            "Normale" => "warning",
+            "Haute" => "danger",
+            "Critique" => "dark",
+            _ => "secondary"
+        };
+    }
+} 

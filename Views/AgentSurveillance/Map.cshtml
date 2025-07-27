@@ -1,0 +1,300 @@
+@model IEnumerable<DiversityPub.Models.AgentTerrain>
+@{
+    ViewData["Title"] = "Carte des Agents";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-map-marked-alt"></i> Carte des Agents
+                    </h4>
+                    <div>
+                        <div class="btn-group me-2" role="group">
+                            <button class="btn btn-outline-primary btn-sm" onclick="switchToSatellite()">
+                                <i class="fas fa-satellite"></i> Satellite
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="switchToStreet()">
+                                <i class="fas fa-road"></i> Route
+                            </button>
+                        </div>
+                        <button class="btn btn-primary btn-sm me-2" onclick="refreshMap()">
+                            <i class="fas fa-sync-alt"></i> Actualiser
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="centerMap()">
+                            <i class="fas fa-crosshairs"></i> Centrer
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 600px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Légende</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-success me-2" style="width: 20px; height: 20px;"></div>
+                                <span>En ligne</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-warning me-2" style="width: 20px; height: 20px;"></div>
+                                <span>Hors ligne</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-danger me-2" style="width: 20px; height: 20px;"></div>
+                                <span>Incident</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-info me-2" style="width: 20px; height: 20px;"></div>
+                                <span>En mission</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les détails de l'agent -->
+<div class="modal fade" id="agentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agentModalTitle">Détails de l'Agent</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="agentModalBody">
+                <!-- Le contenu sera chargé dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="viewDetailsBtn">Voir les détails</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        let map;
+        let markers = {};
+        let agentsData = @Html.Raw(Json.Serialize(Model));
+        let satelliteLayer, streetLayer, labelsLayer;
+
+        // Initialiser la carte
+        function initMap() {
+            map = L.map('map').setView([7.5400, -5.5471], 7); // Centre de la Côte d'Ivoire
+
+            // Créer les couches de carte
+            satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+            });
+
+            streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            });
+
+            labelsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri',
+                opacity: 0.8
+            });
+
+            // Commencer avec la vue satellite
+            satelliteLayer.addTo(map);
+            labelsLayer.addTo(map);
+
+            // Ajouter les marqueurs pour chaque agent
+            agentsData.forEach(function(agent) {
+                if (agent.positionsGPS && agent.positionsGPS.length > 0) {
+                    const lastPosition = agent.positionsGPS[0];
+                    addAgentMarker(agent, lastPosition);
+                }
+            });
+        }
+
+        // Ajouter un marqueur pour un agent
+        function addAgentMarker(agent, position) {
+            const isOnline = new Date(position.horodatage) > new Date(Date.now() - 10 * 60 * 1000);
+            const hasIncidents = agent.incidents && agent.incidents.length > 0;
+            const hasActivations = agent.activations && agent.activations.length > 0;
+
+            let markerColor = 'blue';
+            if (hasIncidents) {
+                markerColor = 'red';
+            } else if (hasActivations) {
+                markerColor = 'green';
+            } else if (!isOnline) {
+                markerColor = 'orange';
+            }
+
+            const marker = L.marker([position.latitude, position.longitude], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                })
+            });
+
+            const popupContent = `
+                <div style="min-width: 200px;">
+                    <h6><i class="fas fa-user"></i> ${agent.utilisateur.prenom} ${agent.utilisateur.nom}</h6>
+                    <p><i class="fas fa-envelope"></i> ${agent.utilisateur.email}</p>
+                    <p><i class="fas fa-phone"></i> ${agent.telephone || 'Non renseigné'}</p>
+                    <p><i class="fas fa-clock"></i> Dernière position: ${new Date(position.horodatage).toLocaleString()}</p>
+                    <p><i class="fas fa-circle" style="color: ${isOnline ? 'green' : 'red'}"></i> ${isOnline ? 'En ligne' : 'Hors ligne'}</p>
+                    ${hasActivations ? `<p><i class="fas fa-tasks"></i> ${agent.activations.length} activation(s) en cours</p>` : ''}
+                    ${hasIncidents ? `<p><i class="fas fa-exclamation-triangle"></i> ${agent.incidents.length} incident(s) ouvert(s)</p>` : ''}
+                    <button class="btn btn-primary btn-sm mt-2" onclick="showAgentDetails('${agent.id}')">
+                        <i class="fas fa-info-circle"></i> Détails
+                    </button>
+                </div>
+            `;
+
+            marker.bindPopup(popupContent);
+            marker.addTo(map);
+            markers[agent.id] = marker;
+        }
+
+        // Afficher les détails d'un agent
+        function showAgentDetails(agentId) {
+            const agent = agentsData.find(a => a.id === agentId);
+            if (!agent) return;
+
+            document.getElementById('agentModalTitle').textContent = `${agent.utilisateur.prenom} ${agent.utilisateur.nom}`;
+            
+            const modalBody = document.getElementById('agentModalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user"></i> Informations</h6>
+                        <p><strong>Email:</strong> ${agent.utilisateur.email}</p>
+                        <p><strong>Téléphone:</strong> ${agent.telephone || 'Non renseigné'}</p>
+                        <p><strong>Dernière position:</strong> ${agent.positionsGPS && agent.positionsGPS.length > 0 ? new Date(agent.positionsGPS[0].horodatage).toLocaleString() : 'Aucune'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-bar"></i> Statistiques</h6>
+                        <p><strong>Activations en cours:</strong> ${agent.activations ? agent.activations.length : 0}</p>
+                        <p><strong>Incidents ouverts:</strong> ${agent.incidents ? agent.incidents.length : 0}</p>
+                        <p><strong>Médias uploadés:</strong> ${agent.medias ? agent.medias.length : 0}</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('viewDetailsBtn').onclick = function() {
+                window.location.href = '/AgentSurveillance/Details/' + agentId;
+            };
+
+            const modal = new bootstrap.Modal(document.getElementById('agentModal'));
+            modal.show();
+        }
+
+        // Actualiser la carte
+        function refreshMap() {
+            fetch('/AgentSurveillance/GetPositions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour les marqueurs existants
+                        data.data.forEach(function(agentData) {
+                            if (agentData.lastPosition) {
+                                const marker = markers[agentData.agentId];
+                                if (marker) {
+                                    marker.setLatLng([agentData.lastPosition.latitude, agentData.lastPosition.longitude]);
+                                } else {
+                                    // Créer un nouveau marqueur si nécessaire
+                                    const agent = agentsData.find(a => a.id === agentData.agentId);
+                                    if (agent) {
+                                        addAgentMarker(agent, agentData.lastPosition);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Erreur lors de l\'actualisation:', error));
+        }
+
+        // Basculer vers la vue satellite
+        function switchToSatellite() {
+            map.removeLayer(streetLayer);
+            satelliteLayer.addTo(map);
+            labelsLayer.addTo(map);
+        }
+
+        // Basculer vers la vue routière
+        function switchToStreet() {
+            map.removeLayer(satelliteLayer);
+            map.removeLayer(labelsLayer);
+            streetLayer.addTo(map);
+        }
+
+        // Centrer la carte
+        function centerMap() {
+            if (Object.keys(markers).length > 0) {
+                const group = new L.featureGroup(Object.values(markers));
+                map.fitBounds(group.getBounds());
+            }
+        }
+
+        // Initialiser la carte au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            
+            // Actualiser automatiquement toutes les 30 secondes
+            setInterval(refreshMap, 30000);
+        });
+    </script>
+}
+
+<style>
+    .custom-marker {
+        background: transparent;
+        border: none;
+    }
+    
+    .leaflet-popup-content {
+        margin: 10px;
+    }
+    
+    .leaflet-popup-content h6 {
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .leaflet-popup-content p {
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .leaflet-popup-content i {
+        width: 16px;
+        margin-right: 5px;
+    }
+</style> 

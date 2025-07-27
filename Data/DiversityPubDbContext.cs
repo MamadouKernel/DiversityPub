@@ -121,19 +121,19 @@ namespace DiversityPub.Data
                 .HasOne(d => d.Campagne)
                 .WithMany(c => c.DemandesActivation)
                 .HasForeignKey(d => d.CampagneId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DemandeActivation>()
                 .HasOne(d => d.Client)
                 .WithMany(cl => cl.DemandesActivation)
                 .HasForeignKey(d => d.ClientId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DemandeActivation>()
                 .HasOne(d => d.Lieu)
                 .WithMany(l => l.DemandesActivation)
                 .HasForeignKey(d => d.LieuId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DemandeActivation>()
                 .HasOne(d => d.ReponduPar)

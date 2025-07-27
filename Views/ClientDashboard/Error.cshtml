@@ -1,6 +1,7 @@
-@model dynamic
+@model object
 @{
     ViewData["Title"] = "Erreur";
+    var message = ((dynamic)Model)?.Message ?? "Une erreur s'est produite.";
 }
 
 <div class="row">
@@ -14,12 +15,9 @@
             <div class="card-body text-center">
                 <div class="py-5">
                     <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
-                    <h5 class="text-danger">Compte Client Non Configuré</h5>
+                    <h5 class="text-danger">Erreur</h5>
                     <p class="text-muted">
-                        Votre compte utilisateur n'est pas correctement associé à un client.
-                    </p>
-                    <p class="text-muted">
-                        Veuillez contacter l'administrateur pour résoudre ce problème.
+                        @message
                     </p>
                     <hr class="my-4">
                     <form asp-controller="Auth" asp-action="Logout" method="post">

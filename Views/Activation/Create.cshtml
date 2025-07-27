@@ -144,14 +144,12 @@
             const dateActivation = document.getElementById('DateActivation');
             const campagneSelect = document.getElementById('CampagneId');
             
-            // Définir la date minimale à aujourd'hui
-            const today = new Date().toISOString().split('T')[0];
-            dateActivation.min = today;
+            // Permettre les dates passées - pas de restriction minimale
             
             // Validation de l'heure de fin
             heureFin.addEventListener('change', function() {
                 if (heureDebut.value && this.value && this.value <= heureDebut.value) {
-                    alert('L\'heure de fin doit être postérieure à l\'heure de début.');
+                    showToast('error', 'L\'heure de fin doit être postérieure à l\'heure de début.');
                     this.value = '';
                 }
             });
@@ -159,10 +157,35 @@
             // Validation de l'heure de début
             heureDebut.addEventListener('change', function() {
                 if (heureFin.value && this.value && this.value >= heureFin.value) {
-                    alert('L\'heure de début doit être antérieure à l\'heure de fin.');
+                    showToast('error', 'L\'heure de début doit être antérieure à l\'heure de fin.');
                     heureFin.value = '';
                 }
             });
+            
+            // Fonction pour afficher des toasts
+            function showToast(type, message) {
+                const toastContainer = document.querySelector('.toast-container');
+                if (toastContainer) {
+                    const toastHtml = `
+                        <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'warning'} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i> ${message}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `;
+                    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                    
+                    const toastElement = toastContainer.lastElementChild;
+                    const toast = new bootstrap.Toast(toastElement);
+                    toast.show();
+                } else {
+                    // Fallback si pas de toast container
+                    alert(message);
+                }
+            }
             
                          // Validation de la date d'activation par rapport à la campagne
              campagneSelect.addEventListener('change', function() {
@@ -171,6 +194,7 @@
                      const dateDebut = selectedOption.dataset.dateDebut;
                      const dateFin = selectedOption.dataset.dateFin;
                      
+                     // Imposer les restrictions min/max pour respecter l'intervalle de la campagne
                      dateActivation.min = dateDebut;
                      dateActivation.max = dateFin;
                      

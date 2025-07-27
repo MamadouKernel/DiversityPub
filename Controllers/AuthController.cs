@@ -26,7 +26,19 @@ namespace DiversityPub.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Dashboard");
+                // Redirection selon le rôle
+                if (User.IsInRole("Client"))
+                {
+                    return RedirectToAction("Index", "ClientDashboard");
+                }
+                else if (User.IsInRole("AgentTerrain"))
+                {
+                    return RedirectToAction("Missions", "AgentTerrain");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Dashboard");
+                }
             }
             return View();
         }
@@ -42,79 +54,113 @@ namespace DiversityPub.Controllers
                 return View();
             }
 
-            var utilisateur = await _context.Utilisateurs
-                .Include(u => u.Client)
-                .Include(u => u.AgentTerrain)
-                .FirstOrDefaultAsync(u => u.Email == email && u.Supprimer == 0);
-
-            if (utilisateur == null)
+            try
             {
-                ViewBag.Error = "Email ou mot de passe incorrect";
+                var utilisateur = await _context.Utilisateurs
+                    .Include(u => u.Client)
+                    .Include(u => u.AgentTerrain)
+                    .FirstOrDefaultAsync(u => u.Email == email && u.Supprimer == 0);
+
+                if (utilisateur == null)
+                {
+                    ViewBag.Error = "Email ou mot de passe incorrect";
+                    return View();
+                }
+
+                // Vérifier le mot de passe (gérer les mots de passe en clair et hashés)
+                bool passwordValid = false;
+                
+                // D'abord essayer de vérifier si c'est un hash BCrypt
+                if (utilisateur.MotDePasse.StartsWith("$2a$") || utilisateur.MotDePasse.StartsWith("$2b$"))
+                {
+                    try
+                    {
+                        passwordValid = BCrypt.Net.BCrypt.Verify(password, utilisateur.MotDePasse);
+                    }
+                    catch
+                    {
+                        passwordValid = false;
+                    }
+                }
+                else
+                {
+                    // Si ce n'est pas un hash BCrypt, comparer directement (pour les mots de passe en clair)
+                    passwordValid = utilisateur.MotDePasse == password;
+                }
+
+                if (!passwordValid)
+                {
+                    ViewBag.Error = "Email ou mot de passe incorrect";
+                    return View();
+                }
+
+                // Créer les claims pour l'authentification
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, utilisateur.Id.ToString()),
+                    new Claim(ClaimTypes.Name, utilisateur.Email), // Utiliser l'email comme nom d'utilisateur
+                    new Claim(ClaimTypes.GivenName, utilisateur.Prenom),
+                    new Claim(ClaimTypes.Surname, utilisateur.Nom),
+                    new Claim(ClaimTypes.Email, utilisateur.Email),
+                    new Claim(ClaimTypes.Role, utilisateur.Role.ToString())
+                };
+
+                // Ajouter des claims spécifiques selon le rôle
+                if (utilisateur.Role == Role.Client && utilisateur.Client != null)
+                {
+                    claims.Add(new Claim("ClientId", utilisateur.Client.Id.ToString()));
+                    claims.Add(new Claim("RaisonSociale", utilisateur.Client.RaisonSociale));
+                }
+                else if (utilisateur.Role == Role.AgentTerrain && utilisateur.AgentTerrain != null)
+                {
+                    claims.Add(new Claim("AgentTerrainId", utilisateur.AgentTerrain.Id.ToString()));
+                }
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                // Redirection selon le rôle
+                if (utilisateur.Role == Role.Client)
+                {
+                    return RedirectToAction("Index", "ClientDashboard");
+                }
+                else if (utilisateur.Role == Role.AgentTerrain)
+                {
+                    return RedirectToAction("Missions", "AgentTerrain");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Dashboard");
+                }
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
+            {
+                // Gérer les erreurs de base de données
+                if (ex.Message.Contains("Invalid object name") || ex.Message.Contains("Cannot open database"))
+                {
+                    ViewBag.Error = "Erreur de configuration de la base de données. Veuillez contacter l'administrateur.";
+                    return View();
+                }
+                else
+                {
+                    ViewBag.Error = "Erreur de connexion à la base de données. Veuillez réessayer.";
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Une erreur inattendue s'est produite. Veuillez réessayer.";
                 return View();
             }
-
-            // Vérifier le mot de passe (gérer les mots de passe en clair et hashés)
-            bool passwordValid = false;
-            
-            // D'abord essayer de vérifier si c'est un hash BCrypt
-            if (utilisateur.MotDePasse.StartsWith("$2a$") || utilisateur.MotDePasse.StartsWith("$2b$"))
-            {
-                try
-                {
-                    passwordValid = BCrypt.Net.BCrypt.Verify(password, utilisateur.MotDePasse);
-                }
-                catch
-                {
-                    passwordValid = false;
-                }
-            }
-            else
-            {
-                // Si ce n'est pas un hash BCrypt, comparer directement (pour les mots de passe en clair)
-                passwordValid = utilisateur.MotDePasse == password;
-            }
-
-            if (!passwordValid)
-            {
-                ViewBag.Error = "Email ou mot de passe incorrect";
-                return View();
-            }
-
-            // Créer les claims pour l'authentification
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, utilisateur.Id.ToString()),
-                new Claim(ClaimTypes.Name, utilisateur.Email), // Utiliser l'email comme nom d'utilisateur
-                new Claim(ClaimTypes.GivenName, utilisateur.Prenom),
-                new Claim(ClaimTypes.Surname, utilisateur.Nom),
-                new Claim(ClaimTypes.Email, utilisateur.Email),
-                new Claim(ClaimTypes.Role, utilisateur.Role.ToString())
-            };
-
-            // Ajouter des claims spécifiques selon le rôle
-            if (utilisateur.Role == Role.Client && utilisateur.Client != null)
-            {
-                claims.Add(new Claim("ClientId", utilisateur.Client.Id.ToString()));
-                claims.Add(new Claim("RaisonSociale", utilisateur.Client.RaisonSociale));
-            }
-            else if (utilisateur.Role == Role.AgentTerrain && utilisateur.AgentTerrain != null)
-            {
-                claims.Add(new Claim("AgentTerrainId", utilisateur.AgentTerrain.Id.ToString()));
-            }
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
-            };
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
-
-            return RedirectToAction("Index", "Dashboard");
         }
 
         // POST: Auth/Logout

@@ -1,0 +1,317 @@
+@model IEnumerable<DiversityPub.Models.Incident>
+@{
+    ViewData["Title"] = "Gestion des Incidents";
+}
+
+<div class="container-fluid">
+    <!-- En-tête avec statistiques -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Gestion des Incidents
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h5><i class="fas fa-exclamation-circle"></i></h5>
+                                    <h6>Ouverts</h6>
+                                    <h4>@Model.Count(i => i.Statut == "Ouvert")</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5><i class="fas fa-clock"></i></h5>
+                                    <h6>En Cours</h6>
+                                    <h4>@Model.Count(i => i.Statut == "En Cours")</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5><i class="fas fa-check-circle"></i></h5>
+                                    <h6>Fermés</h6>
+                                    <h4>@Model.Count(i => i.Statut == "Fermé")</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5><i class="fas fa-chart-bar"></i></h5>
+                                    <h6>Total</h6>
+                                    <h4>@Model.Count()</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-filter"></i> Filtres</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrer par Priorité</label>
+                            <div class="btn-group w-100" role="group">
+                                <a href="@Url.Action("ParPriorite", "Incident", new { priorite = "" })" 
+                                   class="btn btn-outline-secondary @(ViewBag.PrioriteSelectionnee == null ? "active" : "")">
+                                    Toutes
+                                </a>
+                                <a href="@Url.Action("ParPriorite", "Incident", new { priorite = "Basse" })" 
+                                   class="btn btn-outline-success @(ViewBag.PrioriteSelectionnee == "Basse" ? "active" : "")">
+                                    Basse
+                                </a>
+                                <a href="@Url.Action("ParPriorite", "Incident", new { priorite = "Normale" })" 
+                                   class="btn btn-outline-warning @(ViewBag.PrioriteSelectionnee == "Normale" ? "active" : "")">
+                                    Normale
+                                </a>
+                                <a href="@Url.Action("ParPriorite", "Incident", new { priorite = "Haute" })" 
+                                   class="btn btn-outline-danger @(ViewBag.PrioriteSelectionnee == "Haute" ? "active" : "")">
+                                    Haute
+                                </a>
+                                <a href="@Url.Action("ParPriorite", "Incident", new { priorite = "Critique" })" 
+                                   class="btn btn-outline-dark @(ViewBag.PrioriteSelectionnee == "Critique" ? "active" : "")">
+                                    Critique
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Filtrer par Statut</label>
+                            <div class="btn-group w-100" role="group">
+                                <a href="@Url.Action("ParStatut", "Incident", new { statut = "" })" 
+                                   class="btn btn-outline-secondary @(ViewBag.StatutSelectionne == null ? "active" : "")">
+                                    Tous
+                                </a>
+                                <a href="@Url.Action("ParStatut", "Incident", new { statut = "Ouvert" })" 
+                                   class="btn btn-outline-danger @(ViewBag.StatutSelectionne == "Ouvert" ? "active" : "")">
+                                    Ouverts
+                                </a>
+                                <a href="@Url.Action("ParStatut", "Incident", new { statut = "En Cours" })" 
+                                   class="btn btn-outline-warning @(ViewBag.StatutSelectionne == "En Cours" ? "active" : "")">
+                                    En Cours
+                                </a>
+                                <a href="@Url.Action("ParStatut", "Incident", new { statut = "Fermé" })" 
+                                   class="btn btn-outline-success @(ViewBag.StatutSelectionne == "Fermé" ? "active" : "")">
+                                    Fermés
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <a href="@Url.Action("Index", "Incident")" class="btn btn-primary w-100">
+                                <i class="fas fa-sync-alt"></i> Réinitialiser les filtres
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des incidents -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Liste des Incidents
+                    </h5>
+                    <span class="badge bg-primary">@Model.Count() incident(s)</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3">Aucun incident trouvé</h5>
+                            <p class="text-muted">Tous les incidents ont été résolus !</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Priorité</th>
+                                        <th>Titre</th>
+                                        <th>Agent</th>
+                                        <th>Campagne</th>
+                                        <th>Statut</th>
+                                        <th>Date Création</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var incident in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @{
+                                                    var priorityClass = incident.Priorite switch
+                                                    {
+                                                        "Basse" => "success",
+                                                        "Normale" => "warning",
+                                                        "Haute" => "danger",
+                                                        "Critique" => "dark",
+                                                        _ => "secondary"
+                                                    };
+                                                }
+                                                <span class="badge bg-@priorityClass">@incident.Priorite</span>
+                                            </td>
+                                            <td>
+                                                <strong>@incident.Titre</strong>
+                                                @if (!string.IsNullOrEmpty(incident.Description))
+                                                {
+                                                    <br><small class="text-muted">@(incident.Description.Length > 50 ? incident.Description.Substring(0, 50) + "..." : incident.Description)</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (incident.AgentTerrain?.Utilisateur != null)
+                                                {
+                                                    <div>
+                                                        <i class="fas fa-user"></i> @incident.AgentTerrain.Utilisateur.Prenom @incident.AgentTerrain.Utilisateur.Nom
+                                                        <br><small class="text-muted">@incident.AgentTerrain.Telephone</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Non assigné</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (incident.Activation?.Campagne != null)
+                                                {
+                                                    <div>
+                                                        <i class="fas fa-bullhorn"></i> @incident.Activation.Campagne.Nom
+                                                        <br><small class="text-muted">@incident.Activation.Campagne.Statut</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Aucune campagne</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var statusClass = incident.Statut switch
+                                                    {
+                                                        "Ouvert" => "danger",
+                                                        "En Cours" => "warning",
+                                                        "Fermé" => "success",
+                                                        _ => "secondary"
+                                                    };
+                                                }
+                                                <span class="badge bg-@statusClass">@incident.Statut</span>
+                                                @if (incident.DateResolution.HasValue)
+                                                {
+                                                    <br><small class="text-muted">Résolu le @incident.DateResolution.Value.ToString("dd/MM/yyyy")</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-calendar"></i> @incident.DateCreation.ToString("dd/MM/yyyy")
+                                                <br><small class="text-muted">@incident.DateCreation.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "Incident", new { id = incident.Id })" 
+                                                       class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Incident", new { id = incident.Id })" 
+                                                       class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    @if (incident.Statut != "Fermé")
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-success" 
+                                                                onclick="resoudreIncident('@incident.Id')" title="Marquer comme résolu">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    }
+                                                    <a href="@Url.Action("Delete", "Incident", new { id = incident.Id })" 
+                                                       class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function resoudreIncident(incidentId) {
+            if (confirm('Êtes-vous sûr de vouloir marquer cet incident comme résolu ?')) {
+                fetch(`/Incident/Resoudre/${incidentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Afficher un toast de succès
+                        showToast('success', data.message);
+                        // Recharger la page après un délai
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showToast('error', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('error', 'Erreur lors de la résolution de l\'incident');
+                });
+            }
+        }
+
+        function showToast(type, message) {
+            // Créer un toast Bootstrap
+            const toastContainer = document.querySelector('.toast-container');
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // Afficher le toast
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+    </script>
+} 

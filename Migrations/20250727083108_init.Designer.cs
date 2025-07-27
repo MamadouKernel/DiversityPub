@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiversityPub.Migrations
 {
     [DbContext(typeof(DiversityPubDbContext))]
-    [Migration("20250724222904_km02")]
-    partial class km02
+    [Migration("20250727083108_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,23 +52,49 @@ namespace DiversityPub.Migrations
                     b.Property<DateTime>("DateActivation")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateValidationPreuves")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<TimeSpan>("HeureDebut")
                         .HasColumnType("time");
 
                     b.Property<TimeSpan>("HeureFin")
                         .HasColumnType("time");
 
+                    b.Property<string>("Instructions")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("LieuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PreuvesValidees")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ResponsableId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Statut")
                         .HasColumnType("int");
+
+                    b.Property<Guid?>("ValideParId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CampagneId");
 
                     b.HasIndex("LieuId");
+
+                    b.HasIndex("ResponsableId");
+
+                    b.HasIndex("ValideParId");
 
                     b.ToTable("Activations");
                 });
@@ -113,9 +139,18 @@ namespace DiversityPub.Migrations
                     b.Property<DateTime>("DateFin")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Objectifs")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Statut")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -167,6 +202,71 @@ namespace DiversityPub.Migrations
                         .IsUnique();
 
                     b.ToTable("Clients");
+                });
+
+            modelBuilder.Entity("DiversityPub.Models.DemandeActivation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CampagneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateActivation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateDemande")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateReponse")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<TimeSpan>("HeureDebut")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("HeureFin")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("LieuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MotifRefus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("ReponduParId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Statut")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampagneId");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("LieuId");
+
+                    b.HasIndex("ReponduParId");
+
+                    b.ToTable("DemandesActivation");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.Document", b =>
@@ -228,17 +328,40 @@ namespace DiversityPub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ActivationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("AgentTerrainId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DateDeclaration")
+                    b.Property<string>("CommentaireResolution")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateResolution")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Priorite")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Statut")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Titre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivationId");
 
                     b.HasIndex("AgentTerrainId");
 
@@ -270,11 +393,24 @@ namespace DiversityPub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ActivationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("AgentTerrainId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CommentaireValidation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateUpload")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateValidation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -283,9 +419,19 @@ namespace DiversityPub.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Valide")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ValideParId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("ActivationId");
+
                     b.HasIndex("AgentTerrainId");
+
+                    b.HasIndex("ValideParId");
 
                     b.ToTable("Medias");
                 });
@@ -306,6 +452,9 @@ namespace DiversityPub.Migrations
                         .HasColumnType("float");
 
                     b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Precision")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
@@ -352,7 +501,7 @@ namespace DiversityPub.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Email = "admin@diversitypub.ci",
-                            MotDePasse = "$2a$11$aDIrirmLYUWqV/NTu7fIa.0ODpVkWXzN7JHvsaYwB/jqjvXpe7hOy",
+                            MotDePasse = "$2a$11$1RHuk.9O5ghgVB2iz4DM4uovFSDmhxUArm2rMJyum/pptoNUD750W",
                             Nom = "Super",
                             Prenom = "Admin",
                             Role = 1,
@@ -389,9 +538,22 @@ namespace DiversityPub.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DiversityPub.Models.AgentTerrain", "Responsable")
+                        .WithMany()
+                        .HasForeignKey("ResponsableId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DiversityPub.Models.Utilisateur", "ValidePar")
+                        .WithMany()
+                        .HasForeignKey("ValideParId");
+
                     b.Navigation("Campagne");
 
                     b.Navigation("Lieu");
+
+                    b.Navigation("Responsable");
+
+                    b.Navigation("ValidePar");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.AgentTerrain", b =>
@@ -427,6 +589,40 @@ namespace DiversityPub.Migrations
                     b.Navigation("Utilisateur");
                 });
 
+            modelBuilder.Entity("DiversityPub.Models.DemandeActivation", b =>
+                {
+                    b.HasOne("DiversityPub.Models.Campagne", "Campagne")
+                        .WithMany("DemandesActivation")
+                        .HasForeignKey("CampagneId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DiversityPub.Models.Client", "Client")
+                        .WithMany("DemandesActivation")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DiversityPub.Models.Lieu", "Lieu")
+                        .WithMany("DemandesActivation")
+                        .HasForeignKey("LieuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DiversityPub.Models.Utilisateur", "ReponduPar")
+                        .WithMany()
+                        .HasForeignKey("ReponduParId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Campagne");
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Lieu");
+
+                    b.Navigation("ReponduPar");
+                });
+
             modelBuilder.Entity("DiversityPub.Models.Document", b =>
                 {
                     b.HasOne("DiversityPub.Models.AgentTerrain", "AgentTerrain")
@@ -451,24 +647,42 @@ namespace DiversityPub.Migrations
 
             modelBuilder.Entity("DiversityPub.Models.Incident", b =>
                 {
+                    b.HasOne("DiversityPub.Models.Activation", "Activation")
+                        .WithMany("Incidents")
+                        .HasForeignKey("ActivationId");
+
                     b.HasOne("DiversityPub.Models.AgentTerrain", "AgentTerrain")
                         .WithMany("Incidents")
                         .HasForeignKey("AgentTerrainId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Activation");
+
                     b.Navigation("AgentTerrain");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.Media", b =>
                 {
+                    b.HasOne("DiversityPub.Models.Activation", "Activation")
+                        .WithMany("Medias")
+                        .HasForeignKey("ActivationId");
+
                     b.HasOne("DiversityPub.Models.AgentTerrain", "AgentTerrain")
                         .WithMany("Medias")
                         .HasForeignKey("AgentTerrainId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DiversityPub.Models.Utilisateur", "ValidePar")
+                        .WithMany()
+                        .HasForeignKey("ValideParId");
+
+                    b.Navigation("Activation");
+
                     b.Navigation("AgentTerrain");
+
+                    b.Navigation("ValidePar");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.PositionGPS", b =>
@@ -480,6 +694,13 @@ namespace DiversityPub.Migrations
                         .IsRequired();
 
                     b.Navigation("AgentTerrain");
+                });
+
+            modelBuilder.Entity("DiversityPub.Models.Activation", b =>
+                {
+                    b.Navigation("Incidents");
+
+                    b.Navigation("Medias");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.AgentTerrain", b =>
@@ -497,17 +718,23 @@ namespace DiversityPub.Migrations
                 {
                     b.Navigation("Activations");
 
+                    b.Navigation("DemandesActivation");
+
                     b.Navigation("Feedbacks");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.Client", b =>
                 {
                     b.Navigation("Campagnes");
+
+                    b.Navigation("DemandesActivation");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.Lieu", b =>
                 {
                     b.Navigation("Activations");
+
+                    b.Navigation("DemandesActivation");
                 });
 
             modelBuilder.Entity("DiversityPub.Models.Utilisateur", b =>

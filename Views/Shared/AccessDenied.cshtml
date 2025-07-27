@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Accès Refusé";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="text-center mt-5">
+                <!-- Icon -->
+                <div class="mb-4">
+                    <i class="fas fa-ban text-danger" style="font-size: 4rem;"></i>
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-danger mb-3">Accès Refusé</h1>
+
+                <!-- Message -->
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Vous n'avez pas les permissions nécessaires
+                    </h5>
+                    <p class="mb-0">
+                        Vous n'êtes pas autorisé à accéder à cette page. 
+                        Si vous pensez qu'il s'agit d'une erreur, veuillez contacter votre administrateur.
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-4">
+                    @if (User.IsInRole("Client"))
+                    {
+                        <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-primary me-2">
+                            <i class="fas fa-home"></i> Mon Dashboard
+                        </a>
+                    }
+                    else if (User.IsInRole("AgentTerrain"))
+                    {
+                        <a href="@Url.Action("Missions", "AgentTerrain")" class="btn btn-primary me-2">
+                            <i class="fas fa-tasks"></i> Mes Activations
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary me-2">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    }
+                    <a href="@Url.Action("Index", "Profile")" class="btn btn-secondary">
+                        <i class="fas fa-user"></i> Mon Profil
+                    </a>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="mt-4 text-muted">
+                    <small>
+                        <i class="fas fa-info-circle"></i>
+                        Code d'erreur : 403 - Forbidden
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container-fluid {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .text-center {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .fas.fa-ban {
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style> 

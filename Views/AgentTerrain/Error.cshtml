@@ -1,0 +1,70 @@
+@model object
+@{
+    ViewData["Title"] = "Erreur";
+    var message = ((dynamic)Model)?.Message ?? "Une erreur s'est produite.";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erreur
+                    </h4>
+                </div>
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-user-times fa-4x text-danger"></i>
+                    </div>
+                    <h5 class="text-danger mb-3">Erreur de l'Agent Terrain</h5>
+                    <p class="text-muted mb-4">
+                        @message
+                    </p>
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="@Url.Action("Missions", "AgentTerrain")" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>
+                            Retour aux Activations
+                        </a>
+                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Se déconnecter
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #A32D18, #59311F);
+    }
+    
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style> 

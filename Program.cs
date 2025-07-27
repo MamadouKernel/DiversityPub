@@ -12,8 +12,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<DiversityPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Enregistrer le service de vérification des campagnes expirées
+// Enregistrer les services hébergés
 builder.Services.AddHostedService<CampagneExpirationService>();
+builder.Services.AddHostedService<GeolocationService>();
 
 // Configuration de l'authentification par cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

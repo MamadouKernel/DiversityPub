@@ -21,8 +21,9 @@ namespace DiversityPub.Controllers
         // GET: Activation
         public async Task<IActionResult> Index()
         {
-            // Vérifier et mettre à jour automatiquement les campagnes expirées
+            // Vérifier et mettre à jour automatiquement les campagnes et activations expirées
             await CheckAndUpdateExpiredCampagnesAsync();
+            await CheckAndUpdateExpiredActivationsAsync();
             
             var activations = await _context.Activations
                 .Include(a => a.Campagne)
@@ -42,6 +43,10 @@ namespace DiversityPub.Controllers
         {
             if (id == null)
                 return NotFound();
+
+            // Vérifier et mettre à jour automatiquement les campagnes et activations expirées
+            await CheckAndUpdateExpiredCampagnesAsync();
+            await CheckAndUpdateExpiredActivationsAsync();
 
             var activation = await _context.Activations
                 .Include(a => a.Campagne)
@@ -122,6 +127,7 @@ namespace DiversityPub.Controllers
                 var campagne = await _context.Campagnes.FindAsync(activation.CampagneId);
                 if (campagne != null)
                 {
+                    // Pour une campagne passée, les activations doivent être dans l'intervalle de la campagne
                     if (activation.DateActivation < campagne.DateDebut || activation.DateActivation > campagne.DateFin)
                     {
                         ModelState.AddModelError("DateActivation", 
@@ -172,7 +178,16 @@ namespace DiversityPub.Controllers
                 try
                 {
                     activation.Id = Guid.NewGuid();
-                    activation.Statut = DiversityPub.Models.enums.StatutActivation.Planifiee;
+                    
+                    // Vérifier si la date d'activation est passée pour définir le statut automatiquement
+                    if (activation.DateActivation < DateTime.Today)
+                    {
+                        activation.Statut = DiversityPub.Models.enums.StatutActivation.Terminee;
+                    }
+                    else
+                    {
+                        activation.Statut = DiversityPub.Models.enums.StatutActivation.Planifiee;
+                    }
 
                     // Assigner les agents terrain
                     if (agentIds != null && agentIds.Any())
@@ -184,8 +199,8 @@ namespace DiversityPub.Controllers
                         activation.AgentsTerrain = agents;
                     }
 
-                                         _context.Add(activation);
-                     await _context.SaveChangesAsync();
+                    _context.Add(activation);
+                    await _context.SaveChangesAsync();
                      
                      // Mettre à jour automatiquement le statut de la campagne
                      await UpdateCampagneStatutAsync(activation.CampagneId);
@@ -280,6 +295,7 @@ namespace DiversityPub.Controllers
                 var campagne = await _context.Campagnes.FindAsync(activation.CampagneId);
                 if (campagne != null)
                 {
+                    // Pour une campagne passée, les activations doivent être dans l'intervalle de la campagne
                     if (activation.DateActivation < campagne.DateDebut || activation.DateActivation > campagne.DateFin)
                     {
                         ModelState.AddModelError("DateActivation", 
@@ -342,8 +358,17 @@ namespace DiversityPub.Controllers
                     currentActivation.HeureFin = activation.HeureFin;
                     currentActivation.LieuId = activation.LieuId;
                     currentActivation.Instructions = activation.Instructions;
-                    currentActivation.Statut = activation.Statut;
                     currentActivation.CampagneId = activation.CampagneId;
+                    
+                    // Vérifier si la date d'activation est passée pour définir le statut automatiquement
+                    if (activation.DateActivation < DateTime.Today)
+                    {
+                        currentActivation.Statut = DiversityPub.Models.enums.StatutActivation.Terminee;
+                    }
+                    else
+                    {
+                        currentActivation.Statut = activation.Statut;
+                    }
 
                     // Mettre à jour les agents terrain
                     if (agentIds != null && agentIds.Any())
@@ -510,6 +535,25 @@ namespace DiversityPub.Controllers
             }
 
             if (campagnesExpirees.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Méthode pour vérifier et mettre à jour automatiquement les activations expirées
+        private async Task CheckAndUpdateExpiredActivationsAsync()
+        {
+            var activationsExpirees = await _context.Activations
+                .Where(a => a.DateActivation < DateTime.Today 
+                           && a.Statut != StatutActivation.Terminee)
+                .ToListAsync();
+
+            foreach (var activation in activationsExpirees)
+            {
+                activation.Statut = StatutActivation.Terminee;
+            }
+
+            if (activationsExpirees.Any())
             {
                 await _context.SaveChangesAsync();
             }

@@ -6,380 +6,349 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <!-- Header simple -->
-            <div class="header">
-                <h1>Assignation des Agents</h1>
-                <a href="@Url.Action("Index", "Dashboard")" class="btn-retour">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="fas fa-users-cog text-primary"></i> Assignation des Agents
+                    </h1>
+                    <p class="text-muted mb-0">Gestion des équipes d'agents terrain</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
+                </div>
             </div>
 
-            <!-- Messages simples -->
+            <!-- Messages -->
             @if (TempData["Success"] != null)
             {
-                <div class="message success">
-                    <i class="fas fa-check"></i>
-                    <span>@TempData["Success"]</span>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
             
             @if (TempData["Error"] != null)
             {
-                <div class="message error">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span>@TempData["Error"]</span>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
             
-            @if (TempData["Warning"] != null)
-            {
-                <div class="message warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>@TempData["Warning"]</span>
+            <!-- Statistiques -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">@Model.Count()</h4>
+                                    <small>Total Activations</small>
+                                </div>
+                                <i class="fas fa-tasks fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            }
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">@Model.Count(a => a.AgentsTerrain.Any())</h4>
+                                    <small>Avec Agents</small>
+                                </div>
+                                <i class="fas fa-users fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">@Model.Count(a => !a.AgentsTerrain.Any())</h4>
+                                    <small>Sans Agents</small>
+                                </div>
+                                <i class="fas fa-user-times fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">@Model.Sum(a => a.AgentsTerrain.Count)</h4>
+                                    <small>Total Assignations</small>
+                                </div>
+                                <i class="fas fa-link fa-2x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Liste simple -->
-            <div class="liste">
+            <!-- Filtres -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Statut</label>
+                            <select class="form-select" id="filterStatut">
+                                <option value="">Tous les statuts</option>
+                                <option value="EnAttente">En Attente</option>
+                                <option value="EnCours">En Cours</option>
+                                <option value="Terminee">Terminée</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Assignation</label>
+                            <select class="form-select" id="filterAssignation">
+                                <option value="">Toutes</option>
+                                <option value="avec">Avec agents</option>
+                                <option value="sans">Sans agents</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Campagne</label>
+                            <select class="form-select" id="filterCampagne">
+                                <option value="">Toutes les campagnes</option>
+                                @foreach (var campagne in Model.Select(a => a.Campagne).Distinct().Where(c => c != null))
+                                {
+                                    <option value="@campagne.Id">@campagne.Nom</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                                <i class="fas fa-refresh"></i> Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des activations -->
                 @if (!Model.Any())
                 {
-                    <div class="vide">
-                        <i class="fas fa-inbox"></i>
-                        <h3>Aucune activation à assigner</h3>
-                        <a href="@Url.Action("Index", "Activation")" class="btn">
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h3 class="text-muted">Aucune activation à assigner</h3>
+                    <p class="text-muted">Créez d'abord des activations pour pouvoir assigner des agents.</p>
+                    <a href="@Url.Action("Index", "Activation")" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Créer une Activation
                         </a>
                     </div>
                 }
                 else
                 {
-                    <div class="cartes">
+                <div class="row" id="activationsContainer">
                         @foreach (var activation in Model)
                         {
-                            <div class="carte">
-                                <div class="titre">
-                                    <h3>@activation.Nom</h3>
-                                    <span class="statut @(activation.Statut.ToString().ToLower())">
+                        <div class="col-lg-6 col-xl-4 mb-4 activation-card" 
+                             data-statut="@activation.Statut.ToString()"
+                             data-assignation="@(activation.AgentsTerrain.Any() ? "avec" : "sans")"
+                             data-campagne="@(activation.Campagne?.Id.ToString() ?? "")">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 text-truncate" title="@activation.Nom">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                        @activation.Nom
+                                    </h6>
+                                    <span class="badge bg-@(activation.Statut == DiversityPub.Models.enums.StatutActivation.Planifiee ? "warning" : 
+                                                          activation.Statut == DiversityPub.Models.enums.StatutActivation.EnCours ? "info" : "success")">
                                         @activation.Statut
                                     </span>
                                 </div>
                                 
-                                <div class="infos">
-                                    <div class="info">
-                                        <i class="fas fa-bullhorn"></i>
-                                        <span>@(activation.Campagne?.Nom ?? "Non définie")</span>
+                                <div class="card-body">
+                                    <!-- Informations de base -->
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-bullhorn text-muted me-2"></i>
+                                            <small class="text-muted">@(activation.Campagne?.Nom ?? "Campagne non définie")</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <small class="text-muted">@(activation.Lieu?.Nom ?? "Lieu non défini")</small>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-calendar text-muted me-2"></i>
+                                            <small class="text-muted">
+                                                @activation.DateActivation.ToString("dd/MM/yyyy") 
+                                                @activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")
+                                            </small>
+                                    </div>
                                     </div>
                                     
-                                    <div class="info">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <span>@(activation.Lieu?.Nom ?? "Non défini")</span>
-                                    </div>
-                                    
-                                    <div class="info">
-                                        <i class="fas fa-calendar"></i>
-                                        <span>@activation.DateActivation.ToString("dd/MM/yyyy")</span>
-                                        <small>@activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="equipe">
-                                    <h4>Équipe (@activation.AgentsTerrain.Count)</h4>
+                                    <!-- Équipe actuelle -->
+                                    <div class="mb-3">
+                                        <h6 class="text-muted mb-2">
+                                            <i class="fas fa-users"></i> Équipe (@activation.AgentsTerrain.Count)
+                                        </h6>
                                     @if (activation.AgentsTerrain.Any())
                                     {
-                                        <div class="membres">
-                                            @foreach (var agent in activation.AgentsTerrain)
+                                            <div class="team-members">
+                                                @foreach (var agent in activation.AgentsTerrain.Take(3))
                                             {
                                                 var isResponsable = activation.ResponsableId == agent.Id;
-                                                <div class="membre @(isResponsable ? "responsable" : "")">
-                                                    <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i>
+                                                    <div class="team-member @(isResponsable ? "responsable" : "")" 
+                                                         title="@agent.Utilisateur.Prenom @agent.Utilisateur.Nom">
+                                                        <i class="fas @(isResponsable ? "fa-crown text-warning" : "fa-user")"></i>
                                                     <span>@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</span>
-                                                    @if (isResponsable)
+                                                    </div>
+                                                }
+                                                @if (activation.AgentsTerrain.Count > 3)
                                                     {
-                                                        <span class="label">Responsable</span>
-                                                    }
+                                                    <div class="team-member more">
+                                                        <i class="fas fa-ellipsis-h"></i>
+                                                        <span>+@(activation.AgentsTerrain.Count - 3) autres</span>
                                                 </div>
                                             }
                                         </div>
                                     }
                                     else
                                     {
-                                        <p>Aucun agent assigné</p>
-                                    }
+                                            <div class="text-center py-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user-times"></i> Aucun agent assigné
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
                                 
-                                <div class="action">
-                                    <a href="@Url.Action("Edit", "Assignation", new { id = activation.Id })" class="btn">
-                                        <i class="fas fa-edit"></i> Assigner
-                                    </a>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            @if (activation.ResponsableId.HasValue)
+                                            {
+                                                var responsable = activation.AgentsTerrain.FirstOrDefault(a => a.Id == activation.ResponsableId);
+                                                if (responsable != null)
+                                                {
+                                                    <i class="fas fa-crown text-warning"></i>
+                                                    <span>@responsable.Utilisateur.Prenom @responsable.Utilisateur.Nom</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                                <span>Aucun responsable</span>
+                                            }
+                                        </small>
+                                        <a href="@Url.Action("Edit", "Assignation", new { id = activation.Id })" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i> Gérer
+                                        </a>
+                                    </div>
+                                </div>
                                 </div>
                             </div>
                         }
                     </div>
                 }
-            </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Couleurs simples */
-    :root {
-        --rouge: #A32D18;
-        --jaune: #EDAC00;
-        --marron: #59311F;
-        --marron-clair: #A26D55;
-        --blanc: #ffffff;
-        --gris: #f8f9fa;
-        --texte: #333333;
+    .activation-card {
+        transition: all 0.3s ease;
     }
-
-    /* Base simple */
-    body {
-        background: var(--gris);
-        font-family: Arial, sans-serif;
-        color: var(--texte);
+    
+    .activation-card:hover {
+        transform: translateY(-2px);
     }
-
-    /* Header simple */
-    .header {
-        background: var(--rouge);
-        color: var(--blanc);
-        padding: 1rem 2rem;
-        margin-bottom: 2rem;
+    
+    .team-members {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .header h1 {
-        margin: 0;
-        font-size: 1.8rem;
-    }
-
-    .btn-retour {
-        background: var(--blanc);
-        color: var(--rouge);
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 0.5rem;
     }
 
-    /* Messages simples */
-    .message {
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 5px;
+    .team-member {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-    }
-
-    .success {
-        background: #28a745;
-        color: var(--blanc);
-    }
-
-    .error {
-        background: var(--rouge);
-        color: var(--blanc);
-    }
-
-    .warning {
-        background: var(--jaune);
-        color: var(--marron);
-    }
-
-    /* Liste simple */
-    .liste {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .vide {
-        text-align: center;
-        padding: 3rem;
-        background: var(--blanc);
-        border-radius: 10px;
-    }
-
-    .vide i {
-        font-size: 3rem;
-        color: var(--marron-clair);
-        margin-bottom: 1rem;
-    }
-
-    .vide h3 {
-        color: var(--marron);
-        margin-bottom: 1rem;
-    }
-
-    /* Grille simple */
-    .cartes {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 1rem;
-    }
-
-    /* Carte simple */
-    .carte {
-        background: var(--blanc);
-        border-radius: 10px;
-        padding: 1.5rem;
-        border: 1px solid #ddd;
-    }
-
-    .titre {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eee;
-    }
-
-    .titre h3 {
-        margin: 0;
-        color: var(--marron);
-        font-size: 1.3rem;
-    }
-
-    .statut {
-        padding: 0.3rem 0.8rem;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: #f8f9fa;
         border-radius: 15px;
         font-size: 0.8rem;
-        font-weight: bold;
+        max-width: 100%;
     }
-
-    .statut.planifiee {
-        background: var(--jaune);
-        color: var(--marron);
+    
+    .team-member.responsable {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
     }
-
-    .statut.encours {
-        background: #28a745;
-        color: var(--blanc);
+    
+    .team-member.more {
+        background: #e9ecef;
+        color: #6c757d;
     }
-
-    .statut.suspendue {
-        background: #ffc107;
-        color: var(--marron);
+    
+    .card-header h6 {
+        max-width: 200px;
     }
-
-    .statut.terminee {
-        background: #6c757d;
-        color: var(--blanc);
-    }
-
-    /* Infos simples */
-    .infos {
-        margin-bottom: 1.5rem;
-    }
-
-    .info {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        color: var(--texte);
-    }
-
-    .info i {
-        color: var(--rouge);
-        width: 16px;
-    }
-
-    .info small {
-        color: #666;
-        margin-left: auto;
-    }
-
-    /* Équipe simple */
-    .equipe h4 {
-        color: var(--marron);
-        margin: 0 0 1rem 0;
-        font-size: 1rem;
-    }
-
-    .membres {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .membre {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem;
-        background: var(--gris);
-        border-radius: 5px;
-    }
-
-    .membre.responsable {
-        background: var(--jaune);
-        border: 1px solid var(--jaune);
-    }
-
-    .membre i {
-        color: var(--rouge);
-    }
-
-    .membre.responsable i {
-        color: var(--marron);
-    }
-
-    .label {
-        background: var(--marron);
-        color: var(--blanc);
-        padding: 0.2rem 0.5rem;
-        border-radius: 10px;
-        font-size: 0.7rem;
-        margin-left: auto;
-    }
-
-    /* Action simple */
-    .action {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #eee;
-    }
-
-    .btn {
-        background: var(--rouge);
-        color: var(--blanc);
-        padding: 0.7rem 1.5rem;
-        text-decoration: none;
-        border-radius: 5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        width: 100%;
-        justify-content: center;
-        font-weight: bold;
-    }
-
-    .btn:hover {
-        background: var(--marron);
-        color: var(--blanc);
-    }
-
-    /* Responsive simple */
+    
     @@media (max-width: 768px) {
-        .cartes {
-            grid-template-columns: 1fr;
-        }
-        
-        .header {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 1.5rem;
+        .col-lg-6 {
+            margin-bottom: 1rem;
         }
     }
-</style> 
+</style>
+
+<script>
+    // Filtrage des activations
+    function filterActivations() {
+        const statutFilter = document.getElementById('filterStatut').value;
+        const assignationFilter = document.getElementById('filterAssignation').value;
+        const campagneFilter = document.getElementById('filterCampagne').value;
+        
+        const cards = document.querySelectorAll('.activation-card');
+        
+        cards.forEach(card => {
+            let show = true;
+            
+            if (statutFilter && card.dataset.statut !== statutFilter) {
+                show = false;
+            }
+            
+            if (assignationFilter && card.dataset.assignation !== assignationFilter) {
+                show = false;
+            }
+            
+            if (campagneFilter && card.dataset.campagne !== campagneFilter) {
+                show = false;
+            }
+            
+            card.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    function resetFilters() {
+        document.getElementById('filterStatut').value = '';
+        document.getElementById('filterAssignation').value = '';
+        document.getElementById('filterCampagne').value = '';
+        
+        const cards = document.querySelectorAll('.activation-card');
+        cards.forEach(card => {
+            card.style.display = 'block';
+        });
+    }
+    
+    // Écouteurs d'événements pour les filtres
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('filterStatut').addEventListener('change', filterActivations);
+        document.getElementById('filterAssignation').addEventListener('change', filterActivations);
+        document.getElementById('filterCampagne').addEventListener('change', filterActivations);
+    });
+</script> 

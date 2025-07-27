@@ -129,7 +129,8 @@ namespace DiversityPub.Controllers
                         .ThenInclude(at => at.Utilisateur)
                     .Include(a => a.Responsable)
                         .ThenInclude(r => r.Utilisateur)
-                    .Where(a => a.Campagne.ClientId == utilisateur.Client.Id)
+                    .Include(a => a.Medias.Where(m => m.Valide)) // Seulement les médias validés
+                    .Where(a => a.Campagne.ClientId == utilisateur.Client.Id && a.PreuvesValidees) // Seulement les activations validées
                     .OrderByDescending(a => a.DateActivation)
                     .ToListAsync();
 

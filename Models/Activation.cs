@@ -12,6 +12,12 @@ namespace DiversityPub.Models
         public TimeSpan HeureDebut { get; set; }
         public TimeSpan HeureFin { get; set; }
         public StatutActivation Statut { get; set; }
+        
+        // Validation des preuves
+        public bool PreuvesValidees { get; set; } = false;
+        public DateTime? DateValidationPreuves { get; set; }
+        public Guid? ValideParId { get; set; }
+        public Utilisateur? ValidePar { get; set; }
 
         public Guid CampagneId { get; set; }
         public Campagne? Campagne { get; set; }
@@ -24,5 +30,9 @@ namespace DiversityPub.Models
         // Responsable de l'activation (optionnel)
         public Guid? ResponsableId { get; set; }
         public AgentTerrain? Responsable { get; set; }
+        
+        // Navigation vers les médias et incidents
+        public ICollection<Media> Medias { get; set; } = new List<Media>();
+        public ICollection<Incident> Incidents { get; set; } = new List<Incident>();
     }
 } 

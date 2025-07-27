@@ -178,9 +178,9 @@
             const dateActivation = document.getElementById('DateActivation');
             const campagneSelect = document.getElementById('CampagneId');
             
-            // Définir la date minimale à aujourd'hui
-            const today = new Date().toISOString().split('T')[0];
-            dateActivation.min = today;
+            // Permettre les dates passées - pas de restriction minimale
+            // const today = new Date().toISOString().split('T')[0];
+            // dateActivation.min = today;
             
             // Validation de l'heure de fin
             heureFin.addEventListener('change', function() {
@@ -205,6 +205,7 @@
                     const dateDebut = selectedOption.dataset.dateDebut;
                     const dateFin = selectedOption.dataset.dateFin;
                     
+                    // Imposer les restrictions min/max pour respecter l'intervalle de la campagne
                     dateActivation.min = dateDebut;
                     dateActivation.max = dateFin;
                     
