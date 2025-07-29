@@ -9,24 +9,6 @@
 
 <div class="row">
     <div class="col-12">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> @TempData["Success"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger">
-                <i class="fas fa-times-circle"></i> @TempData["Error"]
-            </div>
-        }
-        @if (TempData["Warning"] != null)
-        {
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
-            </div>
-        }
         
         <!-- En-tête du client -->
         <div class="card mb-4">

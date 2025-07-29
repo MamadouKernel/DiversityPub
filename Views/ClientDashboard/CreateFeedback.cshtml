@@ -3,96 +3,383 @@
     ViewData["Title"] = "Nouveau Feedback";
 }
 
-<div class="row">
-    <div class="col-12">
-        @if (TempData["Warning"] != null)
-        {
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger">
-                <i class="fas fa-times-circle"></i> @TempData["Error"]
-            </div>
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .main-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .content-section {
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .feedback-form {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .feedback-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .form-content {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #A32D18;
+        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+
+    .btn-custom {
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #A32D18, #c94a3a);
+        color: white;
+    }
+
+    .btn-secondary-custom {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+
+    .btn-info-custom {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-top: 1px solid #e9ecef;
+    }
+
+    .container-fluid {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
         }
         
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-comment"></i> Nouveau Feedback
-                </h4>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Information :</strong> Vous pouvez laisser un feedback uniquement sur les campagnes terminées.
+        .container-fluid {
+            padding: 0 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-comment"></i>
+                Nouveau Feedback
+            </h1>
+            <p class="page-subtitle">Partagez votre expérience</p>
+        </div>
+
+        <div class="content-section">
+            <div class="feedback-form">
+                @if (TempData["Warning"] != null)
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i> @TempData["Error"]
+                    </div>
+                }
+
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <i class="fas fa-comment"></i>
+                        Formulaire de Feedback
+                    </h2>
+                    <p class="form-subtitle">Évaluez votre satisfaction sur nos services</p>
                 </div>
-                
-                <form asp-action="CreateFeedback" method="post">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="CampagneId" class="form-label">
-                                    <i class="fas fa-bullhorn"></i> Campagne
-                                </label>
-                                <select asp-for="CampagneId" class="form-select" required>
-                                    <option value="">Sélectionner une campagne terminée</option>
-                                    @foreach (var campagne in ViewBag.Campagnes)
-                                    {
-                                        <option value="@campagne.Id">
-                                            @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
-                                        </option>
-                                    }
-                                </select>
-                                <span asp-validation-for="CampagneId" class="text-danger"></span>
-                                <small class="form-text text-muted">Choisissez la campagne sur laquelle vous souhaitez laisser un feedback</small>
+
+                <div class="form-content">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Information :</strong> Vous pouvez laisser un feedback sur les campagnes ou activations terminées.
+                    </div>
+
+                    <form asp-action="CreateFeedback" method="post">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-bullhorn"></i>
+                                Sélection de l'élément à évaluer
+                            </h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="CampagneId" class="form-label">
+                                            <i class="fas fa-bullhorn"></i> Campagne
+                                        </label>
+                                        <select asp-for="CampagneId" class="form-select">
+                                            <option value="">Sélectionner une campagne terminée</option>
+                                            @if (ViewBag.Campagnes != null)
+                                            {
+                                                @foreach (var campagne in ViewBag.Campagnes)
+                                                {
+                                                    <option value="@campagne.Id">
+                                                        @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <small class="form-text">Choisissez une campagne terminée (optionnel si vous sélectionnez une activation)</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="ActivationId" class="form-label">
+                                            <i class="fas fa-map-marker-alt"></i> Activation
+                                        </label>
+                                        <select asp-for="ActivationId" class="form-select">
+                                            <option value="">Sélectionner une activation terminée</option>
+                                            @if (ViewBag.Activations != null)
+                                            {
+                                                @foreach (var activation in ViewBag.Activations)
+                                                {
+                                                    <option value="@activation.Id">
+                                                        @activation.Nom - @activation.Campagne.Nom (@activation.DateActivation.ToString("dd/MM/yyyy"))
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                        <small class="form-text">Choisissez une activation terminée (optionnel si vous sélectionnez une campagne)</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="Note" class="form-label">
-                                    <i class="fas fa-star"></i> Note (1-5)
-                                </label>
-                                <select asp-for="Note" class="form-select" required>
-                                    <option value="">Sélectionner une note</option>
-                                    <option value="1">1 - Très insatisfait</option>
-                                    <option value="2">2 - Insatisfait</option>
-                                    <option value="3">3 - Neutre</option>
-                                    <option value="4">4 - Satisfait</option>
-                                    <option value="5">5 - Très satisfait</option>
-                                </select>
-                                <span asp-validation-for="Note" class="text-danger"></span>
-                                <small class="form-text text-muted">Évaluez votre satisfaction globale</small>
+
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-star"></i>
+                                Évaluation
+                            </h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Note" class="form-label">
+                                            <i class="fas fa-star"></i> Note (1-5)
+                                        </label>
+                                        <select asp-for="Note" class="form-select" required>
+                                            <option value="">Sélectionner une note</option>
+                                            <option value="1">1 - Très insatisfait</option>
+                                            <option value="2">2 - Insatisfait</option>
+                                            <option value="3">3 - Neutre</option>
+                                            <option value="4">4 - Satisfait</option>
+                                            <option value="5">5 - Très satisfait</option>
+                                        </select>
+                                        <small class="form-text">Évaluez votre satisfaction globale</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="Commentaire" class="form-label">
+                                            <i class="fas fa-comment"></i> Commentaire
+                                        </label>
+                                        <textarea asp-for="Commentaire" class="form-control" rows="5" 
+                                                  placeholder="Partagez votre expérience, vos impressions, vos suggestions d'amélioration..."></textarea>
+                                        <small class="form-text">Votre avis détaillé nous aide à améliorer nos services</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label asp-for="Commentaire" class="form-label">
-                            <i class="fas fa-comment"></i> Commentaire
-                        </label>
-                        <textarea asp-for="Commentaire" class="form-control" rows="5" 
-                                  placeholder="Partagez votre expérience, vos impressions, vos suggestions d'amélioration..."></textarea>
-                        <span asp-validation-for="Commentaire" class="text-danger"></span>
-                        <small class="form-text text-muted">Votre avis détaillé nous aide à améliorer nos services</small>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Retour au dashboard
-                        </a>
-                        <div>
-                            <a href="@Url.Action("Feedbacks", "ClientDashboard")" class="btn btn-info">
-                                <i class="fas fa-list"></i> Mes feedbacks
+
+                        <div class="action-buttons">
+                            <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-secondary-custom btn-custom">
+                                <i class="fas fa-arrow-left"></i>
+                                Retour au dashboard
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i> Envoyer le feedback
-                            </button>
+                            <div>
+                                <a href="@Url.Action("Feedbacks", "ClientDashboard")" class="btn btn-info-custom btn-custom me-2">
+                                    <i class="fas fa-list"></i>
+                                    Mes feedbacks
+                                </a>
+                                <button type="submit" class="btn btn-primary-custom btn-custom">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Envoyer le feedback
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -113,42 +400,28 @@
                 }
             });
             
-            // Validation pour la campagne
+            // Validation pour la sélection campagne ou activation
             const campagneSelect = document.getElementById('CampagneId');
-            campagneSelect.addEventListener('change', function() {
-                if (!this.value) {
-                    this.setCustomValidity('Veuillez sélectionner une campagne');
+            const activationSelect = document.getElementById('ActivationId');
+            
+            function validateSelection() {
+                const campagneValue = campagneSelect.value;
+                const activationValue = activationSelect.value;
+                
+                if (!campagneValue && !activationValue) {
+                    campagneSelect.setCustomValidity('Veuillez sélectionner une campagne ou une activation');
+                    activationSelect.setCustomValidity('Veuillez sélectionner une campagne ou une activation');
+                } else if (campagneValue && activationValue) {
+                    campagneSelect.setCustomValidity('Veuillez sélectionner soit une campagne, soit une activation, pas les deux');
+                    activationSelect.setCustomValidity('Veuillez sélectionner soit une campagne, soit une activation, pas les deux');
                 } else {
-                    this.setCustomValidity('');
+                    campagneSelect.setCustomValidity('');
+                    activationSelect.setCustomValidity('');
                 }
-            });
+            }
+            
+            campagneSelect.addEventListener('change', validateSelection);
+            activationSelect.addEventListener('change', validateSelection);
         });
     </script>
-}
-
-<style>
-    .card-header {
-        background: linear-gradient(135deg, #A32D18, #59311F);
-        color: white;
-    }
-    
-    .btn-primary {
-        background-color: #A32D18;
-        border-color: #A32D18;
-    }
-    
-    .btn-primary:hover {
-        background-color: #59311F;
-        border-color: #59311F;
-    }
-    
-    .form-control:focus {
-        border-color: #A32D18;
-        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
-    }
-    
-    .form-select:focus {
-        border-color: #A32D18;
-        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
-    }
-</style> 
+} 

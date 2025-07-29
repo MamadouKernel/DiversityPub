@@ -5,24 +5,6 @@
 
 <div class="row">
     <div class="col-12">
-        @if (TempData["Info"] != null)
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> @TempData["Info"]
-            </div>
-        }
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> @TempData["Success"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger">
-                <i class="fas fa-times-circle"></i> @TempData["Error"]
-            </div>
-        }
         
         <div class="card">
             <div class="card-header">

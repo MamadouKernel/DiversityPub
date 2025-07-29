@@ -29,20 +29,12 @@ namespace DiversityPub.Controllers
                     .OrderByDescending(i => i.DateCreation)
                     .ToListAsync();
 
-                if (incidents.Count == 0)
-                {
-                    TempData["Info"] = "🚨 Aucun incident trouvé.";
-                }
-                else
-                {
-                    TempData["Info"] = $"🚨 {incidents.Count} incident(s) trouvé(s)";
-                }
+
 
                 return View(incidents);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des incidents: {ex.Message}";
                 return View(new List<Incident>());
             }
         }
@@ -219,7 +211,6 @@ namespace DiversityPub.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du filtrage: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -232,7 +223,7 @@ namespace DiversityPub.Controllers
                 var query = _context.Incidents
                     .Include(i => i.AgentTerrain)
                         .ThenInclude(at => at.Utilisateur)
-                    .Include(i => i.Activation)
+                .Include(i => i.Activation)
                         .ThenInclude(a => a.Campagne)
                     .AsQueryable();
 
@@ -250,7 +241,6 @@ namespace DiversityPub.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du filtrage: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }

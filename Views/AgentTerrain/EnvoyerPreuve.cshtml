@@ -1,0 +1,447 @@
+@model DiversityPub.Models.Media
+@{
+    Layout = "_AgentLayout";
+    ViewData["Title"] = "Envoyer une Preuve";
+    var agent = ViewBag.Agent as DiversityPub.Models.AgentTerrain;
+    var activations = ViewBag.Activations as List<DiversityPub.Models.Activation>;
+    var activationId = ViewBag.ActivationId as Guid?;
+}
+
+<style>
+    /* Override du layout pour cette page spécifique */
+    .header {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%) !important;
+    }
+    
+    .nav-footer {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%) !important;
+    }
+    
+    .nav-btn {
+        background: rgba(255,255,255,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+    
+    .nav-btn:hover {
+        background: rgba(255,255,255,0.3) !important;
+    }
+    
+    .nav-btn.active {
+        background: rgba(255,255,255,0.4) !important;
+    }
+    
+    /* Header personnalisé pour cette page */
+    .page-header {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        color: white;
+        padding: 2rem 1.5rem;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .page-title-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .page-icon {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .page-title {
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .header-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .header-btn {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .header-btn:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    /* Formulaire */
+    .form-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .form-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+    }
+    
+    .form-title i {
+        color: #17a2b8;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-label.required::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #A32D18;
+        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+        outline: none;
+    }
+    
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+    
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: rgba(255,255,255,0.5);
+        margin-bottom: 1rem;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #A32D18;
+        background: rgba(163, 45, 24, 0.05);
+    }
+    
+    .file-upload-area.dragover {
+        border-color: #A32D18;
+        background: rgba(163, 45, 24, 0.1);
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .btn-cancel {
+        background: white;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-cancel:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    .btn-submit {
+        background: #17a2b8;
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-submit:hover {
+        background: #138496;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+    }
+    
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .header-buttons {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn-cancel, .btn-submit {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Header personnalisé -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-title-section">
+            <i class="fas fa-upload page-icon"></i>
+            <div>
+                <h1 class="page-title">Envoyer une Preuve</h1>
+                <p class="page-subtitle">@(agent?.Utilisateur != null ? $"{agent.Utilisateur.Prenom} {agent.Utilisateur.Nom}" : "Agent")</p>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <a href="javascript:history.back()" class="header-btn">
+                <i class="fas fa-arrow-left"></i>
+                ← Retour
+            </a>
+            <a href="@Url.Action("Preuves", "AgentTerrain")" class="header-btn">
+                <i class="fas fa-list"></i>
+                Mes Preuves
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Formulaire -->
+<div class="form-container">
+    <div class="form-title">
+        <i class="fas fa-upload"></i>
+        📤 Nouvelle Preuve
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        
+        <div class="form-group">
+            <label class="form-label required">
+                <i class="fas fa-align-left" style="color: #007bff;"></i>
+                Description de la preuve
+            </label>
+            <input type="text" class="form-control" name="Description" placeholder="Ex: Photo du site d'intervention" required>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label required">
+                <i class="fas fa-file" style="color: #28a745;"></i>
+                Type de média
+            </label>
+            <select class="form-select" name="Type" required>
+                <option value="">Sélectionner un type</option>
+                <option value="Photo">Photo</option>
+                <option value="Video">Vidéo</option>
+                <option value="Document">Document</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label required">
+                <i class="fas fa-file-upload" style="color: #ffc107;"></i>
+                Fichier
+            </label>
+            <div class="file-upload-area" id="fileUploadArea">
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                <h6>Glissez-déposez votre fichier ici</h6>
+                <p class="text-muted">ou cliquez pour sélectionner</p>
+                <input type="file" id="fichier" name="fichier" class="form-control" 
+                       accept="image/*,video/*,.pdf,.doc,.docx,.txt" style="display: none;" required />
+                <button type="button" class="btn btn-outline-primary mt-2" onclick="document.getElementById('fichier').click()">
+                    <i class="fas fa-folder-open"></i> Choisir un fichier
+                </button>
+            </div>
+            <div class="form-text">
+                Formats acceptés : Images (JPG, PNG, GIF), Vidéos (MP4, AVI), Documents (PDF, DOC, DOCX, TXT)
+                <br>Taille maximale : 10 MB
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label required">
+                <i class="fas fa-tasks" style="color: #007bff;"></i>
+                Mission concernée
+            </label>
+            <select class="form-select" name="ActivationId" required>
+                <option value="">Sélectionner une mission (obligatoire)</option>
+                @if (activations != null)
+                {
+                    foreach (var activation in activations)
+                    {
+                        if (activationId.HasValue && activationId.Value == activation.Id)
+                        {
+                            <option value="@activation.Id" selected>@activation.Nom</option>
+                        }
+                        else
+                        {
+                            <option value="@activation.Id">@activation.Nom</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        
+        <div class="form-actions">
+            <a href="javascript:history.back()" class="btn-cancel">
+                <i class="fas fa-times"></i>
+                × Annuler
+            </a>
+            <button type="submit" class="btn-submit" onclick="return validateForm()">
+                <i class="fas fa-upload"></i>
+                📤 Envoyer la Preuve
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Gestion du drag & drop
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fichier');
+    
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+    
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileDisplay();
+        }
+    });
+    
+    fileInput.addEventListener('change', updateFileDisplay);
+    
+    function updateFileDisplay() {
+        const file = fileInput.files[0];
+        if (file) {
+            fileUploadArea.innerHTML = `
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h6>Fichier sélectionné</h6>
+                <p class="text-muted">${file.name}</p>
+                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
+        }
+    }
+    
+    // Validation de la taille du fichier
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        const maxSize = 10 * 1024 * 1024; // 10 MB
+        
+        if (file && file.size > maxSize) {
+            alert('Le fichier est trop volumineux. Taille maximale : 10 MB');
+            this.value = '';
+            fileUploadArea.innerHTML = `
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                <h6>Glissez-déposez votre fichier ici</h6>
+                <p class="text-muted">ou cliquez pour sélectionner</p>
+                <button type="button" class="btn btn-outline-primary mt-2" onclick="document.getElementById('fichier').click()">
+                    <i class="fas fa-folder-open"></i> Choisir un fichier
+                </button>
+            `;
+        }
+    });
+    
+    // Validation du formulaire avant envoi
+    function validateForm() {
+        const description = document.querySelector('input[name="Description"]').value;
+        const type = document.querySelector('select[name="Type"]').value;
+        const fichier = document.getElementById('fichier').files[0];
+        const activationId = document.querySelector('select[name="ActivationId"]').value;
+        
+        console.log('Validation du formulaire:');
+        console.log('- Description:', description);
+        console.log('- Type:', type);
+        console.log('- Fichier:', fichier ? fichier.name : 'Aucun fichier');
+        console.log('- ActivationId:', activationId);
+        
+        if (!description || !type || !fichier || !activationId) {
+            alert('Veuillez remplir tous les champs obligatoires.');
+            return false;
+        }
+        
+        console.log('Formulaire valide, envoi en cours...');
+        return true;
+    }
+    
+    // Debug: Afficher les données du formulaire lors de la soumission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        console.log('Soumission du formulaire...');
+        const formData = new FormData(this);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+    });
+</script> 

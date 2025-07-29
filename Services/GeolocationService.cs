@@ -70,23 +70,32 @@ namespace DiversityPub.Services
 
         private async Task<PositionGPS?> GetAgentPosition(AgentTerrain agent)
         {
-            // En production, vous utiliseriez une vraie API GPS ou un service de localisation
-            // Pour l'instant, nous simulons une position aléatoire
+            // En production, cette méthode devrait récupérer la vraie position GPS
+            // depuis l'appareil de l'agent ou une API de localisation
             
-            var random = new Random();
-            var baseLatitude = 48.8566; // Paris
-            var baseLongitude = 2.3522;
-            
-            // Ajouter une variation aléatoire pour simuler le mouvement
-            var latitude = baseLatitude + (random.NextDouble() - 0.5) * 0.01;
-            var longitude = baseLongitude + (random.NextDouble() - 0.5) * 0.01;
-            
-            return new PositionGPS
+            try
             {
-                Latitude = latitude,
-                Longitude = longitude,
-                Precision = random.Next(5, 50) // Précision entre 5 et 50 mètres
-            };
+                // TODO: Remplacer par la vraie récupération GPS
+                // Exemples d'implémentation :
+                
+                // Option 1: API de localisation par IP (pour test)
+                // var position = await GetLocationByIP(agent);
+                
+                // Option 2: Récupération depuis l'appareil de l'agent
+                // var position = await GetDeviceLocation(agent);
+                
+                // Option 3: API GPS externe
+                // var position = await GetGPSLocation(agent);
+                
+                // Pour l'instant, retourner null pour éviter la simulation
+                // L'agent devra envoyer sa position via l'API UpdatePosition
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Erreur lors de la récupération de la position pour l'agent {agent.Id}");
+                return null;
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

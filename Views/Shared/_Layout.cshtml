@@ -175,6 +175,13 @@
                                         <li><a class="dropdown-item" href="@Url.Action("Index", "Campagne")">
                                             <i class="fas fa-bullhorn"></i> Campagnes
                                         </a></li>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="@Url.Action("Index", "Utilisateur")">
+                                                <i class="fas fa-users"></i> Utilisateurs
+                                            </a></li>
+                                        }
                                     </ul>
                                 </li>
                                 <li class="nav-item dropdown">
@@ -260,11 +267,6 @@
                             }
                             @if (User.IsInRole("Admin"))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="@Url.Action("Index", "Utilisateur")">
-                                        <i class="fas fa-users"></i> Utilisateurs
-                                    </a>
-                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="@Url.Action("Statistiques", "Dashboard")">
                                         <i class="fas fa-chart-bar"></i> Statistiques
@@ -378,18 +380,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <script>
-        // Initialiser automatiquement tous les toasts
+        // Initialiser et afficher les toasts seulement s'ils existent
         document.addEventListener('DOMContentLoaded', function() {
             var toastElList = [].slice.call(document.querySelectorAll('.toast'));
-            var toastList = toastElList.map(function(toastEl) {
-                return new bootstrap.Toast(toastEl, {
-                    autohide: true
-                });
-            });
             
-            // Afficher tous les toasts
-            toastList.forEach(function(toast) {
-                toast.show();
+            // Afficher seulement les toasts qui existent (avec du contenu)
+            toastElList.forEach(function(toastEl) {
+                if (toastEl.querySelector('.toast-body').textContent.trim() !== '') {
+                    var toast = new bootstrap.Toast(toastEl, {
+                        autohide: true
+                    });
+                    toast.show();
+                }
             });
         });
     </script>

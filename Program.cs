@@ -7,7 +7,15 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.MaxDepth = 64;
+    });
+
+// Ajouter SignalR
+builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<DiversityPubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -15,6 +23,10 @@ builder.Services.AddDbContext<DiversityPubDbContext>(options =>
 // Enregistrer les services hébergés
 builder.Services.AddHostedService<CampagneExpirationService>();
 builder.Services.AddHostedService<GeolocationService>();
+
+// Enregistrer les services HTTP
+builder.Services.AddHttpClient<GeocodingService>();
+builder.Services.AddScoped<GeocodingService>();
 
 // Configuration de l'authentification par cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -51,5 +63,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+// Mapper le hub SignalR
+app.MapHub<DiversityPub.Hubs.NotificationHub>("/notificationHub");
 
 app.Run();

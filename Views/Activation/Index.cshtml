@@ -125,6 +125,13 @@
                                            class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-trash"></i> Supprimer
                                         </a>
+                                        @if (activation.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
+                                        {
+                                            <button onclick="redemarrerActivation('@activation.Id')" 
+                                                    class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-redo"></i> Redémarrer
+                                            </button>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -152,4 +159,50 @@
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        function redemarrerActivation(activationId) {
+            if (confirm('Êtes-vous sûr de vouloir redémarrer cette activation ? Cela démarrera également la campagne associée.')) {
+                $.ajax({
+                    url: '@Url.Action("RedemarrerActivation", "Activation")',
+                    type: 'POST',
+                    data: { activationId: activationId },
+                    success: function(response) {
+                        if (response.success) {
+                            showToast('success', response.message);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showToast('error', response.message);
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Erreur lors du redémarrage de l\'activation');
+                    }
+                });
+            }
+        }
+
+        function showToast(type, message) {
+            const toastClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const iconClass = type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle';
+            
+            const toast = $(`
+                <div class="alert ${toastClass} alert-dismissible fade show position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999;">
+                    <i class="${iconClass}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            
+            $('body').append(toast);
+            
+            setTimeout(function() {
+                toast.alert('close');
+            }, 5000);
+        }
+    </script>
 } 

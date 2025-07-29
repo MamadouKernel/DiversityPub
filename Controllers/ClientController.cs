@@ -33,11 +33,11 @@ namespace DiversityPub.Controllers
         {
             try
             {
-                var clients = await _context.Clients
-                    .Include(c => c.Utilisateur)
-                    .Include(c => c.Campagnes)
-                    .OrderBy(c => c.RaisonSociale)
-                    .ToListAsync();
+                            var clients = await _context.Clients
+                .Include(c => c.Utilisateur)
+                .Include(c => c.Campagnes)
+                .OrderByDescending(c => c.DateCreation)
+                .ToListAsync();
 
                 // Dictionnaire : clé = ID client, valeur = nombre de campagnes
                 var nombreCampagnesParClient = clients.ToDictionary(
@@ -48,20 +48,12 @@ namespace DiversityPub.Controllers
                 // On le passe à la vue
                 ViewBag.NombreCampagnes = nombreCampagnesParClient;
 
-                if (clients.Count == 0)
-                {
-                    TempData["Info"] = "🏢 Aucun client trouvé. Créez votre premier client !";
-                }
-                else
-                {
-                    TempData["Info"] = $"🏢 {clients.Count} client(s) trouvé(s)";
-                }
+
 
                 return View(clients);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des clients: {ex.Message}";
                 return View(new List<Client>());
             }
         }
@@ -87,7 +79,6 @@ namespace DiversityPub.Controllers
         // GET: Client/Create
         public IActionResult Create()
         {
-            TempData["Info"] = "🏢 Prêt à créer un nouveau client. Un compte utilisateur sera automatiquement créé.";
             return View();
         }
 
@@ -119,6 +110,7 @@ namespace DiversityPub.Controllers
                 try
                 {
                     client.Id = Guid.NewGuid();
+                    client.DateCreation = DateTime.Now;
                     
                     // Créer un utilisateur associé au client
                     var utilisateur = new Utilisateur
@@ -305,12 +297,11 @@ namespace DiversityPub.Controllers
                 _context.Add(testClient);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Client de test créé avec succès !";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Erreur lors de la création du client de test: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -395,12 +386,11 @@ namespace DiversityPub.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                TempData["Success"] = $"✅ Correction terminée ! {string.Join("<br>", results)}";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors de la correction: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -451,12 +441,11 @@ namespace DiversityPub.Controllers
                     }
                 }
 
-                TempData["Info"] = $"Test de connexion des utilisateurs clients :<br>{string.Join("<br>", results)}";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du test: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -474,7 +463,7 @@ namespace DiversityPub.Controllers
                 
                 if (existingUser != null)
                 {
-                    TempData["Warning"] = $"⚠️ L'utilisateur {testEmail} existe déjà";
+    
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -508,12 +497,11 @@ namespace DiversityPub.Controllers
                 _context.Add(testClient);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"✅ Client de test créé avec succès !<br>Email: {testEmail}<br>Mot de passe: Client123!";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors de la création du client de test: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -651,12 +639,11 @@ namespace DiversityPub.Controllers
                     results.Add("✅ Aucune correction nécessaire");
                 }
 
-                TempData["Info"] = string.Join("<br>", results);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors de l'analyse: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -674,7 +661,7 @@ namespace DiversityPub.Controllers
 
                 if (!clientUsers.Any())
                 {
-                    TempData["Warning"] = "⚠️ Aucun utilisateur client trouvé";
+    
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -685,12 +672,11 @@ namespace DiversityPub.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                TempData["Success"] = $"✅ {clientUsers.Count} mot(s) de passe réinitialisé(s) !<br>{string.Join("<br>", results)}";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors de la réinitialisation: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }
         }

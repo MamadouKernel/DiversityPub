@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DiversityPub.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class initCreat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,7 +48,10 @@ namespace DiversityPub.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UtilisateurId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Telephone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EstConnecte = table.Column<bool>(type: "bit", nullable: false),
+                    DerniereConnexion = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DerniereDeconnexion = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,7 +76,8 @@ namespace DiversityPub.Migrations
                     NomDirigeant = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NomContactPrincipal = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TelephoneContactPrincipal = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EmailContactPrincipal = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    EmailContactPrincipal = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateCreation = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,6 +144,7 @@ namespace DiversityPub.Migrations
                     DateFin = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Objectifs = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DateCreation = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Statut = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -165,6 +170,9 @@ namespace DiversityPub.Migrations
                     HeureDebut = table.Column<TimeSpan>(type: "time", nullable: false),
                     HeureFin = table.Column<TimeSpan>(type: "time", nullable: false),
                     Statut = table.Column<int>(type: "int", nullable: false),
+                    DateCreation = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MotifSuspension = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateSuspension = table.Column<DateTime>(type: "datetime2", nullable: true),
                     PreuvesValidees = table.Column<bool>(type: "bit", nullable: false),
                     DateValidationPreuves = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ValideParId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -250,27 +258,6 @@ namespace DiversityPub.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Feedbacks",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Note = table.Column<int>(type: "int", nullable: false),
-                    Commentaire = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateFeedback = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CampagneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Feedbacks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Feedbacks_Campagnes_CampagneId",
-                        column: x => x.CampagneId,
-                        principalTable: "Campagnes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ActivationAgentTerrain",
                 columns: table => new
                 {
@@ -292,6 +279,33 @@ namespace DiversityPub.Migrations
                         principalTable: "AgentsTerrain",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Feedbacks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Note = table.Column<int>(type: "int", nullable: false),
+                    Commentaire = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateFeedback = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CampagneId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ActivationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Feedbacks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Feedbacks_Activations_ActivationId",
+                        column: x => x.ActivationId,
+                        principalTable: "Activations",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Feedbacks_Campagnes_CampagneId",
+                        column: x => x.CampagneId,
+                        principalTable: "Campagnes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -365,7 +379,7 @@ namespace DiversityPub.Migrations
             migrationBuilder.InsertData(
                 table: "Utilisateurs",
                 columns: new[] { "Id", "Email", "MotDePasse", "Nom", "Prenom", "Role", "Supprimer" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$1RHuk.9O5ghgVB2iz4DM4uovFSDmhxUArm2rMJyum/pptoNUD750W", "Super", "Admin", 1, 0 });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$azpwM1Erkw6qdtOrdZGKbe8EuEQJ6/3EGtlUdVqvzOT8ug15Ao/jy", "Super", "Admin", 1, 0 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActivationAgentTerrain_AgentsTerrainId",
@@ -433,6 +447,11 @@ namespace DiversityPub.Migrations
                 name: "IX_Documents_AgentTerrainId",
                 table: "Documents",
                 column: "AgentTerrainId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feedbacks_ActivationId",
+                table: "Feedbacks",
+                column: "ActivationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Feedbacks_CampagneId",

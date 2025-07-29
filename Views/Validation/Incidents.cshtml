@@ -1,0 +1,272 @@
+@model IEnumerable<DiversityPub.Models.Incident>
+
+@{
+    ViewData["Title"] = "Gestion des Incidents";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Gestion des Incidents
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3 text-muted">Aucun incident en cours</h5>
+                            <p class="text-muted">Tous les incidents ont été résolus.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @foreach (var incident in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header @GetStatusColor(incident.Statut)">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0 text-white">
+                                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                                    @incident.Titre
+                                                </h6>
+                                                <span class="badge @GetPriorityBadge(incident.Priorite)">
+                                                    @incident.Priorite
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <strong>Statut:</strong>
+                                                <span class="badge @GetStatusBadge(incident.Statut)">
+                                                    @incident.Statut
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Description:</strong>
+                                                <p class="text-muted mb-0">@incident.Description</p>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Campagne:</strong> @incident.Activation?.Campagne?.Nom
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Lieu:</strong> @incident.Activation?.Lieu?.Nom
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Agent:</strong> @incident.AgentTerrain?.Utilisateur?.Nom @incident.AgentTerrain?.Utilisateur?.Prenom
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <strong>Date de création:</strong>
+                                                <small class="text-muted">@incident.DateCreation.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </div>
+                                            
+                                            @if (incident.DateResolution.HasValue)
+                                            {
+                                                <div class="mb-3">
+                                                    <strong>Date de résolution:</strong>
+                                                    <small class="text-muted">@incident.DateResolution.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                                </div>
+                                            }
+                                            
+                                            @if (!string.IsNullOrEmpty(incident.CommentaireResolution))
+                                            {
+                                                <div class="mb-3">
+                                                    <strong>Commentaire de résolution:</strong>
+                                                    <p class="text-muted mb-0">@incident.CommentaireResolution</p>
+                                                </div>
+                                            }
+                                        </div>
+                                        
+                                        <div class="card-footer bg-light">
+                                            @if (incident.Statut == "Ouvert" || incident.Statut == "EnCours")
+                                            {
+                                                <div class="d-flex justify-content-between">
+                                                    <button class="btn btn-success btn-sm" onclick="resoudreIncident('@incident.Id', 'Resolu')">
+                                                        <i class="fas fa-check me-1"></i>
+                                                        Résoudre
+                                                    </button>
+                                                    <button class="btn btn-warning btn-sm" onclick="resoudreIncident('@incident.Id', 'EnCours')">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        En cours
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" onclick="resoudreIncident('@incident.Id', 'Annule')">
+                                                        <i class="fas fa-times me-1"></i>
+                                                        Annuler
+                                                    </button>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-center">
+                                                    <span class="badge @GetStatusBadge(incident.Statut)">
+                                                        @incident.Statut
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour commentaire de résolution -->
+<div class="modal fade" id="resolutionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Résolution d'incident</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="statutSelect" class="form-label">Nouveau statut:</label>
+                    <select class="form-select" id="statutSelect">
+                        <option value="Resolu">Résolu</option>
+                        <option value="EnCours">En cours</option>
+                        <option value="Annule">Annulé</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="commentaireResolution" class="form-label">Commentaire de résolution (optionnel):</label>
+                    <textarea class="form-control" id="commentaireResolution" rows="3" placeholder="Ajouter un commentaire de résolution..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="confirmResolution">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusColor(string statut)
+    {
+        return statut switch
+        {
+            "Ouvert" => "bg-danger",
+            "EnCours" => "bg-warning",
+            "Resolu" => "bg-success",
+            "Annule" => "bg-secondary",
+            _ => "bg-primary"
+        };
+    }
+    
+    private string GetStatusBadge(string statut)
+    {
+        return statut switch
+        {
+            "Ouvert" => "bg-danger",
+            "EnCours" => "bg-warning",
+            "Resolu" => "bg-success",
+            "Annule" => "bg-secondary",
+            _ => "bg-primary"
+        };
+    }
+    
+    private string GetPriorityBadge(string priorite)
+    {
+        return priorite switch
+        {
+            "Critique" => "bg-danger",
+            "Haute" => "bg-warning",
+            "Normale" => "bg-primary",
+            "Basse" => "bg-secondary",
+            _ => "bg-primary"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        let currentIncidentId = null;
+
+        function resoudreIncident(incidentId, statut) {
+            currentIncidentId = incidentId;
+            
+            // Pré-remplir le statut dans le modal
+            $('#statutSelect').val(statut);
+            $('#commentaireResolution').val('');
+            
+            // Afficher le modal
+            $('#resolutionModal').modal('show');
+        }
+
+        $('#confirmResolution').click(function() {
+            const statut = $('#statutSelect').val();
+            const commentaire = $('#commentaireResolution').val();
+            
+            $.ajax({
+                url: '@Url.Action("ResoudreIncident", "Validation")',
+                type: 'POST',
+                data: {
+                    incidentId: currentIncidentId,
+                    statut: statut,
+                    commentaire: commentaire
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Afficher un message de succès
+                        showAlert('success', response.message);
+                        
+                        // Recharger la page après un délai
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function() {
+                    showAlert('danger', 'Erreur lors de la résolution de l\'incident.');
+                }
+            });
+            
+            // Fermer le modal
+            $('#resolutionModal').modal('hide');
+        });
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Supprimer les anciennes alertes
+            $('.alert').remove();
+            
+            // Ajouter la nouvelle alerte en haut de la page
+            $('.card-body').prepend(alertHtml);
+        }
+    </script>
+} 

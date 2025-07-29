@@ -3,286 +3,812 @@
     ViewData["Title"] = "Détails de la Campagne";
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-bullhorn"></i> Détails de la Campagne : @Model.Nom
-                </h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 class="text-primary mb-3">
-                            <i class="fas fa-info-circle"></i> Informations Générales
-                        </h5>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nom :</label>
-                            <p class="mb-0">@Model.Nom</p>
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .main-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .content-section {
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        margin-bottom: 2rem;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .info-header {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .info-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-subtitle {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .info-content {
+        padding: 2rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-color: #A32D18;
+    }
+
+    .info-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+        color: white;
+        flex-shrink: 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-icon.campaign {
+        background: linear-gradient(135deg, #A32D18, #c94a3a);
+    }
+
+    .info-icon.date {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .info-icon.status {
+        background: linear-gradient(135deg, #17a2b8, #6f42c1);
+    }
+
+    .info-icon.description {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+    }
+
+    .info-text {
+        flex: 1;
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1.125rem;
+        color: #2c3e50;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        padding: 2rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: #6c757d;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .table-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        margin-bottom: 2rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.875rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .table tbody td {
+        padding: 1.5rem 1rem;
+        vertical-align: middle;
+        border: none;
+        font-weight: 500;
+    }
+
+    .activation-name {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .activation-date {
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .activation-time {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .activation-location {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .activation-agents {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .feedback-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
+    }
+
+    .feedback-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .feedback-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .feedback-content {
+        padding: 1.5rem;
+    }
+
+    .stars-container {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .star {
+        font-size: 1.25rem;
+        color: #ffc107;
+    }
+
+    .star.empty {
+        color: #dee2e6;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        margin: 2rem 0;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .empty-subtitle {
+        color: #adb5bd;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-custom {
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #A32D18, #c94a3a);
+        color: white;
+    }
+
+    .btn-secondary-custom {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+
+    .btn-success-custom {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .container-fluid {
+            padding: 0 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-bullhorn"></i>
+                Détails de la Campagne
+            </h1>
+            <p class="page-subtitle">@Model.Nom</p>
+        </div>
+
+        <div class="content-section">
+            <!-- Informations Générales -->
+            <div class="info-card">
+                <div class="info-header">
+                    <h2 class="info-title">
+                        <i class="fas fa-info-circle"></i>
+                        Informations Générales
+                    </h2>
+                    <p class="info-subtitle">Détails de la campagne</p>
+                </div>
+                <div class="info-content">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-icon campaign">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="info-text">
+                                <div class="info-label">Nom de la Campagne</div>
+                                <div class="info-value">@Model.Nom</div>
+                            </div>
                         </div>
-                        
+
+                        <div class="info-item">
+                            <div class="info-icon date">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="info-text">
+                                <div class="info-label">Période</div>
+                                <div class="info-value">
+                                    Du @Model.DateDebut.ToString("dd/MM/yyyy") au @Model.DateFin.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon status">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="info-text">
+                                <div class="info-label">Statut</div>
+                                <div class="info-value">
+                                    <span class="status-badge @GetStatusBadgeClass(Model.Statut)">
+                                        @GetStatusText(Model.Statut)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                         @if (!string.IsNullOrEmpty(Model.Description))
                         {
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Description :</label>
-                                <p class="mb-0">@Model.Description</p>
-                            </div>
-                        }
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Période :</label>
-                            <p class="mb-0">
-                                Du @Model.DateDebut.ToString("dd/MM/yyyy") au @Model.DateFin.ToString("dd/MM/yyyy")
-                            </p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Statut :</label>
-                            <span class="badge bg-@(Model.Statut switch {
-                                DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
-                                DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
-                                DiversityPub.Models.enums.StatutCampagne.Terminee => "info",
-                                DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
-                                _ => "secondary"
-                            })">@Model.Statut</span>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <h5 class="text-primary mb-3">
-                            <i class="fas fa-chart-bar"></i> Statistiques
-                        </h5>
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-primary">@(Model.Activations?.Count ?? 0)</h4>
-                                    <small class="text-muted">Activations</small>
+                            <div class="info-item">
+                                <div class="info-icon description">
+                                    <i class="fas fa-align-left"></i>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center p-3 bg-light rounded">
-                                    <h4 class="text-success">@(Model.Feedbacks?.Count ?? 0)</h4>
-                                    <small class="text-muted">Feedbacks</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        @if (Model.Feedbacks?.Any() == true)
-                        {
-                            <div class="mt-3">
-                                <label class="form-label fw-bold">Note moyenne :</label>
-                                <div class="d-flex align-items-center">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        if (i <= Model.Feedbacks.Average(f => f.Note))
-                                        {
-                                            <i class="fas fa-star text-warning"></i>
-                                        }
-                                        else
-                                        {
-                                            <i class="far fa-star text-muted"></i>
-                                        }
-                                    }
-                                    <span class="ms-2 badge bg-primary">@Model.Feedbacks.Average(f => f.Note).ToString("F1")/5</span>
+                                <div class="info-text">
+                                    <div class="info-label">Description</div>
+                                    <div class="info-value">@Model.Description</div>
                                 </div>
                             </div>
                         }
                     </div>
                 </div>
-                
-                <hr class="my-4">
-                
-                <!-- Activations -->
-                <h5 class="text-primary mb-3">
-                    <i class="fas fa-map-marker-alt"></i> Activations (@(Model.Activations?.Count ?? 0))
-                </h5>
-                
-                @if (Model.Activations?.Any() == true)
-                {
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Date</th>
-                                    <th>Horaires</th>
-                                    <th>Lieu</th>
-                                    <th>Agents</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
-                                {
-                                    <tr>
-                                        <td>
-                                            <strong>@activation.Nom</strong>
-                                            @if (!string.IsNullOrEmpty(activation.Description))
-                                            {
-                                                <br><small class="text-muted">@activation.Description</small>
-                                            }
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">@activation.DateActivation.ToString("dd/MM/yyyy")</small>
-                                        </td>
-                                        <td>
-                                            @{
-                                                var heureDebut = activation.HeureDebut.ToString(@"hh\:mm");
-                                                var heureFin = activation.HeureFin.ToString(@"hh\:mm");
-                                            }
-                                            <small>
-                                                <i class="fas fa-clock text-primary"></i>
-                                                @heureDebut - @heureFin
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary">@activation.Lieu?.Nom</span>
-                                        </td>
-                                        <td>
-                                            @if (activation.AgentsTerrain?.Any() == true)
-                                            {
-                                                <span class="badge bg-success">@activation.AgentsTerrain.Count agent(s)</span>
-                                                <br>
-                                                <div class="d-flex flex-wrap gap-1 mt-1">
-                                                    @foreach (var agent in activation.AgentsTerrain)
-                                                    {
-                                                        var isResponsable = activation.ResponsableId == agent.Id;
-                                                        <span class="badge @(isResponsable ? "bg-warning" : "bg-secondary")" style="font-size: 0.7rem;">
-                                                            <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i> 
-                                                            @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                            @if (isResponsable)
-                                                            {
-                                                                <small class="ms-1">(Responsable)</small>
-                                                            }
-                                                        </span>
-                                                    }
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-warning">Aucun agent</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-@(activation.Statut switch {
-                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
-                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
-                                                _ => "secondary"
-                                            })">@activation.Statut</span>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Aucune activation trouvée pour cette campagne.
-                    </div>
-                }
-                
-                <hr class="my-4">
-                
-                <!-- Feedbacks -->
-                <h5 class="text-primary mb-3">
-                    <i class="fas fa-comments"></i> Feedbacks (@(Model.Feedbacks?.Count ?? 0))
-                </h5>
-                
-                @if (Model.Feedbacks?.Any() == true)
-                {
-                    @foreach (var feedback in Model.Feedbacks)
-                    {
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="d-flex align-items-center mb-2">
-                                            @for (int i = 1; i <= 5; i++)
-                                            {
-                                                if (i <= feedback.Note)
-                                                {
-                                                    <i class="fas fa-star text-warning"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="far fa-star text-muted"></i>
-                                                }
-                                            }
-                                            <span class="ms-2 badge bg-primary">@feedback.Note/5</span>
-                                            <small class="text-muted ms-3">@feedback.DateFeedback.ToString("dd/MM/yyyy à HH:mm")</small>
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(feedback.Commentaire))
-                                        {
-                                            <p class="mb-0">@feedback.Commentaire</p>
-                                        }
-                                        else
-                                        {
-                                            <p class="mb-0 text-muted">Aucun commentaire</p>
-                                        }
-                                    </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="info-card">
+                <div class="info-header">
+                    <h2 class="info-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Statistiques
+                    </h2>
+                    <p class="info-subtitle">Vue d'ensemble de la campagne</p>
+                </div>
+                <div class="info-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="stat-number">@(Model.Activations?.Count ?? 0)</div>
+                            <div class="stat-label">Activations</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-number">@(Model.Feedbacks?.Count ?? 0)</div>
+                            <div class="stat-label">Feedbacks</div>
+                        </div>
+                        @if (Model.Feedbacks?.Any() == true)
+                        {
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-star"></i>
                                 </div>
+                                <div class="stat-number">@Model.Feedbacks.Average(f => f.Note).ToString("F1")</div>
+                                <div class="stat-label">Note Moyenne</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activations -->
+            <div class="info-card">
+                <div class="info-header">
+                    <h2 class="info-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Activations (@(Model.Activations?.Count ?? 0))
+                    </h2>
+                    <p class="info-subtitle">Liste des activations de cette campagne</p>
+                </div>
+                <div class="info-content">
+                    @if (Model.Activations?.Any() == true)
+                    {
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-tasks me-2"></i>Activation</th>
+                                            <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                            <th><i class="fas fa-clock me-2"></i>Horaires</th>
+                                            <th><i class="fas fa-map-pin me-2"></i>Lieu</th>
+                                            <th><i class="fas fa-users me-2"></i>Agents</th>
+                                            <th><i class="fas fa-info-circle me-2"></i>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="activation-name">@activation.Nom</div>
+                                                    @if (!string.IsNullOrEmpty(activation.Description))
+                                                    {
+                                                        <small class="text-muted">@activation.Description</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="activation-date">@activation.DateActivation.ToString("dd/MM/yyyy")</div>
+                                                </td>
+                                                <td>
+                                                    <div class="activation-time">
+                                                        @(activation.HeureDebut.Hours.ToString("00") + ":" + activation.HeureDebut.Minutes.ToString("00")) - 
+                                                        @(activation.HeureFin.Hours.ToString("00") + ":" + activation.HeureFin.Minutes.ToString("00"))
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="activation-location">@activation.Lieu?.Nom</div>
+                                                </td>
+                                                <td>
+                                                    <div class="activation-agents">
+                                                        @(activation.AgentsTerrain?.Count ?? 0) agent(s)
+                                                        @if (activation.AgentsTerrain?.Any() == true)
+                                                        {
+                                                            <br><small class="text-muted">
+                                                                Responsable: @(activation.Responsable?.Utilisateur?.Prenom) @(activation.Responsable?.Utilisateur?.Nom)
+                                                            </small>
+                                                        }
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge @GetStatusBadgeClass(activation.Statut)">
+                                                        @GetStatusText(activation.Statut)
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     }
-                }
-                else
-                {
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-circle"></i> Aucun feedback trouvé pour cette campagne.
-                        @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                    else
+                    {
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h3 class="empty-title">Aucune activation trouvée</h3>
+                            <p class="empty-subtitle">Cette campagne n'a pas encore d'activations associées.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Feedbacks -->
+            <div class="info-card">
+                <div class="info-header">
+                    <h2 class="info-title">
+                        <i class="fas fa-comments"></i>
+                        Feedbacks (@(Model.Feedbacks?.Count ?? 0))
+                    </h2>
+                    <p class="info-subtitle">Avis et commentaires sur cette campagne</p>
+                </div>
+                <div class="info-content">
+                    @if (Model.Feedbacks?.Any() == true)
+                    {
+                        @foreach (var feedback in Model.Feedbacks)
                         {
-                            <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-sm btn-success ms-2">
-                                <i class="fas fa-plus"></i> Laisser un feedback
-                            </a>
+                            <div class="feedback-card">
+                                <div class="feedback-header">
+                                    <div class="stars-container">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= feedback.Note)
+                                            {
+                                                <i class="fas fa-star star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star star empty"></i>
+                                            }
+                                        }
+                                        <span class="badge bg-primary ms-2">@feedback.Note/5</span>
+                                        <small class="text-muted ms-3">@feedback.DateFeedback.ToString("dd/MM/yyyy à HH:mm")</small>
+                                    </div>
+                                </div>
+                                <div class="feedback-content">
+                                    @if (!string.IsNullOrEmpty(feedback.Commentaire))
+                                    {
+                                        <p class="mb-0">@feedback.Commentaire</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="mb-0 text-muted">Aucun commentaire</p>
+                                    }
+                                </div>
+                            </div>
                         }
-                    </div>
-                }
-                
-                <hr class="my-4">
-                
-                <div class="d-flex justify-content-between">
-                    <a href="@Url.Action("Campagnes", "ClientDashboard")" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour aux campagnes
-                    </a>
-                    <div>
-                        @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !Model.Feedbacks?.Any() == true)
-                        {
-                            <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-success">
-                                <i class="fas fa-comment"></i> Laisser un feedback
-                            </a>
-                        }
-                        <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-primary">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3 class="empty-title">Aucun feedback trouvé</h3>
+                            <p class="empty-subtitle">
+                                Aucun feedback n'a encore été laissé pour cette campagne.
+                                @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                                {
+                                    <br><br>
+                                    <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-success-custom btn-custom">
+                                        <i class="fas fa-plus"></i>
+                                        Laisser un feedback
+                                    </a>
+                                }
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <a href="@Url.Action("Campagnes", "ClientDashboard")" class="btn btn-secondary-custom btn-custom">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour aux campagnes
+                </a>
+                <div>
+                    @if (Model.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !Model.Feedbacks?.Any() == true)
+                    {
+                        <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-success-custom btn-custom me-2">
+                            <i class="fas fa-comment"></i>
+                            Laisser un feedback
                         </a>
-                    </div>
+                    }
+                    <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-primary-custom btn-custom">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .card-header {
-        background: linear-gradient(135deg, #A32D18, #59311F);
-        color: white;
+@functions {
+    public string GetStatusBadgeClass(DiversityPub.Models.enums.StatutCampagne statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutCampagne.EnPreparation => "bg-warning",
+            DiversityPub.Models.enums.StatutCampagne.EnCours => "bg-success",
+            DiversityPub.Models.enums.StatutCampagne.Terminee => "bg-info",
+            DiversityPub.Models.enums.StatutCampagne.Annulee => "bg-danger",
+            _ => "bg-secondary"
+        };
     }
-    
-    .text-primary {
-        color: #A32D18 !important;
+
+    public string GetStatusText(DiversityPub.Models.enums.StatutCampagne statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutCampagne.EnPreparation => "En Préparation",
+            DiversityPub.Models.enums.StatutCampagne.EnCours => "En Cours",
+            DiversityPub.Models.enums.StatutCampagne.Terminee => "Terminée",
+            DiversityPub.Models.enums.StatutCampagne.Annulee => "Annulée",
+            _ => "Inconnu"
+        };
     }
-    
-    .bg-light {
-        background-color: #f8f9fa !important;
+
+    public string GetStatusBadgeClass(DiversityPub.Models.enums.StatutActivation statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutActivation.Planifiee => "bg-warning",
+            DiversityPub.Models.enums.StatutActivation.EnCours => "bg-success",
+            DiversityPub.Models.enums.StatutActivation.Suspendue => "bg-warning",
+            DiversityPub.Models.enums.StatutActivation.Terminee => "bg-info",
+            _ => "bg-secondary"
+        };
     }
-    
-    .badge {
-        font-size: 0.8rem;
+
+    public string GetStatusText(DiversityPub.Models.enums.StatutActivation statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutActivation.Planifiee => "Planifiée",
+            DiversityPub.Models.enums.StatutActivation.EnCours => "En Cours",
+            DiversityPub.Models.enums.StatutActivation.Suspendue => "Suspendue",
+            DiversityPub.Models.enums.StatutActivation.Terminee => "Terminée",
+            _ => "Inconnu"
+        };
     }
-</style> 
+}

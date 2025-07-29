@@ -26,20 +26,12 @@ namespace DiversityPub.Controllers
                     .OrderBy(l => l.Nom)
                     .ToListAsync();
                 
-                if (lieux.Count == 0)
-                {
-                    TempData["Info"] = "📍 Aucun lieu trouvé. Créez votre premier lieu !";
-                }
-                else
-                {
-                    TempData["Info"] = $"📍 {lieux.Count} lieu(x) trouvé(s)";
-                }
+
                 
                 return View(lieux);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des lieux: {ex.Message}";
                 return View(new List<Lieu>());
             }
         }
@@ -67,7 +59,6 @@ namespace DiversityPub.Controllers
         // GET: Lieu/Create
         public IActionResult Create()
         {
-            TempData["Info"] = "📍 Prêt à créer un nouveau lieu d'activation.";
             return View();
         }
 
@@ -198,32 +189,6 @@ namespace DiversityPub.Controllers
             return _context.Lieux.Any(e => e.Id == id);
         }
 
-        // Action pour créer un lieu de test
-        public async Task<IActionResult> CreateTestLieu()
-        {
-            try
-            {
-                var testLieu = new Lieu
-                {
-                    Id = Guid.NewGuid(),
-                    Nom = "Place du Marché",
-                    Adresse = "123 Avenue de la République, 75001 Paris"
-                };
 
-                _context.Add(testLieu);
-                await _context.SaveChangesAsync();
-
-                return Json(new { 
-                    Success = true, 
-                    Message = "Lieu de test créé avec succès",
-                    LieuId = testLieu.Id,
-                    Nom = testLieu.Nom
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { Error = ex.Message, StackTrace = ex.StackTrace });
-            }
-        }
     }
 } 

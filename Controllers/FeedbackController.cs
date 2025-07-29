@@ -27,20 +27,12 @@ namespace DiversityPub.Controllers
                     .OrderByDescending(f => f.DateFeedback)
                     .ToListAsync();
 
-                if (feedbacks.Count == 0)
-                {
-                    TempData["Info"] = "💬 Aucun feedback trouvé.";
-                }
-                else
-                {
-                    TempData["Info"] = $"💬 {feedbacks.Count} feedback(s) trouvé(s)";
-                }
+
 
                 return View(feedbacks);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des feedbacks: {ex.Message}";
                 return View(new List<Feedback>());
             }
         }

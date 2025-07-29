@@ -9,6 +9,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace DiversityPub.Controllers
 {
@@ -98,35 +100,32 @@ namespace DiversityPub.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, utilisateur.Id.ToString()),
-                    new Claim(ClaimTypes.Name, utilisateur.Email), // Utiliser l'email comme nom d'utilisateur
-                    new Claim(ClaimTypes.GivenName, utilisateur.Prenom),
-                    new Claim(ClaimTypes.Surname, utilisateur.Nom),
-                    new Claim(ClaimTypes.Email, utilisateur.Email),
-                    new Claim(ClaimTypes.Role, utilisateur.Role.ToString())
+                    new Claim(ClaimTypes.Name, utilisateur.Email),
+                    new Claim(ClaimTypes.Role, utilisateur.Role.ToString()),
+                    new Claim("UserId", utilisateur.Id.ToString())
                 };
 
-                // Ajouter des claims spécifiques selon le rôle
-                if (utilisateur.Role == Role.Client && utilisateur.Client != null)
-                {
-                    claims.Add(new Claim("ClientId", utilisateur.Client.Id.ToString()));
-                    claims.Add(new Claim("RaisonSociale", utilisateur.Client.RaisonSociale));
-                }
-                else if (utilisateur.Role == Role.AgentTerrain && utilisateur.AgentTerrain != null)
-                {
-                    claims.Add(new Claim("AgentTerrainId", utilisateur.AgentTerrain.Id.ToString()));
-                }
-
+                // Créer l'identité et le ticket d'authentification
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) // Session de 8 heures
                 };
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
+                    authProperties
+                );
+
+                // Marquer l'agent comme connecté si c'est un AgentTerrain
+                if (utilisateur.AgentTerrain != null)
+                {
+                    utilisateur.AgentTerrain.EstConnecte = true;
+                    utilisateur.AgentTerrain.DerniereConnexion = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                }
 
                 // Redirection selon le rôle
                 if (utilisateur.Role == Role.Client)
@@ -168,14 +167,122 @@ namespace DiversityPub.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
+            try
+            {
+                // Récupérer l'email de l'utilisateur connecté
+                var userEmail = User.Identity?.Name;
+                
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    // Marquer l'agent comme déconnecté
+                    var agentTerrain = await _context.AgentsTerrain
+                        .Include(at => at.Utilisateur)
+                        .FirstOrDefaultAsync(at => at.Utilisateur.Email == userEmail);
+
+                    if (agentTerrain != null)
+                    {
+                        // Marquer l'agent comme déconnecté
+                        agentTerrain.EstConnecte = false;
+                        agentTerrain.DerniereDeconnexion = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                // Déconnexion standard
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                
+                // Nettoyer les cookies de session
+                Response.Cookies.Delete(".AspNetCore.Identity.Application");
+                Response.Cookies.Delete(".AspNetCore.Session");
+                
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                // En cas d'erreur, forcer quand même la déconnexion
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login");
+            }
+        }
+
+        // GET: Auth/ForceLogout - Méthode pour forcer la déconnexion d'un agent
+        [HttpGet]
+        [Authorize(Roles = "Admin,ChefProjet")]
+        public async Task<IActionResult> ForceLogout(Guid agentId)
+        {
+            try
+            {
+                var agentTerrain = await _context.AgentsTerrain
+                    .Include(at => at.Utilisateur)
+                    .FirstOrDefaultAsync(at => at.Id == agentId);
+
+                if (agentTerrain == null)
+                {
+                    return Json(new { success = false, message = "Agent non trouvé." });
+                }
+
+                // Marquer l'agent comme déconnecté
+                agentTerrain.EstConnecte = false;
+                agentTerrain.DerniereDeconnexion = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                // Envoyer une notification SignalR pour déconnecter l'agent de sa tablette
+                try
+                {
+                    var hubContext = HttpContext.RequestServices.GetRequiredService<IHubContext<DiversityPub.Hubs.NotificationHub>>();
+                    await hubContext.Clients.Group($"agent_{agentId}").SendAsync("ForceLogout");
+                    Console.WriteLine($"📡 Notification SignalR envoyée au groupe agent_{agentId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Erreur SignalR: {ex.Message}");
+                }
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Agent {agentTerrain.Utilisateur.Prenom} {agentTerrain.Utilisateur.Nom} déconnecté avec succès." 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erreur lors de la déconnexion forcée: {ex.Message}" });
+            }
         }
 
         // GET: Auth/AccessDenied
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        // GET: Auth/CheckConnectionStatus - Vérifier le statut de connexion d'un agent
+        [HttpGet]
+        [Authorize(Roles = "AgentTerrain")]
+        public async Task<IActionResult> CheckConnectionStatus()
+        {
+            try
+            {
+                var userEmail = User.Identity?.Name;
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Json(new { isConnected = false });
+                }
+
+                var agentTerrain = await _context.AgentsTerrain
+                    .Include(at => at.Utilisateur)
+                    .FirstOrDefaultAsync(at => at.Utilisateur.Email == userEmail);
+
+                if (agentTerrain == null)
+                {
+                    return Json(new { isConnected = false });
+                }
+
+                return Json(new { isConnected = agentTerrain.EstConnecte });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { isConnected = false, error = ex.Message });
+            }
         }
 
         // GET: Auth/DebugLogin - Méthode de debug pour tester la connexion

@@ -3,61 +3,370 @@
     ViewData["Title"] = "Mes Activations";
 }
 
-<div class="row">
-    <div class="col-12">
-        @if (TempData["Info"] != null)
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> @TempData["Info"]
-            </div>
-        }
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> @TempData["Success"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger">
-                <i class="fas fa-times-circle"></i> @TempData["Error"]
-            </div>
+@Html.AntiForgeryToken()
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .main-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin: 2rem 0;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stats-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 3rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 1.125rem;
+        color: #6c757d;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .activations-section {
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #A32D18, #EDAC00);
+        border-radius: 2px;
+    }
+
+    .table-container {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.875rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .table tbody td {
+        padding: 1.5rem 1rem;
+        vertical-align: middle;
+        border: none;
+        font-weight: 500;
+    }
+
+    .activation-name {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .activation-campaign {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .activation-location {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .activation-date {
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .activation-time {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .activation-agents {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 6rem 3rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 30px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        margin: 2rem 0;
+    }
+
+    .empty-icon {
+        font-size: 8rem;
+        color: #dee2e6;
+        margin-bottom: 2rem;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+    }
+
+    .empty-title {
+        font-size: 2.5rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        font-weight: 800;
+    }
+
+    .empty-subtitle {
+        color: #adb5bd;
+        font-size: 1.25rem;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
         }
         
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-map-marker-alt"></i> Mes Activations
-                </h4>
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .container-fluid {
+            padding: 0 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: 15px;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-map-marker-alt"></i>
+                Mes Activations
+            </h1>
+            <p class="page-subtitle">Suivez l'évolution de vos campagnes et activations</p>
+        </div>
+
+        @if (Model?.Any() == true)
+        {
+            <div class="stats-section">
+                @{
+                    var totalActivations = Model.Count();
+                    var activationsPlanifiees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Planifiee);
+                    var activationsEnCours = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.EnCours);
+                    var activationsTerminees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Terminee);
+                }
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-number">@totalActivations</div>
+                        <div class="stat-label">Total Activations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number">@activationsPlanifiees</div>
+                        <div class="stat-label">Planifiées</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-number">@activationsEnCours</div>
+                        <div class="stat-label">En Cours</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number">@activationsTerminees</div>
+                        <div class="stat-label">Terminées</div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                @if (Model.Any())
-                {
+
+            <div class="activations-section">
+                <h2 class="section-title">Liste des Activations</h2>
+                
+                <div class="table-container">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <th>
-                                        <i class="fas fa-map-marker-alt"></i> Nom
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-bullhorn"></i> Campagne
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-calendar"></i> Date
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-clock"></i> Horaires
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-map-pin"></i> Lieu
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-users"></i> Agents
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-tasks"></i> Statut
-                                    </th>
+                                    <th><i class="fas fa-tasks me-2"></i>Activation</th>
+                                    <th><i class="fas fa-bullhorn me-2"></i>Campagne</th>
+                                    <th><i class="fas fa-map-pin me-2"></i>Lieu</th>
+                                    <th><i class="fas fa-calendar me-2"></i>Date</th>
+                                    <th><i class="fas fa-clock me-2"></i>Horaires</th>
+                                    <th><i class="fas fa-users me-2"></i>Agents</th>
+                                    <th><i class="fas fa-info-circle me-2"></i>Statut</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,86 +374,174 @@
                                 {
                                     <tr>
                                         <td>
-                                            <strong>@item.Nom</strong>
+                                            <div class="activation-name">@item.Nom</div>
                                             @if (!string.IsNullOrEmpty(item.Description))
                                             {
-                                                <br><small class="text-muted">@item.Description</small>
+                                                <small class="text-muted">@item.Description</small>
                                             }
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">@item.Campagne?.Nom</span>
+                                            <div class="activation-campaign">@item.Campagne?.Nom</div>
                                         </td>
                                         <td>
-                                            <small class="text-muted">@item.DateActivation.ToString("dd/MM/yyyy")</small>
+                                            <div class="activation-location">@item.Lieu?.Nom</div>
                                         </td>
                                         <td>
-                                            <small>
-                                                @item.HeureDebut.ToString("HH:mm") - @item.HeureFin.ToString("HH:mm")
-                                            </small>
+                                            <div class="activation-date">@item.DateActivation.ToString("dd/MM/yyyy")</div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-secondary">@item.Lieu?.Nom</span>
+                                            <div class="activation-time">
+                                                @(item.HeureDebut.Hours.ToString("00") + ":" + item.HeureDebut.Minutes.ToString("00")) - 
+                                                @(item.HeureFin.Hours.ToString("00") + ":" + item.HeureFin.Minutes.ToString("00"))
+                                            </div>
                                         </td>
                                         <td>
-                                            @if (item.AgentsTerrain?.Any() == true)
-                                            {
-                                                <span class="badge bg-success">@item.AgentsTerrain.Count agent(s)</span>
-                                                <br>
-                                                <div class="d-flex flex-wrap gap-1 mt-1">
-                                                    @foreach (var agent in item.AgentsTerrain)
-                                                    {
-                                                        var isResponsable = item.ResponsableId == agent.Id;
-                                                        <span class="badge @(isResponsable ? "bg-warning" : "bg-secondary")" style="font-size: 0.7rem;">
-                                                            <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i> 
-                                                            @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                            @if (isResponsable)
-                                                            {
-                                                                <small class="ms-1">(Responsable)</small>
-                                                            }
-                                                        </span>
-                                                    }
-                                                </div>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-warning">Aucun agent</span>
-                                            }
+                                            <div class="activation-agents">
+                                                @(item.AgentsTerrain?.Count ?? 0) agent(s)
+                                                @if (item.AgentsTerrain?.Any() == true)
+                                                {
+                                                    <br><small class="text-muted">
+                                                        Responsable: @(item.Responsable?.Utilisateur?.Prenom) @(item.Responsable?.Utilisateur?.Nom)
+                                                    </small>
+                                                }
+                                            </div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-@(item.Statut switch {
-                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
-                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "warning",
-                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
-                                                _ => "secondary"
-                                            })">@item.Statut</span>
+                                            <span class="status-badge @GetStatusBadgeClass(item.Statut)">
+                                                @GetStatusText(item.Statut)
+                                            </span>
                                         </td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
-                }
-                else
-                {
-                    <div class="text-center py-5">
-                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucune activation trouvée</h5>
-                        <p class="text-muted">Vous n'avez pas encore d'activations associées à vos campagnes.</p>
-                    </div>
-                }
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="activations-section">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="empty-title">Aucune activation trouvée</h3>
+                    <p class="empty-subtitle">
+                        Vous n'avez pas encore d'activations associées à vos campagnes.<br>
+                        Les activations apparaîtront ici une fois qu'elles seront créées par l'administrateur.
+                    </p>
+                    
+                    <!-- Bouton pour créer des données de test -->
+                    <div class="text-center mt-4">
+                        <button id="createTestDataBtn" class="btn btn-warning btn-lg" style="background: linear-gradient(135deg, #ffc107, #fd7e14); border: none; color: white; padding: 1rem 2rem; border-radius: 25px; font-weight: 700; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;">
+                            <i class="fas fa-magic me-2"></i>
+                            Créer des Données de Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
-<style>
-    .table th {
-        font-weight: 600;
-        background-color: #f8f9fa;
+@functions {
+    public string GetStatusBadgeClass(DiversityPub.Models.enums.StatutActivation statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutActivation.Planifiee => "bg-warning",
+            DiversityPub.Models.enums.StatutActivation.EnCours => "bg-success",
+            DiversityPub.Models.enums.StatutActivation.Suspendue => "bg-warning",
+            DiversityPub.Models.enums.StatutActivation.Terminee => "bg-info",
+            _ => "bg-secondary"
+        };
     }
+
+    public string GetStatusText(DiversityPub.Models.enums.StatutActivation statut)
+    {
+        return statut switch
+        {
+            DiversityPub.Models.enums.StatutActivation.Planifiee => "Planifiée",
+            DiversityPub.Models.enums.StatutActivation.EnCours => "En Cours",
+            DiversityPub.Models.enums.StatutActivation.Suspendue => "Suspendue",
+            DiversityPub.Models.enums.StatutActivation.Terminee => "Terminée",
+            _ => "Inconnu"
+        };
+    }
+}
+
+<script>
+$(document).ready(function() {
+    // Gestion du bouton de création de données de test
+    $('#createTestDataBtn').click(function() {
+        var button = $(this);
+        var originalText = button.html();
+        
+        // Désactiver le bouton et changer le texte
+        button.prop('disabled', true);
+        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Création en cours...');
+        
+        // Appel AJAX pour créer les données de test
+        $.ajax({
+            url: '@Url.Action("CreateTestData", "ClientDashboard")',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Afficher un message de succès
+                    Swal.fire({
+                        title: '✅ Succès !',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonText: 'Recharger la page',
+                        confirmButtonColor: '#A32D18'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    // Afficher un message d'erreur
+                    Swal.fire({
+                        title: '❌ Erreur',
+                        text: response.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#A32D18'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                // Afficher un message d'erreur
+                Swal.fire({
+                    title: '❌ Erreur',
+                    text: 'Une erreur est survenue lors de la création des données de test.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#A32D18'
+                });
+            },
+            complete: function() {
+                // Réactiver le bouton et restaurer le texte
+                button.prop('disabled', false);
+                button.html(originalText);
+            }
+        });
+    });
     
-    .badge {
-        font-size: 0.8rem;
-    }
-</style> 
+    // Animation au survol du bouton
+    $('#createTestDataBtn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-3px) scale(1.05)');
+            $(this).css('box-shadow', '0 12px 35px rgba(0, 0, 0, 0.2)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0) scale(1)');
+            $(this).css('box-shadow', '0 8px 25px rgba(0, 0, 0, 0.15)');
+        }
+    );
+});
+</script>

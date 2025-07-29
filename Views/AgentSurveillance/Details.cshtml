@@ -1,0 +1,398 @@
+@model DiversityPub.Models.AgentTerrain
+@{
+    ViewData["Title"] = "Détails de l'Agent Terrain";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="fas fa-user-tie text-primary"></i> Détails de l'Agent Terrain
+                    </h1>
+                    <p class="text-muted mb-0">Surveillance détaillée de l'activité</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="@Url.Action("Index", "AgentSurveillance")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Informations de l'Agent -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user"></i> Informations Générales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-lg me-3">
+                                    <i class="fas fa-user-circle fa-3x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">@Model.Utilisateur.Prenom @Model.Utilisateur.Nom</h5>
+                                    <small class="text-muted">@Model.Utilisateur.Email</small>
+                                </div>
+                            </div>
+                            
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Téléphone :</strong></td>
+                                    <td>
+                                        <i class="fas fa-phone text-muted"></i> @Model.Telephone
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email pro :</strong></td>
+                                    <td>
+                                        <i class="fas fa-envelope text-muted"></i> @Model.Email
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Statut :</strong></td>
+                                    <td>
+                                        @{
+                                            var lastPosition = Model.PositionsGPS.FirstOrDefault();
+                                            var isOnline = Model.EstConnecte; // Utiliser le statut de connexion direct
+                                        }
+                                        <span class="badge bg-@(isOnline ? "success" : "secondary")">
+                                            <i class="fas fa-circle"></i> @(isOnline ? "En ligne" : "Hors ligne")
+                                        </span>
+                                    </td>
+                                </tr>
+                                @if (lastPosition != null)
+                                {
+                                    <tr>
+                                        <td><strong>Dernière position :</strong></td>
+                                        <td>
+                                            <i class="fas fa-map-marker-alt text-muted"></i> 
+                                            @lastPosition.Horodatage.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="row">
+                        <!-- Statistiques -->
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tasks fa-2x mb-2"></i>
+                                    <h4 class="mb-0">@Model.Activations.Count</h4>
+                                    <small>Activation(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                    <h4 class="mb-0">@Model.Incidents.Count</h4>
+                                    <small>Incident(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                                    <h4 class="mb-0">@Model.PositionsGPS.Count</h4>
+                                    <small>Position(s) GPS</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-camera fa-2x mb-2"></i>
+                                    <h4 class="mb-0">@Model.Medias.Count</h4>
+                                    <small>Média(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglets pour les détails -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="agentTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="activations-tab" data-bs-toggle="tab" data-bs-target="#activations" type="button" role="tab">
+                                        <i class="fas fa-tasks"></i> Activations (@Model.Activations.Count)
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="positions-tab" data-bs-toggle="tab" data-bs-target="#positions" type="button" role="tab">
+                                        <i class="fas fa-map-marker-alt"></i> Positions (@Model.PositionsGPS.Count)
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="incidents-tab" data-bs-toggle="tab" data-bs-target="#incidents" type="button" role="tab">
+                                        <i class="fas fa-exclamation-triangle"></i> Incidents (@Model.Incidents.Count)
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="medias-tab" data-bs-toggle="tab" data-bs-target="#medias" type="button" role="tab">
+                                        <i class="fas fa-camera"></i> Médias (@Model.Medias.Count)
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="agentTabsContent">
+                                <!-- Onglet Activations -->
+                                <div class="tab-pane fade" id="activations" role="tabpanel">
+                                    @if (Model.Activations.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Campagne</th>
+                                                        <th>Lieu</th>
+                                                        <th>Date Activation</th>
+                                                        <th>Statut</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var activation in Model.Activations.OrderByDescending(a => a.DateActivation))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <strong>@activation.Campagne?.Nom</strong>
+                                                                <br><small class="text-muted">@activation.Campagne?.Description</small>
+                                                            </td>
+                                                            <td>
+                                                                <i class="fas fa-map-marker-alt text-muted"></i>
+                                                                @activation.Lieu?.Nom
+                                                            </td>
+                                                            <td>@activation.DateActivation.ToString("dd/MM/yyyy HH:mm")</td>
+                                                            <td>
+                                                                <span class="badge bg-@(activation.Statut == DiversityPub.Models.enums.StatutActivation.EnCours ? "success" : "secondary")">
+                                                                    @activation.Statut
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <a href="@Url.Action("Details", "Activation", new { id = activation.Id })" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucune activation trouvée</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Onglet Positions -->
+                                <div class="tab-pane fade show active" id="positions" role="tabpanel">
+                                    @if (Model.PositionsGPS.Any())
+                                    {
+                                        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                                            <i class="fas fa-map-marker-alt"></i> 
+                                            <strong>@Model.PositionsGPS.Count position(s) GPS</strong> récupérée(s) depuis le device de l'agent.
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                        
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date/Horaire</th>
+                                                        <th>Latitude</th>
+                                                        <th>Longitude</th>
+                                                        <th>Précision</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var position in Model.PositionsGPS.OrderByDescending(p => p.Horodatage))
+                                                    {
+                                                        <tr>
+                                                            <td>@position.Horodatage.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                                                                    <td><code>@position.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)</code></td>
+                                        <td><code>@position.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)</code></td>
+                                                            <td><span class="badge bg-info">@position.Precision m</span></td>
+                                                            <td>
+                                                                <a href="https://www.google.com/maps?q=@position.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture),@position.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)" 
+                                                                   target="_blank" class="btn btn-sm btn-outline-primary" 
+                                                                   title="Voir sur Google Maps">
+                                                                    <i class="fas fa-map"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucune position GPS trouvée</p>
+                                            <small class="text-muted">
+                                                Les positions GPS apparaîtront ici quand l'agent se connectera et activera la géolocalisation sur son device.
+                                                <br>
+                                                <strong>Note :</strong> L'agent doit autoriser l'accès à sa localisation pour que les positions soient enregistrées.
+                                            </small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Onglet Incidents -->
+                                <div class="tab-pane fade" id="incidents" role="tabpanel">
+                                    @if (Model.Incidents.Any())
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Titre/Description</th>
+                                                        <th>Priorité</th>
+                                                        <th>Statut</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var incident in Model.Incidents.OrderByDescending(i => i.DateCreation))
+                                                    {
+                                                        <tr>
+                                                            <td>@incident.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                                                            <td>
+                                                                <strong>@incident.Titre</strong>
+                                                                <br><small class="text-muted">@incident.Description</small>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-@(incident.Priorite == "Haute" ? "danger" : incident.Priorite == "Moyenne" ? "warning" : "info")">
+                                                                    @incident.Priorite
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-@(incident.Statut == "Ouvert" ? "danger" : incident.Statut == "EnCours" ? "warning" : "success")">
+                                                                    @incident.Statut
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <a href="@Url.Action("Details", "Incident", new { id = incident.Id })" class="btn btn-sm btn-outline-primary">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-exclamation-triangle fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucun incident trouvé</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Onglet Médias -->
+                                <div class="tab-pane fade" id="medias" role="tabpanel">
+                                    @if (Model.Medias.Any())
+                                    {
+                                        <div class="row">
+                                            @foreach (var media in Model.Medias.OrderByDescending(m => m.DateUpload))
+                                            {
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="card">
+                                                        <div class="card-body text-center">
+                                                            <i class="fas fa-@(media.Type == DiversityPub.Models.enums.TypeMedia.Photo ? "image" : media.Type == DiversityPub.Models.enums.TypeMedia.Video ? "video" : "file") fa-2x text-primary mb-2"></i>
+                                                            <h6 class="card-title">@media.Description</h6>
+                                                            <p class="card-text">
+                                                                <small class="text-muted">
+                                                                    Uploadé le @media.DateUpload.ToString("dd/MM/yyyy HH:mm")
+                                                                </small>
+                                                            </p>
+                                                            <span class="badge bg-@(media.Valide ? "success" : "warning")">
+                                                                @(media.Valide ? "Validé" : "En attente")
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Aucun média trouvé</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-lg {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+              .nav-tabs .nav-link {
+         border: none;
+         border-bottom: 2px solid transparent;
+         color: #59311F !important;  /* Marron foncé de la charte */
+         font-weight: 400;
+         transition: all 0.3s ease;
+     }
+     
+     .nav-tabs .nav-link.active {
+         border-bottom-color: #A32D18;  /* Orange/rouge primaire */
+         color: #A32D18 !important;     /* Orange/rouge primaire */
+         font-weight: 500;
+     }
+     
+     .nav-tabs .nav-link:hover {
+         color: #A32D18 !important;     /* Orange/rouge primaire */
+         border-bottom-color: #A32D18;
+     }
+    
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style> 

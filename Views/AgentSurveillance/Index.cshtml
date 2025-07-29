@@ -14,32 +14,12 @@
                     </h1>
                     <p class="text-muted mb-0">Suivi en temps réel des positions et activités</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="@Url.Action("Map", "AgentSurveillance")" class="btn btn-info">
-                        <i class="fas fa-map"></i> Vue Carte
-                    </a>
-                    <a href="@Url.Action("Activity", "AgentSurveillance")" class="btn btn-secondary">
-                        <i class="fas fa-chart-line"></i> Activité
-                    </a>
-                </div>
+                                 <div class="d-flex gap-2">
+                     <button onclick="updateStatistics()" class="btn btn-info">
+                         <i class="fas fa-sync-alt"></i> Actualiser
+                     </button>
+                 </div>
             </div>
-
-            <!-- Messages -->
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-            
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
 
             <!-- Statistiques -->
             <div class="row mb-4">
@@ -97,17 +77,7 @@
                 </div>
             </div>
 
-            <!-- Carte -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-map-marker-alt"></i> Positions en Temps Réel
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div id="map" style="height: 400px; width: 100%;"></div>
-                </div>
-            </div>
+
 
             <!-- Liste des agents -->
             <div class="card">
@@ -133,7 +103,7 @@
                                 @foreach (var agent in Model)
                                 {
                                     var lastPosition = agent.PositionsGPS.FirstOrDefault();
-                                    var isOnline = lastPosition?.Horodatage > DateTime.Now.AddMinutes(-10);
+                                    var isOnline = agent.EstConnecte; // Utiliser le statut de connexion direct
                                     var activeActivations = agent.Activations.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.EnCours);
                                     var openIncidents = agent.Incidents.Count(i => i.Statut == "Ouvert" || i.Statut == "EnCours");
                                     
@@ -160,7 +130,7 @@
                                                 <div>
                                                     <small class="text-muted">
                                                         <i class="fas fa-map-marker-alt"></i> 
-                                                        @lastPosition.Latitude.ToString("F6"), @lastPosition.Longitude.ToString("F6")
+                                                        @lastPosition.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture) / @lastPosition.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture)
                                                     </small>
                                                     <br>
                                                     <small class="text-muted">
@@ -193,9 +163,14 @@
                                                    class="btn btn-sm btn-outline-primary">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button class="btn btn-sm btn-outline-info" onclick="centerOnAgent('@agent.Id')">
-                                                    <i class="fas fa-crosshairs"></i>
-                                                </button>
+                                                @if (isOnline)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-warning" 
+                                                            onclick="forceLogout('@agent.Id', '@agent.Utilisateur.Prenom @agent.Utilisateur.Nom')"
+                                                            title="Forcer la déconnexion">
+                                                        <i class="fas fa-sign-out-alt"></i>
+                                                    </button>
+                                                }
                                             </div>
                                         </td>
                                     </tr>
@@ -239,192 +214,173 @@
         font-size: 0.7em;
     }
     
-    #map {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .agent-marker {
-        background: #A32D18;
-        border: 2px solid white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .agent-marker.online {
-        background: #28a745;
-    }
-    
-    .agent-marker.offline {
-        background: #6c757d;
-    }
+
 </style>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=geometry"></script>
+
 <script>
-    let map;
-    let markers = {};
+    // Variables globales
     let agentsData = [];
 
-    // Initialisation de la carte
-    function initMap() {
-        const center = { lat: 48.8566, lng: 2.3522 }; // Paris
-        
-        map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 10,
-            center: center,
-            styles: [
-                {
-                    featureType: 'poi',
-                    elementType: 'labels',
-                    stylers: [{ visibility: 'off' }]
-                }
-            ]
-        });
-    }
-
-    // Ajouter un marqueur d'agent
-    function addAgentMarker(agent) {
-        if (!agent.LastPosition) return;
-        
-        const position = {
-            lat: agent.LastPosition.Latitude,
-            lng: agent.LastPosition.Longitude
-        };
-        
-        const marker = new google.maps.Marker({
-            position: position,
-            map: map,
-            title: agent.AgentName,
-            icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 10,
-                fillColor: agent.IsOnline ? '#28a745' : '#6c757d',
-                fillOpacity: 1,
-                strokeColor: '#ffffff',
-                strokeWeight: 2
-            }
-        });
-        
-        const infoWindow = new google.maps.InfoWindow({
-            content: `
-                <div style="padding: 10px;">
-                    <h6>${agent.AgentName}</h6>
-                    <p><strong>Statut:</strong> ${agent.IsOnline ? 'En ligne' : 'Hors ligne'}</p>
-                    <p><strong>Activations actives:</strong> ${agent.ActiveActivations}</p>
-                    <p><strong>Incidents ouverts:</strong> ${agent.OpenIncidents}</p>
-                    <p><strong>Dernière position:</strong> ${new Date(agent.LastPosition.Horodatage).toLocaleString('fr-FR')}</p>
-                </div>
-            `
-        });
-        
-        marker.addListener('click', () => {
-            infoWindow.open(map, marker);
-        });
-        
-        markers[agent.AgentId] = marker;
-    }
-
-    // Mettre à jour les positions
-    async function updatePositions() {
+    // Mettre à jour les statistiques et le tableau
+    async function updateStatistics() {
         try {
+            console.log('🔄 Mise à jour des statistiques...');
             const response = await fetch('/AgentSurveillance/GetPositions');
             const result = await response.json();
             
+            console.log('📡 Réponse API:', result);
+            
             if (result.success) {
-                agentsData = result.data;
+                // Extraire les données du format $values
+                agentsData = result.data.$values || result.data;
+                console.log('📊 Données reçues:', agentsData.length, 'agents');
+                console.log('📋 Détail des agents:', agentsData);
                 
-                // Mettre à jour les statistiques
-                document.getElementById('onlineAgents').textContent = agentsData.filter(a => a.IsOnline).length;
-                document.getElementById('activeActivations').textContent = agentsData.reduce((sum, a) => sum + a.ActiveActivations, 0);
-                document.getElementById('openIncidents').textContent = agentsData.reduce((sum, a) => sum + a.OpenIncidents, 0);
-                
-                // Mettre à jour les marqueurs sur la carte
-                agentsData.forEach(agent => {
-                    if (markers[agent.AgentId]) {
-                        // Mettre à jour la position existante
-                        const position = {
-                            lat: agent.LastPosition.Latitude,
-                            lng: agent.LastPosition.Longitude
-                        };
-                        markers[agent.AgentId].setPosition(position);
-                        
-                        // Mettre à jour l'icône selon le statut
-                        markers[agent.AgentId].setIcon({
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 10,
-                            fillColor: agent.IsOnline ? '#28a745' : '#6c757d',
-                            fillOpacity: 1,
-                            strokeColor: '#ffffff',
-                            strokeWeight: 2
-                        });
-                    } else {
-                        // Ajouter un nouveau marqueur
-                        addAgentMarker(agent);
-                    }
+                const onlineCount = agentsData.filter(a => a.isOnline).length;
+                const activeActivations = agentsData.reduce((sum, a) => sum + a.activeActivations, 0);
+                const openIncidents = agentsData.reduce((sum, a) => sum + a.openIncidents, 0);
+
+                console.log('📈 Statistiques calculées:', {
+                    online: onlineCount,
+                    activations: activeActivations,
+                    incidents: openIncidents
                 });
+
+                // Mettre à jour les statistiques
+                const onlineElement = document.getElementById('onlineAgents');
+                const activationsElement = document.getElementById('activeActivations');
+                const incidentsElement = document.getElementById('openIncidents');
                 
-                // Mettre à jour le tableau
-                updateTable();
+                if (onlineElement) {
+                    onlineElement.textContent = onlineCount;
+                    console.log('✅ Compteur "En Ligne" mis à jour:', onlineCount);
+                } else {
+                    console.error('❌ Élément "onlineAgents" non trouvé');
+                }
+                
+                if (activationsElement) {
+                    activationsElement.textContent = activeActivations;
+                }
+                
+                if (incidentsElement) {
+                    incidentsElement.textContent = openIncidents;
+                }
+
+                // Mettre à jour le tableau des agents
+                updateAgentsTable(agentsData);
+            } else {
+                console.error('❌ Erreur API:', result.message);
             }
         } catch (error) {
-            console.error('Erreur lors de la mise à jour des positions:', error);
+            console.error('❌ Erreur lors de la mise à jour des statistiques:', error);
         }
     }
 
-    // Mettre à jour le tableau
-    function updateTable() {
-        agentsData.forEach(agent => {
-            const row = document.querySelector(`tr[data-agent-id="${agent.AgentId}"]`);
-            if (row) {
-                const statusCell = row.querySelector('td:nth-child(2) .badge');
-                const activationsCell = row.querySelector('td:nth-child(4) .badge');
-                const incidentsCell = row.querySelector('td:nth-child(5) .badge');
-                
-                if (statusCell) {
-                    statusCell.className = `badge bg-${agent.IsOnline ? 'success' : 'secondary'}`;
-                    statusCell.innerHTML = `<i class="fas fa-circle"></i> ${agent.IsOnline ? 'En ligne' : 'Hors ligne'}`;
-                }
-                
-                if (activationsCell) {
-                    activationsCell.textContent = agent.ActiveActivations;
-                }
-                
-                if (incidentsCell) {
-                    incidentsCell.className = `badge bg-${agent.OpenIncidents > 0 ? 'danger' : 'success'}`;
-                    incidentsCell.textContent = agent.OpenIncidents;
-                }
-            });
+    // Mettre à jour le tableau des agents
+    function updateAgentsTable(agents) {
+        const tbody = document.querySelector('#agentsTable tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        
+        agents.forEach(agent => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-agent-id', agent.agentId);
+            
+            const lastPosition = agent.lastPosition;
+            const isOnline = agent.isOnline;
+            
+            row.innerHTML = `
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm me-3">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">${agent.agentName}</h6>
+                            <small class="text-muted">${agent.agentEmail}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-${isOnline ? 'success' : 'secondary'}">
+                        <i class="fas fa-circle"></i> ${isOnline ? 'En ligne' : 'Hors ligne'}
+                    </span>
+                </td>
+                <td>
+                    ${lastPosition ? `
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                ${lastPosition.latitude.toFixed(6)} / ${lastPosition.longitude.toFixed(6)}
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> 
+                                ${new Date(lastPosition.horodatage).toLocaleString('fr-FR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})}
+                            </small>
+                        </div>
+                    ` : '<span class="text-muted">Aucune position</span>'}
+                </td>
+                <td>
+                    <span class="badge bg-info">${agent.activeActivations}</span>
+                </td>
+                <td>
+                    ${agent.openIncidents > 0 ? 
+                        `<span class="badge bg-danger">${agent.openIncidents}</span>` : 
+                        `<span class="badge bg-success">0</span>`
+                    }
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="/AgentSurveillance/Details/${agent.agentId}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        ${isOnline ? `
+                            <button class="btn btn-sm btn-outline-warning" 
+                                    onclick="forceLogout('${agent.agentId}', '${agent.agentName}')"
+                                    title="Forcer la déconnexion">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
         });
     }
 
-    // Centrer la carte sur un agent
-    function centerOnAgent(agentId) {
-        const agent = agentsData.find(a => a.AgentId === agentId);
-        if (agent && agent.LastPosition) {
-            const position = {
-                lat: agent.LastPosition.Latitude,
-                lng: agent.LastPosition.Longitude
-            };
-            map.setCenter(position);
-            map.setZoom(15);
-            
-            // Ouvrir l'info window du marqueur
-            if (markers[agentId]) {
-                google.maps.event.trigger(markers[agentId], 'click');
+    // Mettre à jour les statistiques toutes les 30 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStatistics();
+        setInterval(updateStatistics, 30000);
+    });
+
+    // Fonction pour forcer la déconnexion d'un agent
+    async function forceLogout(agentId, agentName) {
+        if (confirm(`Êtes-vous sûr de vouloir forcer la déconnexion de ${agentName} ?`)) {
+            try {
+                const response = await fetch(`/Auth/ForceLogout?agentId=${agentId}`, {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    alert(`Déconnexion forcée de ${agentName} réussie`);
+                    updateStatistics(); // Recharger les données
+                } else {
+                    alert('Erreur lors de la déconnexion forcée');
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de la déconnexion forcée:', error);
+                alert('Erreur lors de la déconnexion forcée');
             }
         }
     }
 
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', function() {
-        initMap();
-        updatePositions();
-        
-        // Mettre à jour toutes les 30 secondes
-        setInterval(updatePositions, 30000);
-    });
-</script> 
+
+</script>
+
+ 

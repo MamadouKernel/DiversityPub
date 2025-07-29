@@ -12,6 +12,11 @@ namespace DiversityPub.Models
         public TimeSpan HeureDebut { get; set; }
         public TimeSpan HeureFin { get; set; }
         public StatutActivation Statut { get; set; }
+        public DateTime DateCreation { get; set; } = DateTime.Now;
+        
+        // Motif de suspension (obligatoire pour suspendre)
+        public string? MotifSuspension { get; set; }
+        public DateTime? DateSuspension { get; set; }
         
         // Validation des preuves
         public bool PreuvesValidees { get; set; } = false;

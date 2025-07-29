@@ -32,7 +32,7 @@ namespace DiversityPub.Controllers
                     .ThenInclude(at => at.Utilisateur)
                 .Include(a => a.Responsable)
                     .ThenInclude(r => r.Utilisateur)
-                .OrderByDescending(a => a.DateActivation)
+                .OrderByDescending(a => a.DateCreation)
                 .ToListAsync();
             
             return View(activations);
@@ -178,6 +178,7 @@ namespace DiversityPub.Controllers
                 try
                 {
                     activation.Id = Guid.NewGuid();
+                    activation.DateCreation = DateTime.Now;
                     
                     // Vérifier si la date d'activation est passée pour définir le statut automatiquement
                     if (activation.DateActivation < DateTime.Today)
@@ -610,6 +611,178 @@ namespace DiversityPub.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Action pour permettre à un agent de démarrer une activation
+        [HttpPost]
+        [Authorize(Roles = "AgentTerrain")]
+        public async Task<IActionResult> DemarrerActivation(Guid activationId)
+        {
+            try
+            {
+                var userEmail = User.Identity.Name;
+                var agent = await _context.AgentsTerrain
+                    .Include(at => at.Utilisateur)
+                    .FirstOrDefaultAsync(at => at.Utilisateur.Email == userEmail);
+
+                if (agent == null)
+                {
+                    return Json(new { success = false, message = "Agent non trouvé." });
+                }
+
+                var activation = await _context.Activations
+                    .Include(a => a.AgentsTerrain)
+                    .Include(a => a.Campagne)
+                    .FirstOrDefaultAsync(a => a.Id == activationId);
+
+                if (activation == null)
+                {
+                    return Json(new { success = false, message = "Activation non trouvée." });
+                }
+
+                // Vérifier que l'agent est bien affecté à cette activation
+                if (!activation.AgentsTerrain.Any(at => at.Id == agent.Id))
+                {
+                    return Json(new { success = false, message = "Vous n'êtes pas autorisé à démarrer cette activation." });
+                }
+
+                // Vérifier que l'activation est planifiée
+                if (activation.Statut != StatutActivation.Planifiee)
+                {
+                    return Json(new { success = false, message = "Cette activation ne peut pas être démarrée." });
+                }
+
+                // Vérifier que la date d'activation est aujourd'hui
+                if (activation.DateActivation.Date != DateTime.Today)
+                {
+                    return Json(new { success = false, message = "Cette activation ne peut être démarrée qu'à sa date prévue." });
+                }
+
+                // Démarrer l'activation
+                activation.Statut = StatutActivation.EnCours;
+                await _context.SaveChangesAsync();
+
+                // Mettre à jour le statut de la campagne si nécessaire
+                await UpdateCampagneStatutAsync(activation.CampagneId);
+
+                return Json(new { 
+                    success = true, 
+                    message = "Activation démarrée avec succès !",
+                    activationId = activation.Id,
+                    statut = activation.Statut.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erreur lors du démarrage: {ex.Message}" });
+            }
+        }
+
+        // Action pour redémarrer automatiquement une activation et démarrer la campagne
+        [HttpPost]
+        public async Task<IActionResult> RedemarrerActivation(Guid activationId)
+        {
+            try
+            {
+                var activation = await _context.Activations
+                    .Include(a => a.Campagne)
+                    .FirstOrDefaultAsync(a => a.Id == activationId);
+
+                if (activation == null)
+                {
+                    return Json(new { success = false, message = "Activation non trouvée." });
+                }
+
+                // Vérifier que l'activation est terminée
+                if (activation.Statut != StatutActivation.Terminee)
+                {
+                    return Json(new { success = false, message = "Seules les activations terminées peuvent être redémarrées." });
+                }
+
+                // Redémarrer l'activation
+                activation.Statut = StatutActivation.Planifiee;
+                activation.DateActivation = DateTime.Today;
+                await _context.SaveChangesAsync();
+
+                // Démarrer automatiquement la campagne si elle n'est pas déjà en cours
+                if (activation.Campagne.Statut != StatutCampagne.EnCours)
+                {
+                    activation.Campagne.Statut = StatutCampagne.EnCours;
+                    await _context.SaveChangesAsync();
+                }
+
+                return Json(new { 
+                    success = true, 
+                    message = "Activation redémarrée et campagne démarrée avec succès !",
+                    activationId = activation.Id,
+                    campagneId = activation.CampagneId,
+                    statutActivation = activation.Statut.ToString(),
+                    statutCampagne = activation.Campagne.Statut.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erreur lors du redémarrage: {ex.Message}" });
+            }
+        }
+
+        // Action pour terminer une activation
+        [HttpPost]
+        [Authorize(Roles = "AgentTerrain")]
+        public async Task<IActionResult> TerminerActivation(Guid activationId)
+        {
+            try
+            {
+                var userEmail = User.Identity.Name;
+                var agent = await _context.AgentsTerrain
+                    .Include(at => at.Utilisateur)
+                    .FirstOrDefaultAsync(at => at.Utilisateur.Email == userEmail);
+
+                if (agent == null)
+                {
+                    return Json(new { success = false, message = "Agent non trouvé." });
+                }
+
+                var activation = await _context.Activations
+                    .Include(a => a.AgentsTerrain)
+                    .Include(a => a.Campagne)
+                    .FirstOrDefaultAsync(a => a.Id == activationId);
+
+                if (activation == null)
+                {
+                    return Json(new { success = false, message = "Activation non trouvée." });
+                }
+
+                // Vérifier que l'agent est bien affecté à cette activation
+                if (!activation.AgentsTerrain.Any(at => at.Id == agent.Id))
+                {
+                    return Json(new { success = false, message = "Vous n'êtes pas autorisé à terminer cette activation." });
+                }
+
+                // Vérifier que l'activation est en cours
+                if (activation.Statut != StatutActivation.EnCours)
+                {
+                    return Json(new { success = false, message = "Cette activation ne peut pas être terminée." });
+                }
+
+                // Terminer l'activation
+                activation.Statut = StatutActivation.Terminee;
+                await _context.SaveChangesAsync();
+
+                // Mettre à jour le statut de la campagne si nécessaire
+                await UpdateCampagneStatutAsync(activation.CampagneId);
+
+                return Json(new { 
+                    success = true, 
+                    message = "Activation terminée avec succès !",
+                    activationId = activation.Id,
+                    statut = activation.Statut.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erreur lors de la terminaison: {ex.Message}" });
             }
         }
     }

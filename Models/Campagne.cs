@@ -10,6 +10,7 @@ namespace DiversityPub.Models
         public string? Objectifs { get; set; }
         public Guid ClientId { get; set; }
         public Client? Client { get; set; }
+        public DateTime DateCreation { get; set; } = DateTime.Now;
 
         public DiversityPub.Models.enums.StatutCampagne Statut { get; set; } = DiversityPub.Models.enums.StatutCampagne.EnPreparation;
 

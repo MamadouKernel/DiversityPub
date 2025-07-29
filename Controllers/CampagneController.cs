@@ -25,25 +25,17 @@ namespace DiversityPub.Controllers
                 // Vérifier et mettre à jour automatiquement les campagnes expirées
                 await CheckAndUpdateExpiredCampagnesAsync();
                 
-                var campagnes = await _context.Campagnes
-                    .Include(c => c.Client)
-                    .OrderByDescending(c => c.DateDebut)
-                    .ToListAsync();
+                            var campagnes = await _context.Campagnes
+                .Include(c => c.Client)
+                .OrderByDescending(c => c.DateCreation)
+                .ToListAsync();
                 
-                if (campagnes.Count == 0)
-                {
-                    TempData["Info"] = "📋 Aucune campagne trouvée. Créez votre première campagne !";
-                }
-                else
-                {
-                    TempData["Info"] = $"📋 {campagnes.Count} campagne(s) trouvée(s)";
-                }
+
                 
                 return View(campagnes);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des campagnes: {ex.Message}";
                 return View(new List<Campagne>());
             }
         }
@@ -81,18 +73,14 @@ namespace DiversityPub.Controllers
                 
                 if (clients.Count == 0)
                 {
-                    TempData["Warning"] = "⚠️ Aucun client disponible. Veuillez d'abord créer au moins un client.";
                     return RedirectToAction("Index", "Client");
                 }
-                
-                TempData["Info"] = $"✅ Prêt à créer une campagne avec {clients.Count} client(s) disponible(s).";
                 
                 ViewBag.Clients = clients;
                 return View();
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"❌ Erreur lors du chargement des clients: {ex.Message}";
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -125,6 +113,7 @@ namespace DiversityPub.Controllers
                 try
                 {
                     campagne.Id = Guid.NewGuid();
+                    campagne.DateCreation = DateTime.Now;
                     campagne.Statut = DiversityPub.Models.enums.StatutCampagne.EnPreparation;
                     _context.Add(campagne);
                     await _context.SaveChangesAsync();

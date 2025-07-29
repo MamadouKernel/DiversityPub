@@ -13,6 +13,7 @@ namespace DiversityPub.Models
         public string NomContactPrincipal { get; set; } = string.Empty;
         public string TelephoneContactPrincipal { get; set; } = string.Empty;
         public string EmailContactPrincipal { get; set; } = string.Empty;
+        public DateTime DateCreation { get; set; } = DateTime.Now;
 
         public ICollection<Campagne> Campagnes { get; set; } = new List<Campagne>();
         public ICollection<DemandeActivation> DemandesActivation { get; set; } = new List<DemandeActivation>();

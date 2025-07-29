@@ -28,7 +28,7 @@ namespace DiversityPub.Controllers
                 .Include(a => a.Responsable)
                     .ThenInclude(r => r.Utilisateur)
                 .Where(a => a.Statut != StatutActivation.Terminee)
-                .OrderByDescending(a => a.DateActivation)
+                .OrderByDescending(a => a.DateCreation)
                 .ToListAsync();
 
             return View(activations);

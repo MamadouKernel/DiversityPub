@@ -49,6 +49,12 @@ namespace DiversityPub.Migrations
                     b.Property<DateTime>("DateActivation")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateSuspension")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("DateValidationPreuves")
                         .HasColumnType("datetime2");
 
@@ -66,6 +72,9 @@ namespace DiversityPub.Migrations
 
                     b.Property<Guid>("LieuId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MotifSuspension")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nom")
                         .IsRequired()
@@ -102,9 +111,18 @@ namespace DiversityPub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("DerniereConnexion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DerniereDeconnexion")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EstConnecte")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Telephone")
                         .IsRequired()
@@ -129,6 +147,9 @@ namespace DiversityPub.Migrations
 
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateDebut")
                         .HasColumnType("datetime2");
@@ -165,6 +186,9 @@ namespace DiversityPub.Migrations
                     b.Property<string>("Adresse")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreation")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EmailContactPrincipal")
                         .IsRequired()
@@ -299,7 +323,10 @@ namespace DiversityPub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CampagneId")
+                    b.Property<Guid?>("ActivationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CampagneId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Commentaire")
@@ -313,6 +340,8 @@ namespace DiversityPub.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivationId");
 
                     b.HasIndex("CampagneId");
 
@@ -498,7 +527,7 @@ namespace DiversityPub.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Email = "admin@diversitypub.ci",
-                            MotDePasse = "$2a$11$1RHuk.9O5ghgVB2iz4DM4uovFSDmhxUArm2rMJyum/pptoNUD750W",
+                            MotDePasse = "$2a$11$azpwM1Erkw6qdtOrdZGKbe8EuEQJ6/3EGtlUdVqvzOT8ug15Ao/jy",
                             Nom = "Super",
                             Prenom = "Admin",
                             Role = 1,
@@ -633,11 +662,16 @@ namespace DiversityPub.Migrations
 
             modelBuilder.Entity("DiversityPub.Models.Feedback", b =>
                 {
+                    b.HasOne("DiversityPub.Models.Activation", "Activation")
+                        .WithMany()
+                        .HasForeignKey("ActivationId");
+
                     b.HasOne("DiversityPub.Models.Campagne", "Campagne")
                         .WithMany("Feedbacks")
                         .HasForeignKey("CampagneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Activation");
 
                     b.Navigation("Campagne");
                 });

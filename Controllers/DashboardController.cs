@@ -36,12 +36,12 @@ namespace DiversityPub.Controllers
                 TotalClients = await _context.Clients.CountAsync(),
                 TotalUtilisateurs = await _context.Utilisateurs.Where(u => u.Supprimer == 0).CountAsync(),
                 TotalAgents = await _context.AgentsTerrain.CountAsync(),
-                ActivationsRecentes = await _context.Activations
-                    .Include(a => a.Campagne)
-                    .Include(a => a.Lieu)
-                    .OrderByDescending(a => a.DateActivation)
-                    .Take(5)
-                    .ToListAsync(),
+                            ActivationsRecentes = await _context.Activations
+                .Include(a => a.Campagne)
+                .Include(a => a.Lieu)
+                .OrderByDescending(a => a.DateCreation)
+                .Take(5)
+                .ToListAsync(),
                 CampagnesActives = await _context.Campagnes
                     .Where(c => c.Statut == DiversityPub.Models.enums.StatutCampagne.EnCours)
                     .Include(c => c.Client)
