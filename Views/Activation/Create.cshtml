@@ -1,213 +1,950 @@
 @model DiversityPub.Models.Activation
+
 @{
     ViewData["Title"] = "Créer une Activation";
 }
 
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background: #fafbfc;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 10px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.6s ease;
+    }
+
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+
+    .step-dot {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #6c757d;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .step-dot.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .step-dot.completed {
+        background: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .step {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .step.active {
+        display: block;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+
+    .form-control:read-only {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 500;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    #NomActivation {
+        min-width: 300px;
+        width: 100%;
+        font-weight: 500;
+        color: #495057;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        word-wrap: normal;
+        text-overflow: ellipsis;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .step-title {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .step-title i {
+        font-size: 1.5rem;
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .lieu-details {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        border-left: 4px solid #667eea;
+    }
+
+    .lieu-details small {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-col {
+        flex: 1;
+    }
+
+    .field-group {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .field-group h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+    .time-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .validation-summary {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #856404;
+    }
+
+    .success-message {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #155724;
+    }
+
+    .agents-selection {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+
+    .agent-checkbox {
+        transition: all 0.3s ease;
+    }
+
+    .agent-checkbox:hover {
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin: -0.5rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+    .form-check-input:checked + .form-check-label {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .form-check-input:not(:checked) + .form-check-label {
+        color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-check-label:hover {
+        background: rgba(102, 126, 234, 0.05);
+    }
+</style>
+
+<div class="container-fluid">
 <div class="row">
     <div class="col-12">
-
         <div class="card">
             <div class="card-header">
                 <h4 class="mb-0">
-                    <i class="fas fa-plus"></i> Créer une Nouvelle Activation
+                        <i class="fas fa-plus-circle me-2"></i> Créer une nouvelle activation
                 </h4>
             </div>
             <div class="card-body">
-                <form asp-action="Create" method="post">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="Nom" class="form-label">
-                                    <i class="fas fa-map-marker-alt"></i> Nom de l'activation
-                                </label>
-                                <input asp-for="Nom" class="form-control" required />
-                                <span asp-validation-for="Nom" class="text-danger"></span>
+                <form asp-action="Create" method="post" id="activationForm">
+                        <!-- Indicateur de progression -->
+                        <div class="progress mb-4">
+                            <div class="progress-bar" role="progressbar" style="width: 33%" id="progressBar"></div>
+                        </div>
+
+                        <!-- Indicateur d'étapes -->
+                        <div class="step-indicator">
+                            <div class="step-dot active" id="step1Dot">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="step-dot" id="step2Dot">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="step-dot" id="step3Dot">
+                                <i class="fas fa-edit"></i>
                             </div>
                         </div>
+
+                        <!-- Étapes du formulaire -->
+                        <div class="step-container">
+                    <!-- Étape 1: Informations de base -->
+                            <div class="step active" id="step1">
+                                <h5 class="step-title">
+                                    <i class="fas fa-info-circle"></i> Étape 1: Informations de base
+                        </h5>
+                        
+                    <div class="row">
                         <div class="col-md-6">
+                                        <div class="field-group">
+                                            <h6><i class="fas fa-bullhorn text-primary me-2"></i>Informations de campagne</h6>
+                                            
                                                 <div class="mb-3">
                         <label asp-for="CampagneId" class="form-label">
-                            <i class="fas fa-bullhorn"></i> Campagne
+                                        <i class="fas fa-bullhorn"></i> Campagne *
                         </label>
-                        <select asp-for="CampagneId" class="form-select" required id="CampagneId">
-                            <option value="">Sélectionner une campagne</option>
-                            @foreach (var campagne in ViewBag.Campagnes)
+                                                <select asp-for="CampagneId" class="form-control" required>
+                                                    <option value="">Sélectionnez une campagne</option>
+                                                    @if (ViewBag.Campagnes != null)
+                                                    {
+                                                        foreach (var campagne in ViewBag.Campagnes)
                             {
                                 <option value="@campagne.Id" 
                                         data-date-debut="@campagne.DateDebut.ToString("yyyy-MM-dd")" 
-                                        data-date-fin="@campagne.DateFin.ToString("yyyy-MM-dd")">
-                                    @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
+                                                    data-date-fin="@campagne.DateFin.ToString("yyyy-MM-dd")"
+                                                                    data-client="@campagne.Client?.RaisonSociale"
+                                                    data-description="@campagne.Description">
+                                                                @campagne.Nom (@campagne.Client?.RaisonSociale)
                                 </option>
+                                                        }
                             }
                         </select>
                         <span asp-validation-for="CampagneId" class="text-danger"></span>
-                        <div id="campagne-date-info" class="alert alert-info mt-2" style="display: none;"></div>
+                                </div>
+
+                                            <div class="mb-3">
+                                                <label asp-for="Nom" class="form-label">
+                                                    <i class="fas fa-tag"></i> Nom de l'activation
+                                                </label>
+                                                <input asp-for="Nom" class="form-control" id="NomActivation" readonly 
+                                                       style="font-size: 14px; padding: 12px; min-width: 300px; width: 100%; font-weight: 500; color: #495057;" />
+                                                <span asp-validation-for="Nom" class="text-danger"></span>
+                                                <small class="form-text text-muted">
+                                                    <i class="fas fa-magic me-1"></i> Généré automatiquement
+                                                </small>
+                                </div>
                     </div>
+                        </div>
+
+                                    <div class="col-md-6">
+                                        <div class="field-group">
+                                            <h6><i class="fas fa-map-marker-alt text-primary me-2"></i>Informations de lieu</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label asp-for="LieuId" class="form-label">
+                                                    <i class="fas fa-map-marker-alt"></i> Lieu *
+                                                </label>
+                                                <select asp-for="LieuId" class="form-control" required id="LieuSelect">
+                                                    <option value="">Sélectionnez un lieu</option>
+                                                    @if (ViewBag.Lieux != null)
+                                                    {
+                                                        foreach (var lieu in ViewBag.Lieux)
+                                                        {
+                                                            <option value="@lieu.Id" data-adresse="@lieu.Adresse">
+                                                                @lieu.Nom - @lieu.Adresse
+                                                            </option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <span asp-validation-for="LieuId" class="text-danger"></span>
+                                                <div id="lieuDetails" class="lieu-details" style="display: none;">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-info-circle"></i> 
+                                                        <span id="lieuAdresse"></span>
+                                                    </small>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">
-                            <i class="fas fa-align-left"></i> Description
+                                                <label asp-for="Instructions" class="form-label">
+                                                    <i class="fas fa-list-check"></i> Instructions
                         </label>
-                        <textarea asp-for="Description" class="form-control" rows="3" 
-                                  placeholder="Décrivez les objectifs de cette activation..."></textarea>
-                        <span asp-validation-for="Description" class="text-danger"></span>
+                                                <textarea asp-for="Instructions" class="form-control" rows="3" placeholder="Instructions pour les agents"></textarea>
+                                                <span asp-validation-for="Instructions" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                     </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        Suivant <i class="fas fa-arrow-right"></i>
+                                    </button>
+                        </div>
+                    </div>
+
+                            <!-- Étape 2: Date et heures -->
+                            <div class="step" id="step2">
+                                <h5 class="step-title">
+                                    <i class="fas fa-calendar-alt"></i> Étape 2: Date et heures
+                        </h5>
+                                
+                                <div class="field-group">
+                                    <h6><i class="fas fa-clock text-primary me-2"></i>Planification temporelle</h6>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="DateActivation" class="form-label">
-                                    <i class="fas fa-calendar"></i> Date d'activation
+                                        <i class="fas fa-calendar"></i> Date d'activation *
                                 </label>
-                                <input asp-for="DateActivation" type="date" class="form-control" required />
+                                    <input asp-for="DateActivation" type="date" class="form-control" required id="DateActivation" />
                                 <span asp-validation-for="DateActivation" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label asp-for="LieuId" class="form-label">
-                                    <i class="fas fa-map-marker-alt"></i> Lieu
-                                </label>
-                                <select asp-for="LieuId" class="form-select" required>
-                                    <option value="">Sélectionner un lieu</option>
-                                    @foreach (var lieu in ViewBag.Lieux)
-                                    {
-                                        <option value="@lieu.Id">@lieu.Nom</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="LieuId" class="text-danger"></span>
-                            </div>
+                                <small class="form-text text-muted" id="dateRangeInfo">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Sélectionnez une date dans l'intervalle de la campagne
+                                </small>
                         </div>
                     </div>
 
-                    <div class="row">
                         <div class="col-md-6">
+                                            <div class="time-group">
                             <div class="mb-3">
                                 <label asp-for="HeureDebut" class="form-label">
-                                    <i class="fas fa-clock"></i> Heure de début
+                                        <i class="fas fa-clock"></i> Heure de début *
                                 </label>
-                                <input asp-for="HeureDebut" type="time" class="form-control" required />
+                                                    <input asp-for="HeureDebut" type="time" class="form-control" required />
                                 <span asp-validation-for="HeureDebut" class="text-danger"></span>
                             </div>
-                        </div>
-                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="HeureFin" class="form-label">
-                                    <i class="fas fa-clock"></i> Heure de fin
+                                        <i class="fas fa-clock"></i> Heure de fin *
                                 </label>
-                                <input asp-for="HeureFin" type="time" class="form-control" required />
+                                                    <input asp-for="HeureFin" type="time" class="form-control" required />
                                 <span asp-validation-for="HeureFin" class="text-danger"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                        <i class="fas fa-arrow-left"></i> Précédent
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        Suivant <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
                             </div>
+
+                            <!-- Étape 3: Description et responsable -->
+                            <div class="step" id="step3">
+                                <h5 class="step-title">
+                                    <i class="fas fa-edit"></i> Étape 3: Description et responsable
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="field-group">
+                                            <h6><i class="fas fa-align-left text-primary me-2"></i>Description</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label asp-for="Description" class="form-label">
+                                                    <i class="fas fa-align-left"></i> Description
+                                                </label>
+                                                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Description détaillée de l'activation"></textarea>
+                                                <span asp-validation-for="Description" class="text-danger"></span>
+                                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Instructions" class="form-label">
-                            <i class="fas fa-list-check"></i> Instructions
-                        </label>
-                        <textarea asp-for="Instructions" class="form-control" rows="4" 
-                                  placeholder="Donnez les instructions détaillées pour cette activation..."></textarea>
-                        <span asp-validation-for="Instructions" class="text-danger"></span>
-                    </div>
+                                    <div class="col-md-6" id="responsable-section" style="display: none;">
+                                        <div class="field-group">
+                                            <h6><i class="fas fa-user-tie text-primary me-2"></i>Responsabilité</h6>
+                                            <p class="text-muted mb-3">
+                                                <i class="fas fa-info-circle me-1"></i> 
+                                                Le responsable doit être choisi parmi les agents sélectionnés ci-dessous
+                                            </p>
 
-                                         
+                        <div class="mb-3">
+                            <label asp-for="ResponsableId" class="form-label">
+                                                    <i class="fas fa-user-tie"></i> Responsable (optionnel)
+                            </label>
+                                                                            <select asp-for="ResponsableId" class="form-control" id="ResponsableId">
+                                <option value="" selected>Aucun responsable</option>
+                            </select>
+                            <span asp-validation-for="ResponsableId" class="text-danger"></span>
+                        </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Note :</strong> L'activation sera créée avec le statut "Planifiée". 
-                        Vous pourrez le modifier ultérieurement.
+                                <!-- Section Agents Terrain -->
+                                <div class="field-group mt-4">
+                                    <h6><i class="fas fa-users text-primary me-2"></i>Agents Terrain (Optionnel)</h6>
+                                    <p class="text-muted mb-3">
+                                        <i class="fas fa-info-circle me-1"></i> 
+                                        Vous pouvez sélectionner les agents qui participeront à cette activation (optionnel)
+                                    </p>
+                                    
+                                <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="agents-selection">
+                                                @if (ViewBag.AgentsTerrain != null)
+                                                {
+                                                    foreach (var agent in ViewBag.AgentsTerrain)
+                                                    {
+                                                        <div class="agent-checkbox mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="AgentsTerrainIds" value="@agent.Id" 
+                                                                       id="agent_@agent.Id" 
+                                                                       unchecked />
+                                                <label class="form-check-label" for="agent_@agent.Id">
+                                                                    <i class="fas fa-user me-2"></i>
+                                                                    <strong>@agent.Utilisateur.Prenom @agent.Utilisateur.Nom</strong>
+                                                                    @if (!string.IsNullOrEmpty(agent.Utilisateur.Email))
+                                                                    {
+                                                                        <small class="text-muted ms-2">(@agent.Utilisateur.Email)</small>
+                                                                    }
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="alert alert-info">
+                                                        <i class="fas fa-info-circle me-2"></i>
+                                                        Aucun agent terrain disponible pour le moment.
+                                                    </div>
+                                                }
+                                                
+                                                <div class="alert alert-warning mt-3">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    <strong>Note :</strong> La sélection d'agents est optionnelle. Vous pouvez créer l'activation sans affecter d'agents pour le moment.
+                                </div>
+                            </div>
+                        </div>
+                            </div>
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="@Url.Action("Index", "Activation")" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Retour
-                        </a>
-                        <button type="submit" class="btn btn-primary">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                        <i class="fas fa-arrow-left"></i> Précédent
+                                    </button>
+                            <button type="submit" class="btn btn-success">
                             <i class="fas fa-save"></i> Créer l'activation
                         </button>
+                                </div>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+</div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        // Validation des heures et de la date d'activation
-        document.addEventListener('DOMContentLoaded', function() {
-            const heureDebut = document.getElementById('HeureDebut');
-            const heureFin = document.getElementById('HeureFin');
-            const dateActivation = document.getElementById('DateActivation');
-            const campagneSelect = document.getElementById('CampagneId');
-            
-            // Permettre les dates passées - pas de restriction minimale
-            
-            // Validation de l'heure de fin
-            heureFin.addEventListener('change', function() {
-                if (heureDebut.value && this.value && this.value <= heureDebut.value) {
-                    showToast('error', 'L\'heure de fin doit être postérieure à l\'heure de début.');
-                    this.value = '';
-                }
-            });
-            
-            // Validation de l'heure de début
-            heureDebut.addEventListener('change', function() {
-                if (heureFin.value && this.value && this.value >= heureFin.value) {
-                    showToast('error', 'L\'heure de début doit être antérieure à l\'heure de fin.');
-                    heureFin.value = '';
-                }
-            });
-            
-            // Fonction pour afficher des toasts
-            function showToast(type, message) {
-                const toastContainer = document.querySelector('.toast-container');
-                if (toastContainer) {
-                    const toastHtml = `
-                        <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'warning'} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-                            <div class="d-flex">
-                                <div class="toast-body">
-                                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i> ${message}
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    `;
-                    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-                    
-                    const toastElement = toastContainer.lastElementChild;
-                    const toast = new bootstrap.Toast(toastElement);
-                    toast.show();
-                } else {
-                    // Fallback si pas de toast container
-                    alert(message);
+        let currentStep = 1;
+    const totalSteps = 3;
+
+    function showStep(step) {
+        // Masquer toutes les étapes
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        
+        // Afficher l'étape actuelle
+        document.getElementById(`step${step}`).classList.add('active');
+        
+        // Mettre à jour les indicateurs
+        document.querySelectorAll('.step-dot').forEach((dot, index) => {
+            dot.classList.remove('active', 'completed');
+            if (index + 1 < step) {
+                dot.classList.add('completed');
+            } else if (index + 1 === step) {
+                dot.classList.add('active');
+            }
+        });
+        
+        // Mettre à jour la barre de progression
+        const progress = ((step - 1) / (totalSteps - 1)) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
                 }
             }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+        }
+        }
+
+        function validateCurrentStep() {
+        let isValid = true;
+        
+        if (currentStep === 1) {
+            // Validation étape 1 - Campagne et Lieu obligatoires
+            const campagneId = document.getElementById('CampagneId').value;
+            if (!campagneId) {
+                alert('Veuillez sélectionner une campagne.');
+                isValid = false;
+            }
             
-                         // Validation de la date d'activation par rapport à la campagne
-             campagneSelect.addEventListener('change', function() {
-                 const selectedOption = this.options[this.selectedIndex];
-                 if (selectedOption && selectedOption.dataset.dateDebut && selectedOption.dataset.dateFin) {
-                     const dateDebut = selectedOption.dataset.dateDebut;
-                     const dateFin = selectedOption.dataset.dateFin;
-                     
-                     // Imposer les restrictions min/max pour respecter l'intervalle de la campagne
-                     dateActivation.min = dateDebut;
-                     dateActivation.max = dateFin;
-                     
-                     // Afficher un message informatif
-                     const infoDiv = document.getElementById('campagne-date-info');
-                     if (infoDiv) {
-                         infoDiv.innerHTML = `<i class="fas fa-info-circle"></i> La date d'activation doit être comprise entre ${dateDebut} et ${dateFin}`;
-                         infoDiv.style.display = 'block';
-                     }
-                 }
-             });
-             
-                           
-         });
-    </script>
-} 
+            const lieuId = document.getElementById('LieuSelect').value;
+            if (!lieuId) {
+                alert('Veuillez sélectionner un lieu.');
+                isValid = false;
+            }
+        } else if (currentStep === 2) {
+            // Validation étape 2 - Date et heures obligatoires
+            const dateActivation = document.getElementById('DateActivation').value;
+            const heureDebut = document.getElementById('HeureDebut').value;
+            const heureFin = document.getElementById('HeureFin').value;
+
+            if (!dateActivation) {
+                alert('Veuillez sélectionner une date d\'activation.');
+                isValid = false;
+            } else if (!heureDebut) {
+                alert('Veuillez sélectionner une heure de début.');
+                isValid = false;
+            } else if (!heureFin) {
+                alert('Veuillez sélectionner une heure de fin.');
+                isValid = false;
+            } else if (heureDebut >= heureFin) {
+                alert('L\'heure de fin doit être postérieure à l\'heure de début.');
+                isValid = false;
+            }
+        } else if (currentStep === 3) {
+            // Validation étape 3 - Aucun champ obligatoire (Description et Responsable sont optionnels)
+            // Pas de validation nécessaire pour cette étape
+        }
+        
+        return isValid;
+    }
+
+    function genererNomActivation() {
+        const campagneId = document.getElementById('CampagneId').value;
+        const lieuId = document.getElementById('LieuSelect').value;
+        const nomActivation = document.getElementById('NomActivation');
+        
+        console.log('=== DÉBUT GÉNÉRATION NOM ===');
+        console.log('CampagneId:', campagneId);
+        console.log('LieuId:', lieuId);
+        console.log('Élément nomActivation:', nomActivation);
+        
+        if (!campagneId || !lieuId) {
+            console.log('❌ CampagneId ou LieuId manquant');
+            return;
+        }
+        
+        const campagneOption = document.querySelector(`#CampagneId option[value="${campagneId}"]`);
+        const lieuOption = document.querySelector(`#LieuSelect option[value="${lieuId}"]`);
+        
+        console.log('Campagne option trouvée:', !!campagneOption);
+        console.log('Lieu option trouvée:', !!lieuOption);
+        
+        if (campagneOption && lieuOption) {
+            console.log('Texte campagne complet:', campagneOption.textContent);
+            console.log('Texte lieu complet:', lieuOption.textContent);
+            
+            // Extraire le nom de la campagne (avant le premier parenthèse)
+            const nomCampagne = campagneOption.textContent.split(' (')[0];
+            console.log('Nom campagne extrait:', nomCampagne);
+            
+            // Extraire le nom du lieu (avant le premier tiret)
+            const nomLieu = lieuOption.textContent.split(' - ')[0];
+            console.log('Nom lieu extrait:', nomLieu);
+            
+            // Récupérer les dates
+                    const dateDebut = campagneOption.dataset.dateDebut;
+                    const dateFin = campagneOption.dataset.dateFin;
+            console.log('Date début:', dateDebut);
+            console.log('Date fin:', dateFin);
+            
+            let nomComplet = '';
+            
+            if (dateDebut && dateFin) {
+                // Formater les dates en format français
+                const dateDebutFr = new Date(dateDebut).toLocaleDateString('fr-FR');
+                const dateFinFr = new Date(dateFin).toLocaleDateString('fr-FR');
+                const periode = `(${dateDebutFr} - ${dateFinFr})`;
+                nomComplet = `${nomLieu}-${nomCampagne} ${periode}`;
+                console.log('✅ Nom généré avec période:', nomComplet);
+            } else {
+                nomComplet = `${nomLieu}-${nomCampagne}`;
+                console.log('✅ Nom généré sans période:', nomComplet);
+            }
+            
+            // Nettoyer le nom (supprimer les retours à la ligne et espaces multiples)
+            console.log('Nom avant nettoyage:', JSON.stringify(nomComplet));
+            nomComplet = nomComplet.replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/\s+/g, ' ').trim();
+            console.log('Nom après nettoyage:', JSON.stringify(nomComplet));
+            
+            // Assigner la valeur et forcer la mise à jour
+            nomActivation.value = nomComplet;
+            nomActivation.style.width = '100%';
+            nomActivation.style.minWidth = '300px';
+            
+            // Déclencher un événement pour forcer la mise à jour
+            nomActivation.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            console.log('Valeur finale du champ:', nomActivation.value);
+            console.log('=== FIN GÉNÉRATION NOM ===');
+                } else {
+            console.log('❌ Options non trouvées');
+        }
+    }
+
+    // Événements pour la génération automatique
+    document.getElementById('CampagneId').addEventListener('change', function() {
+        if (document.getElementById('LieuSelect').value) {
+            genererNomActivation();
+        }
+        
+        // Mettre à jour les limites de date selon la campagne
+        updateDateLimits();
+    });
+
+    // Événement unique pour LieuSelect (génération + détails)
+    document.getElementById('LieuSelect').addEventListener('change', function() {
+        // Génération automatique du nom
+        if (document.getElementById('CampagneId').value) {
+            genererNomActivation();
+        }
+        
+        // Affichage des détails du lieu
+        const selectedOption = this.options[this.selectedIndex];
+        const lieuDetails = document.getElementById('lieuDetails');
+        const lieuAdresse = document.getElementById('lieuAdresse');
+        
+        if (this.value && selectedOption.dataset.adresse) {
+            lieuAdresse.textContent = selectedOption.dataset.adresse;
+            lieuDetails.style.display = 'block';
+        } else {
+            lieuDetails.style.display = 'none';
+        }
+    });
+
+            // Génération initiale si les champs sont déjà remplis
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('CampagneId').value && document.getElementById('LieuSelect').value) {
+                genererNomActivation();
+            }
+            
+            // S'assurer que toutes les checkboxes des agents sont décochées
+            const agentCheckboxes = document.querySelectorAll('input[name="AgentsTerrainIds"]');
+            agentCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // S'assurer que le champ responsable est vide
+            const responsableSelect = document.getElementById('ResponsableId');
+            if (responsableSelect) {
+                responsableSelect.value = '';
+            }
+            
+            // Ajouter des événements pour les checkboxes des agents
+            agentCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateResponsableOptions);
+            });
+            
+            // Initialiser les limites de date
+            updateDateLimits();
+        });
+
+        // Validation de la date d'activation
+        document.getElementById('DateActivation').addEventListener('change', function() {
+            const campagneSelect = document.getElementById('CampagneId');
+            const selectedDate = new Date(this.value);
+            
+            if (campagneSelect.value) {
+                const selectedOption = campagneSelect.options[campagneSelect.selectedIndex];
+                const dateDebut = new Date(selectedOption.dataset.dateDebut);
+                const dateFin = new Date(selectedOption.dataset.dateFin);
+                
+                if (selectedDate < dateDebut || selectedDate > dateFin) {
+                    alert(`La date d'activation doit être comprise entre ${dateDebut.toLocaleDateString('fr-FR')} et ${dateFin.toLocaleDateString('fr-FR')}.`);
+                    this.value = '';
+                }
+            }
+        });
+
+    function updateDateLimits() {
+        const campagneSelect = document.getElementById('CampagneId');
+        const dateActivation = document.getElementById('DateActivation');
+        const dateRangeInfo = document.getElementById('dateRangeInfo');
+        
+        if (campagneSelect.value) {
+            const selectedOption = campagneSelect.options[campagneSelect.selectedIndex];
+            const dateDebut = selectedOption.dataset.dateDebut;
+            const dateFin = selectedOption.dataset.dateFin;
+            
+            if (dateDebut && dateFin) {
+                // Mettre à jour les attributs min et max du champ date
+                dateActivation.min = dateDebut;
+                dateActivation.max = dateFin;
+                
+                // Réinitialiser la valeur si elle est hors limites
+                if (dateActivation.value) {
+                    const selectedDate = new Date(dateActivation.value);
+                    const minDate = new Date(dateDebut);
+                    const maxDate = new Date(dateFin);
+                    
+                    if (selectedDate < minDate || selectedDate > maxDate) {
+                        dateActivation.value = '';
+                    }
+                }
+                
+                // Mettre à jour le message d'information
+                const dateDebutFr = new Date(dateDebut).toLocaleDateString('fr-FR');
+                const dateFinFr = new Date(dateFin).toLocaleDateString('fr-FR');
+                dateRangeInfo.innerHTML = `<i class="fas fa-info-circle me-1"></i> Période autorisée : ${dateDebutFr} à ${dateFinFr}`;
+                dateRangeInfo.className = 'form-text text-info';
+            }
+        } else {
+            // Réinitialiser les limites si aucune campagne n'est sélectionnée
+            dateActivation.min = '';
+            dateActivation.max = '';
+            dateRangeInfo.innerHTML = '<i class="fas fa-info-circle me-1"></i> Sélectionnez d\'abord une campagne';
+            dateRangeInfo.className = 'form-text text-muted';
+        }
+    }
+
+    // Données des agents pour le responsable (sera peuplé dynamiquement)
+    const agentsData = [
+        @foreach (var agent in ViewBag.AgentsTerrain ?? new List<dynamic>())
+        {
+            <text>{ id: '@agent.Id', nom: '@agent.Utilisateur.Prenom @agent.Utilisateur.Nom' },</text>
+        }
+    ];
+
+    // Fonction pour mettre à jour les options du responsable
+    function updateResponsableOptions() {
+        const checkboxes = document.querySelectorAll('input[name="AgentsTerrainIds"]:checked');
+        const responsableSelect = document.getElementById('ResponsableId');
+        const responsableSection = document.getElementById('responsable-section');
+        const currentResponsable = responsableSelect.value;
+        
+        // Afficher/masquer la section responsable selon s'il y a des agents sélectionnés
+        if (checkboxes.length > 0) {
+            responsableSection.style.display = 'block';
+        } else {
+            responsableSection.style.display = 'none';
+            // Réinitialiser la sélection du responsable si aucun agent n'est sélectionné
+            responsableSelect.value = '';
+            return;
+        }
+        
+        // Vider le select
+        responsableSelect.innerHTML = '<option value="">Aucun responsable</option>';
+        
+        // Ajouter seulement les agents sélectionnés
+        checkboxes.forEach(checkbox => {
+            const agentId = checkbox.value;
+            const agent = agentsData.find(a => a.id === agentId);
+            if (agent) {
+                const option = document.createElement('option');
+                option.value = agentId;
+                option.textContent = agent.nom;
+                if (agentId === currentResponsable) {
+                    option.selected = true;
+                }
+                responsableSelect.appendChild(option);
+            }
+        });
+    }
+
+    // Initialisation
+    showStep(1);
+</script> 

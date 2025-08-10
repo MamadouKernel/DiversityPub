@@ -40,10 +40,10 @@ namespace DiversityPub.Controllers
                 var dashboardData = new
                 {
                     Client = utilisateur.Client,
-                                    Campagnes = await _context.Campagnes
-                    .Where(c => c.ClientId == clientId)
-                    .OrderByDescending(c => c.DateCreation)
-                    .ToListAsync(),
+                    Campagnes = await _context.Campagnes
+                        .Where(c => c.ClientId == clientId)
+                        .OrderByDescending(c => c.DateCreation)
+                        .ToListAsync(),
                     Activations = await _context.Activations
                         .Include(a => a.Campagne)
                         .Include(a => a.Lieu)
@@ -56,7 +56,12 @@ namespace DiversityPub.Controllers
                         .ToListAsync(),
                     Feedbacks = await _context.Feedbacks
                         .Include(f => f.Campagne)
-                        .Where(f => f.Campagne.ClientId == clientId)
+                            .ThenInclude(c => c.Client)
+                        .Include(f => f.Activation)
+                            .ThenInclude(a => a.Campagne)
+                                .ThenInclude(c => c.Client)
+                        .Where(f => (f.CampagneId != null && f.Campagne.ClientId == clientId) || 
+                                   (f.ActivationId != null && f.Activation.Campagne.ClientId == clientId))
                         .OrderByDescending(f => f.DateFeedback)
                         .ToListAsync()
                 };
@@ -91,7 +96,11 @@ namespace DiversityPub.Controllers
                     .OrderByDescending(c => c.DateCreation)
                     .ToListAsync();
 
-
+                // Mettre à jour automatiquement le statut des campagnes selon leurs activations
+                foreach (var campagne in campagnes)
+                {
+                    await UpdateCampaignStatus(campagne);
+                }
 
                 return View(campagnes);
             }
@@ -187,17 +196,70 @@ namespace DiversityPub.Controllers
                     return View("Error", new { Message = "Votre compte client n'est pas correctement configuré. Veuillez contacter l'administrateur." });
                 }
 
-                // Récupérer les feedbacks sur les campagnes
+                // Récupérer les feedbacks sur les campagnes avec les données de réponse
                 var feedbacksCampagnes = await _context.Feedbacks
                     .Include(f => f.Campagne)
+                        .ThenInclude(c => c.Client)
                     .Where(f => f.CampagneId != null && f.Campagne.ClientId == utilisateur.Client.Id)
                     .OrderByDescending(f => f.DateFeedback)
                     .ToListAsync();
 
-                // Récupérer les feedbacks sur les activations
+                // Récupérer les feedbacks sur les activations avec les données de réponse
                 var feedbacksActivations = await _context.Feedbacks
                     .Include(f => f.Activation)
                         .ThenInclude(a => a.Campagne)
+                            .ThenInclude(c => c.Client)
+                    .Where(f => f.ActivationId != null && f.Activation.Campagne.ClientId == utilisateur.Client.Id)
+                    .OrderByDescending(f => f.DateFeedback)
+                    .ToListAsync();
+
+                // Combiner les deux listes et prendre seulement les 5 derniers
+                var allFeedbacks = feedbacksCampagnes.Concat(feedbacksActivations)
+                    .OrderByDescending(f => f.DateFeedback)
+                    .Take(5)
+                    .ToList();
+
+                // Passer le nombre total de feedbacks à la vue
+                var totalFeedbacks = feedbacksCampagnes.Concat(feedbacksActivations).Count();
+                ViewBag.TotalFeedbacks = totalFeedbacks;
+                ViewBag.ShowMoreButton = totalFeedbacks > 5;
+
+                return View(allFeedbacks);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new { Message = $"Erreur lors du chargement des feedbacks: {ex.Message}" });
+            }
+        }
+
+        // GET: ClientDashboard/FeedbacksAll
+        public async Task<IActionResult> FeedbacksAll()
+        {
+            try
+            {
+                var userEmail = User.Identity.Name;
+                var utilisateur = await _context.Utilisateurs
+                    .Include(u => u.Client)
+                    .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (utilisateur?.Client == null)
+                {
+                    return View("Error", new { Message = "Votre compte client n'est pas correctement configuré. Veuillez contacter l'administrateur." });
+                }
+
+                // Récupérer les feedbacks sur les campagnes avec les données de réponse
+                var feedbacksCampagnes = await _context.Feedbacks
+                    .Include(f => f.Campagne)
+                        .ThenInclude(c => c.Client)
+                    .Where(f => f.CampagneId != null && f.Campagne.ClientId == utilisateur.Client.Id)
+                    .OrderByDescending(f => f.DateFeedback)
+                    .ToListAsync();
+
+                // Récupérer les feedbacks sur les activations avec les données de réponse
+                var feedbacksActivations = await _context.Feedbacks
+                    .Include(f => f.Activation)
+                        .ThenInclude(a => a.Campagne)
+                            .ThenInclude(c => c.Client)
                     .Where(f => f.ActivationId != null && f.Activation.Campagne.ClientId == utilisateur.Client.Id)
                     .OrderByDescending(f => f.DateFeedback)
                     .ToListAsync();
@@ -207,7 +269,7 @@ namespace DiversityPub.Controllers
                     .OrderByDescending(f => f.DateFeedback)
                     .ToList();
 
-                return View(allFeedbacks);
+                return View("Feedbacks", allFeedbacks);
             }
             catch (Exception ex)
             {
@@ -227,6 +289,7 @@ namespace DiversityPub.Controllers
 
                 if (utilisateur?.Client == null)
                 {
+                    Console.WriteLine("=== ERREUR: Client non trouvé ===");
                     return View("Error", new { Message = "Votre compte client n'est pas correctement configuré. Veuillez contacter l'administrateur." });
                 }
 
@@ -234,54 +297,83 @@ namespace DiversityPub.Controllers
                 Console.WriteLine($"Client ID: {utilisateur.Client.Id}");
                 Console.WriteLine($"Client Email: {userEmail}");
 
-                // Récupérer les campagnes terminées du client qui n'ont pas encore de feedback
-                var campagnesTerminees = await _context.Campagnes
-                    .Where(c => c.ClientId == utilisateur.Client.Id && 
-                               c.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                // Récupérer TOUTES les campagnes du client (pas seulement terminées)
+                var toutesLesCampagnes = await _context.Campagnes
+                    .Include(c => c.Client)
+                    .Where(c => c.ClientId == utilisateur.Client.Id)
                     .ToListAsync();
 
-                Console.WriteLine($"Campagnes terminées trouvées: {campagnesTerminees.Count}");
+                Console.WriteLine($"Toutes les campagnes trouvées: {toutesLesCampagnes.Count}");
+                foreach (var c in toutesLesCampagnes)
+                {
+                    Console.WriteLine($"  - {c.Nom} (ID: {c.Id}) - Statut: {c.Statut}");
+                }
 
-                // Récupérer les activations terminées du client qui n'ont pas encore de feedback
-                var activationsTerminees = await _context.Activations
+                // Récupérer TOUTES les activations du client avec leurs campagnes
+                var toutesLesActivations = await _context.Activations
                     .Include(a => a.Campagne)
-                    .Where(a => a.Campagne.ClientId == utilisateur.Client.Id && 
-                               a.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
+                        .ThenInclude(c => c.Client)
+                    .Include(a => a.Lieu)
+                    .Where(a => a.Campagne.ClientId == utilisateur.Client.Id)
                     .ToListAsync();
 
-                Console.WriteLine($"Activations terminées trouvées: {activationsTerminees.Count}");
+                Console.WriteLine($"Toutes les activations trouvées: {toutesLesActivations.Count}");
+                foreach (var a in toutesLesActivations)
+                {
+                    Console.WriteLine($"  - {a.Nom} (ID: {a.Id}) - Statut: {a.Statut} - Campagne: {a.Campagne?.Nom}");
+                }
 
-                // Récupérer les campagnes avec feedback existant
-                var campagnesAvecFeedback = await _context.Feedbacks
-                    .Where(f => f.CampagneId != null && f.Campagne.ClientId == utilisateur.Client.Id)
-                    .Select(f => f.CampagneId)
-                    .ToListAsync();
-
-                // Récupérer les activations avec feedback existant
-                var activationsAvecFeedback = await _context.Feedbacks
-                    .Where(f => f.ActivationId != null && f.Activation.Campagne.ClientId == utilisateur.Client.Id)
-                    .Select(f => f.ActivationId)
-                    .ToListAsync();
-
-                var campagnesDisponibles = campagnesTerminees
-                    .Where(c => !campagnesAvecFeedback.Contains(c.Id))
-                    .ToList();
-
-                var activationsDisponibles = activationsTerminees
-                    .Where(a => !activationsAvecFeedback.Contains(a.Id))
-                    .ToList();
+                // Permettre plusieurs feedbacks - montrer toutes les campagnes et activations
+                var campagnesDisponibles = toutesLesCampagnes.ToList();
+                var activationsDisponibles = toutesLesActivations.ToList();
 
                 Console.WriteLine($"Campagnes disponibles pour feedback: {campagnesDisponibles.Count}");
                 Console.WriteLine($"Activations disponibles pour feedback: {activationsDisponibles.Count}");
 
                 if (!campagnesDisponibles.Any() && !activationsDisponibles.Any())
                 {
-                    Console.WriteLine("Aucune campagne ou activation disponible pour feedback - redirection vers Feedbacks");
-                    return RedirectToAction("Feedbacks");
+                    Console.WriteLine("Aucune campagne ou activation disponible pour feedback - affichage du formulaire vide avec message");
+                    TempData["Info"] = "Aucune campagne ou activation disponible pour feedback. Utilisez le bouton 'Créer Données Test' pour créer des données de test.";
+                    ViewBag.Campagnes = new List<Campagne>();
+                    ViewBag.Activations = new List<Activation>();
+                    ViewBag.ActivationsJson = "[]";
+                    return View(new Feedback());
                 }
 
                 ViewBag.Campagnes = campagnesDisponibles;
                 ViewBag.Activations = activationsDisponibles;
+                
+                Console.WriteLine($"=== DEBUG VIEWBAG ===");
+                Console.WriteLine($"ViewBag.Campagnes count: {campagnesDisponibles.Count}");
+                Console.WriteLine($"ViewBag.Activations count: {activationsDisponibles.Count}");
+                
+                if (campagnesDisponibles.Any())
+                {
+                    var firstCampagne = campagnesDisponibles.First();
+                    Console.WriteLine($"Première campagne - Nom: {firstCampagne.Nom}, ID: {firstCampagne.Id}, ClientId: {firstCampagne.ClientId}");
+                }
+                
+                if (activationsDisponibles.Any())
+                {
+                    var firstActivation = activationsDisponibles.First();
+                    Console.WriteLine($"Première activation - Nom: {firstActivation.Nom}, ID: {firstActivation.Id}, CampagneId: {firstActivation.CampagneId}");
+                }
+                
+                // Préparer les données JSON pour JavaScript
+                var activationsJson = activationsDisponibles.Select(a => new
+                {
+                    id = a.Id.ToString(),
+                    nom = a.Nom,
+                    campagneId = a.CampagneId.ToString(),
+                    dateActivation = a.DateActivation.ToString("dd/MM/yyyy"),
+                    statut = a.Statut.ToString()
+                }).ToList();
+                
+                Console.WriteLine($"=== DEBUG JSON ACTIVATIONS ===");
+                Console.WriteLine($"Activations JSON créé: {System.Text.Json.JsonSerializer.Serialize(activationsJson)}");
+                
+                ViewBag.ActivationsJson = System.Text.Json.JsonSerializer.Serialize(activationsJson);
+                
                 return View(new Feedback());
             }
             catch (Exception ex)
@@ -359,17 +451,8 @@ namespace DiversityPub.Controllers
                             return View("Error", new { Message = "Campagne non trouvée ou non autorisée." });
                         }
 
-                        // Vérifier qu'il n'y a pas déjà un feedback pour cette campagne
-                        var feedbackExistant = await _context.Feedbacks
-                            .FirstOrDefaultAsync(f => f.CampagneId == feedback.CampagneId);
-
-                        Console.WriteLine($"Feedback existant pour campagne: {(feedbackExistant != null ? "Oui" : "Non")}");
-
-                        if (feedbackExistant != null)
-                        {
-                            TempData["Error"] = "❌ Un feedback existe déjà pour cette campagne.";
-                            return RedirectToAction("Feedbacks");
-                        }
+                        // Permettre plusieurs feedbacks pour une même campagne
+                        Console.WriteLine($"Feedback existant pour campagne: Permis (plusieurs feedbacks autorisés)");
                     }
                     else if (feedback.ActivationId != null)
                     {
@@ -385,17 +468,8 @@ namespace DiversityPub.Controllers
                             return View("Error", new { Message = "Activation non trouvée ou non autorisée." });
                         }
 
-                        // Vérifier qu'il n'y a pas déjà un feedback pour cette activation
-                        var feedbackExistant = await _context.Feedbacks
-                            .FirstOrDefaultAsync(f => f.ActivationId == feedback.ActivationId);
-
-                        Console.WriteLine($"Feedback existant pour activation: {(feedbackExistant != null ? "Oui" : "Non")}");
-
-                        if (feedbackExistant != null)
-                        {
-                            TempData["Error"] = "❌ Un feedback existe déjà pour cette activation.";
-                            return RedirectToAction("Feedbacks");
-                        }
+                        // Permettre plusieurs feedbacks pour une même activation
+                        Console.WriteLine($"Feedback existant pour activation: Permis (plusieurs feedbacks autorisés)");
                     }
 
                     feedback.Id = Guid.NewGuid();
@@ -410,7 +484,7 @@ namespace DiversityPub.Controllers
 
                     Console.WriteLine("Feedback sauvegardé avec succès!");
 
-                    TempData["Success"] = "✅ Feedback créé avec succès !";
+                    TempData["Success"] = "✅ Feedback créé avec succès ! Vous pouvez créer plusieurs feedbacks pour la même campagne ou activation.";
                     return RedirectToAction("Feedbacks");
                 }
 
@@ -426,23 +500,9 @@ namespace DiversityPub.Controllers
                                a.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
                     .ToListAsync();
 
-                var campagnesAvecFeedback = await _context.Feedbacks
-                    .Where(f => f.CampagneId != null && f.Campagne.ClientId == utilisateur.Client.Id)
-                    .Select(f => f.CampagneId)
-                    .ToListAsync();
-
-                var activationsAvecFeedback = await _context.Feedbacks
-                    .Where(f => f.ActivationId != null && f.Activation.Campagne.ClientId == utilisateur.Client.Id)
-                    .Select(f => f.ActivationId)
-                    .ToListAsync();
-
-                var campagnesDisponibles = campagnesTerminees
-                    .Where(c => !campagnesAvecFeedback.Contains(c.Id))
-                    .ToList();
-
-                var activationsDisponibles = activationsTerminees
-                    .Where(a => !activationsAvecFeedback.Contains(a.Id))
-                    .ToList();
+                // Permettre plusieurs feedbacks - montrer toutes les campagnes et activations
+                var campagnesDisponibles = campagnesTerminees.ToList();
+                var activationsDisponibles = activationsTerminees.ToList();
 
                 ViewBag.Campagnes = campagnesDisponibles;
                 ViewBag.Activations = activationsDisponibles;
@@ -454,6 +514,87 @@ namespace DiversityPub.Controllers
                 Console.WriteLine($"Message: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 return View("Error", new { Message = $"Erreur lors de la création du feedback: {ex.Message}" });
+            }
+        }
+
+        // Action pour créer des feedbacks groupés
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateGroupedFeedback([FromBody] GroupedFeedbackRequest request)
+        {
+            try
+            {
+                var utilisateur = await _context.Utilisateurs
+                    .Include(u => u.Client)
+                    .FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
+
+                if (utilisateur?.Client == null)
+                {
+                    return Json(new { success = false, message = "Utilisateur non autorisé." });
+                }
+
+                if (request.Feedbacks == null || !request.Feedbacks.Any())
+                {
+                    return Json(new { success = false, message = "Aucun feedback à créer." });
+                }
+
+                var createdFeedbacks = new List<object>();
+
+                foreach (var feedbackData in request.Feedbacks)
+                {
+                    var feedback = new Feedback
+                    {
+                        Id = Guid.NewGuid(),
+                        Note = feedbackData.Note,
+                        Commentaire = feedbackData.Commentaire,
+                        DateFeedback = DateTime.Now,
+                        CampagneId = feedbackData.CampagneId,
+                        ActivationId = feedbackData.ActivationId
+                    };
+
+                    // Validation de sécurité
+                    if (feedback.CampagneId.HasValue)
+                    {
+                        var campagne = await _context.Campagnes
+                            .FirstOrDefaultAsync(c => c.Id == feedback.CampagneId && c.ClientId == utilisateur.Client.Id);
+                        
+                        if (campagne == null)
+                        {
+                            return Json(new { success = false, message = $"Campagne non autorisée: {feedback.CampagneId}" });
+                        }
+                    }
+
+                    if (feedback.ActivationId.HasValue)
+                    {
+                        var activation = await _context.Activations
+                            .Include(a => a.Campagne)
+                            .FirstOrDefaultAsync(a => a.Id == feedback.ActivationId && a.Campagne.ClientId == utilisateur.Client.Id);
+                        
+                        if (activation == null)
+                        {
+                            return Json(new { success = false, message = $"Activation non autorisée: {feedback.ActivationId}" });
+                        }
+                    }
+
+                    _context.Add(feedback);
+                    createdFeedbacks.Add(new { 
+                        id = feedback.Id, 
+                        type = feedback.CampagneId.HasValue ? "campagne" : "activation",
+                        targetId = feedback.CampagneId ?? feedback.ActivationId
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = $"✅ {createdFeedbacks.Count} feedback(s) créé(s) avec succès !",
+                    feedbacks = createdFeedbacks
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Erreur lors de la création des feedbacks: {ex.Message}" });
             }
         }
 
@@ -482,18 +623,32 @@ namespace DiversityPub.Controllers
                     Adresse = "123 Boulevard de la République, Abidjan",
                 };
 
-                // Créer une campagne de test
-                var campagne = new Campagne
+                // Créer une campagne TERMINÉE de test
+                var campagneTerminee = new Campagne
                 {
                     Id = Guid.NewGuid(),
-                    Nom = "Campagne Marketing Test",
-                    Description = "Campagne de test pour démonstration",
-                    DateDebut = DateTime.Today,
-                    DateFin = DateTime.Today.AddDays(30),
+                    Nom = "Campagne Marketing Terminée",
+                    Description = "Campagne de test terminée pour démonstration des feedbacks",
+                    DateDebut = DateTime.Today.AddDays(-30),
+                    DateFin = DateTime.Today.AddDays(-1),
+                    Objectifs = "Tester l'interface client avec feedbacks",
+                    ClientId = utilisateur.Client.Id,
+                    Statut = StatutCampagne.Terminee,
+                    DateCreation = DateTime.Now.AddDays(-35)
+                };
+
+                // Créer une campagne EN COURS de test
+                var campagneEnCours = new Campagne
+                {
+                    Id = Guid.NewGuid(),
+                    Nom = "Campagne Marketing En Cours",
+                    Description = "Campagne de test en cours pour démonstration",
+                    DateDebut = DateTime.Today.AddDays(-15),
+                    DateFin = DateTime.Today.AddDays(15),
                     Objectifs = "Tester l'interface client",
                     ClientId = utilisateur.Client.Id,
                     Statut = StatutCampagne.EnCours,
-                    DateCreation = DateTime.Now
+                    DateCreation = DateTime.Now.AddDays(-20)
                 };
 
                 // Créer des agents de test
@@ -536,88 +691,107 @@ namespace DiversityPub.Controllers
                     Role = Role.AgentTerrain
                 };
 
-                // Créer des activations de test
-                var activation1 = new Activation
+                // Créer une activation TERMINÉE de test
+                var activationTerminee = new Activation
                 {
                     Id = Guid.NewGuid(),
-                    Nom = "Activation Marketing Centre Commercial",
-                    Description = "Distribution de flyers et promotion des produits",
+                    Nom = "Activation Marketing Terminée",
+                    Description = "Distribution de flyers et promotion des produits - TERMINÉE",
                     Instructions = "Distribuer les flyers aux clients et collecter les retours",
-                    DateActivation = DateTime.Today.AddDays(2),
+                    DateActivation = DateTime.Today.AddDays(-5),
                     HeureDebut = new TimeSpan(9, 0, 0),
                     HeureFin = new TimeSpan(17, 0, 0),
-                    Statut = StatutActivation.Planifiee,
-                    CampagneId = campagne.Id,
+                    Statut = StatutActivation.Terminee,
+                    CampagneId = campagneTerminee.Id,
                     LieuId = lieu.Id,
                     ResponsableId = agent1.Id,
-                    DateCreation = DateTime.Now
+                    DateCreation = DateTime.Now.AddDays(-10)
                 };
 
-                var activation2 = new Activation
+                // Créer une activation EN COURS de test
+                var activationEnCours = new Activation
                 {
                     Id = Guid.NewGuid(),
-                    Nom = "Activation Événementiel Place Félix Houphouët",
-                    Description = "Organisation d'un événement promotionnel",
-                    Instructions = "Installer les stands et animer l'événement",
-                    DateActivation = DateTime.Today.AddDays(5),
+                    Nom = "Activation Événementiel En Cours",
+                    Description = "Organisation d'un événement promotionnel - EN COURS",
+                    Instructions = "Organiser l'événement et gérer les participants",
+                    DateActivation = DateTime.Today.AddDays(2),
                     HeureDebut = new TimeSpan(10, 0, 0),
                     HeureFin = new TimeSpan(18, 0, 0),
                     Statut = StatutActivation.EnCours,
-                    CampagneId = campagne.Id,
+                    CampagneId = campagneEnCours.Id,
                     LieuId = lieu.Id,
                     ResponsableId = agent2.Id,
-                    DateCreation = DateTime.Now
+                    DateCreation = DateTime.Now.AddDays(-5)
                 };
 
-                var activation3 = new Activation
-                {
-                    Id = Guid.NewGuid(),
-                    Nom = "Activation Digital Zone 4",
-                    Description = "Promotion digitale et collecte de données",
-                    Instructions = "Utiliser les tablettes pour collecter les données clients",
-                    DateActivation = DateTime.Today.AddDays(-1),
-                    HeureDebut = new TimeSpan(8, 0, 0),
-                    HeureFin = new TimeSpan(16, 0, 0),
-                    Statut = StatutActivation.Terminee,
-                    CampagneId = campagne.Id,
-                    LieuId = lieu.Id,
-                    ResponsableId = agent1.Id,
-                    DateCreation = DateTime.Now
-                };
-
-                // Ajouter les agents aux activations
-                activation1.AgentsTerrain.Add(agent1);
-                activation1.AgentsTerrain.Add(agent2);
-                activation2.AgentsTerrain.Add(agent1);
-                activation2.AgentsTerrain.Add(agent2);
-                activation3.AgentsTerrain.Add(agent1);
-
-                // Sauvegarder dans la base de données
-                _context.Add(lieu);
-                _context.Add(utilisateurAgent1);
-                _context.Add(utilisateurAgent2);
-                _context.Add(agent1);
-                _context.Add(agent2);
-                _context.Add(campagne);
-                _context.Add(activation1);
-                _context.Add(activation2);
-                _context.Add(activation3);
+                // Sauvegarder les données
+                _context.Lieux.Add(lieu);
+                _context.Campagnes.Add(campagneTerminee);
+                _context.Campagnes.Add(campagneEnCours);
+                _context.Utilisateurs.Add(utilisateurAgent1);
+                _context.Utilisateurs.Add(utilisateurAgent2);
+                _context.AgentsTerrain.Add(agent1);
+                _context.AgentsTerrain.Add(agent2);
+                _context.Activations.Add(activationTerminee);
+                _context.Activations.Add(activationEnCours);
 
                 await _context.SaveChangesAsync();
 
                 return Json(new { 
                     success = true, 
-                    message = "✅ Données de test créées avec succès ! Vous pouvez maintenant voir vos activations.",
-                    activationsCreated = 3,
-                    campagneCreated = campagne.Nom
+                    message = "Données de test créées avec succès ! Campagnes et activations terminées disponibles pour les feedbacks." 
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { 
-                    success = false, 
-                    message = $"❌ Erreur lors de la création des données de test: {ex.Message}" 
-                });
+                return Json(new { success = false, message = $"Erreur lors de la création des données de test: {ex.Message}" });
+            }
+        }
+
+        // GET: ClientDashboard/DetailsActivation
+        public async Task<IActionResult> DetailsActivation(Guid? id)
+        {
+            try
+            {
+                var userEmail = User.Identity.Name;
+                var utilisateur = await _context.Utilisateurs
+                    .Include(u => u.Client)
+                    .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+                if (utilisateur?.Client == null)
+                {
+                    return View("Error", new { Message = "Votre compte client n'est pas correctement configuré. Veuillez contacter l'administrateur." });
+                }
+
+                if (id == null)
+                {
+                    return View("Error", new { Message = "ID d'activation non fourni." });
+                }
+
+                var activation = await _context.Activations
+                    .Include(a => a.Campagne)
+                        .ThenInclude(c => c.Client)
+                    .Include(a => a.Lieu)
+                    .Include(a => a.Responsable)
+                        .ThenInclude(r => r.Utilisateur)
+                    .Include(a => a.AgentsTerrain)
+                        .ThenInclude(at => at.Utilisateur)
+                    .Include(a => a.Medias.Where(m => m.Valide)) // Filtrer uniquement les médias validés
+                    .Include(a => a.Incidents)
+                    .Include(a => a.Feedbacks)
+                    .FirstOrDefaultAsync(a => a.Id == id && a.Campagne.ClientId == utilisateur.Client.Id);
+
+                if (activation == null)
+                {
+                    return View("Error", new { Message = "Activation non trouvée ou non autorisée." });
+                }
+
+                return View(activation);
+            }
+            catch (Exception ex)
+            {
+                return View("Error", new { Message = $"Erreur lors du chargement des détails de l'activation: {ex.Message}" });
             }
         }
 
@@ -665,5 +839,88 @@ namespace DiversityPub.Controllers
                 return View("Error", new { Message = $"Erreur lors du chargement des détails de la campagne: {ex.Message}" });
             }
         }
+
+        // Méthode privée pour mettre à jour automatiquement le statut d'une campagne
+        private async Task UpdateCampaignStatus(Campagne campagne)
+        {
+            try
+            {
+                if (campagne.Activations == null || !campagne.Activations.Any())
+                {
+                    // Pas d'activations : rester en préparation
+                    if (campagne.Statut != StatutCampagne.EnPreparation && campagne.Statut != StatutCampagne.Annulee)
+                    {
+                        campagne.Statut = StatutCampagne.EnPreparation;
+                        _context.Update(campagne);
+                        await _context.SaveChangesAsync();
+                    }
+                    return;
+                }
+
+                // Vérifier si la campagne est passée (toutes les activations terminées et après DateFin)
+                var aujourdhui = DateTime.Today;
+                var toutesActivationsTerminees = campagne.Activations.All(a => a.Statut == StatutActivation.Terminee);
+                var campagnePassee = aujourdhui > campagne.DateFin;
+
+                // Vérifier s'il y a des activations en cours
+                var activationsEnCours = campagne.Activations.Any(a => a.Statut == StatutActivation.EnCours);
+
+                // Vérifier s'il y a des activations planifiées pour aujourd'hui ou dans le futur
+                var activationsPlanifiees = campagne.Activations.Any(a => 
+                    a.Statut == StatutActivation.Planifiee && a.DateActivation >= aujourdhui);
+
+                StatutCampagne nouveauStatut;
+
+                if (campagne.Statut == StatutCampagne.Annulee)
+                {
+                    // Ne pas changer le statut des campagnes annulées
+                    return;
+                }
+                else if (activationsEnCours)
+                {
+                    // Au moins une activation en cours → Campagne en cours
+                    nouveauStatut = StatutCampagne.EnCours;
+                }
+                else if (toutesActivationsTerminees && campagnePassee)
+                {
+                    // Toutes les activations terminées et campagne passée → Terminée
+                    nouveauStatut = StatutCampagne.Terminee;
+                }
+                else if (activationsPlanifiees || !campagnePassee)
+                {
+                    // Activations planifiées ou campagne pas encore finie → En cours ou en préparation
+                    var campagneCommencee = aujourdhui >= campagne.DateDebut;
+                    nouveauStatut = campagneCommencee ? StatutCampagne.EnCours : StatutCampagne.EnPreparation;
+                }
+                else
+                {
+                    // Cas par défaut : toutes les activations terminées mais dans la période
+                    nouveauStatut = StatutCampagne.Terminee;
+                }
+
+                // Mettre à jour uniquement si le statut a changé
+                if (campagne.Statut != nouveauStatut)
+                {
+                    var ancienStatut = campagne.Statut;
+                    campagne.Statut = nouveauStatut;
+                    _context.Update(campagne);
+                    await _context.SaveChangesAsync();
+                    
+                    Console.WriteLine($"=== MISE À JOUR STATUT CAMPAGNE ===");
+                    Console.WriteLine($"Campagne: {campagne.Nom}");
+                    Console.WriteLine($"Ancien statut: {ancienStatut} → Nouveau statut: {nouveauStatut}");
+                    Console.WriteLine($"Activations en cours: {activationsEnCours}");
+                    Console.WriteLine($"Activations planifiées: {activationsPlanifiees}");
+                    Console.WriteLine($"Toutes terminées: {toutesActivationsTerminees}");
+                    Console.WriteLine($"Campagne passée: {campagnePassee}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la mise à jour du statut de la campagne {campagne.Nom}: {ex.Message}");
+            }
+        }
+
+
     }
 } 

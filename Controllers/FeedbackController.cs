@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using DiversityPub.Data;
 using DiversityPub.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace DiversityPub.Controllers
 {
@@ -24,10 +25,11 @@ namespace DiversityPub.Controllers
                 var feedbacks = await _context.Feedbacks
                     .Include(f => f.Campagne)
                         .ThenInclude(c => c.Client)
+                    .Include(f => f.Activation)
+                        .ThenInclude(a => a.Campagne)
+                            .ThenInclude(c => c.Client)
                     .OrderByDescending(f => f.DateFeedback)
                     .ToListAsync();
-
-
 
                 return View(feedbacks);
             }
@@ -46,6 +48,9 @@ namespace DiversityPub.Controllers
             var feedback = await _context.Feedbacks
                 .Include(f => f.Campagne)
                     .ThenInclude(c => c.Client)
+                .Include(f => f.Activation)
+                    .ThenInclude(a => a.Campagne)
+                        .ThenInclude(c => c.Client)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (feedback == null)
@@ -54,14 +59,18 @@ namespace DiversityPub.Controllers
             return View(feedback);
         }
 
-        // GET: Feedback/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        // GET: Feedback/Repondre/5
+        public async Task<IActionResult> Repondre(Guid? id)
         {
             if (id == null)
                 return NotFound();
 
             var feedback = await _context.Feedbacks
                 .Include(f => f.Campagne)
+                    .ThenInclude(c => c.Client)
+                .Include(f => f.Activation)
+                    .ThenInclude(a => a.Campagne)
+                        .ThenInclude(c => c.Client)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (feedback == null)
@@ -70,21 +79,29 @@ namespace DiversityPub.Controllers
             return View(feedback);
         }
 
-        // POST: Feedback/Edit/5
+        // POST: Feedback/Repondre/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Note,Commentaire,DateFeedback,CampagneId")] Feedback feedback)
+        public async Task<IActionResult> Repondre(Guid id, [Bind("Id,ReponseAdmin")] Feedback feedback)
         {
             if (id != feedback.Id)
+                return NotFound();
+
+            var feedbackExistant = await _context.Feedbacks.FindAsync(id);
+            if (feedbackExistant == null)
                 return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(feedback);
+                    feedbackExistant.ReponseAdmin = feedback.ReponseAdmin;
+                    feedbackExistant.DateReponseAdmin = DateTime.Now;
+                    feedbackExistant.AdminRepondant = User.Identity?.Name;
+
+                    _context.Update(feedbackExistant);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "✅ Feedback modifié avec succès !";
+                    TempData["Success"] = "✅ Réponse envoyée avec succès !";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -97,8 +114,55 @@ namespace DiversityPub.Controllers
             }
 
             // Recharger les données pour la vue
-            feedback.Campagne = await _context.Campagnes.FindAsync(feedback.CampagneId);
-            return View(feedback);
+            feedbackExistant = await _context.Feedbacks
+                .Include(f => f.Campagne)
+                    .ThenInclude(c => c.Client)
+                .Include(f => f.Activation)
+                    .ThenInclude(a => a.Campagne)
+                        .ThenInclude(c => c.Client)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            return View(feedbackExistant);
+        }
+
+        // POST: Feedback/Masquer/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Masquer(Guid id)
+        {
+            var feedback = await _context.Feedbacks.FindAsync(id);
+            if (feedback == null)
+                return NotFound();
+
+            feedback.EstMasque = true;
+            feedback.DateMasquage = DateTime.Now;
+            feedback.AdminMasquant = User.Identity?.Name;
+
+            _context.Update(feedback);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "✅ Feedback masqué avec succès !";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Feedback/Afficher/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Afficher(Guid id)
+        {
+            var feedback = await _context.Feedbacks.FindAsync(id);
+            if (feedback == null)
+                return NotFound();
+
+            feedback.EstMasque = false;
+            feedback.DateMasquage = null;
+            feedback.AdminMasquant = null;
+
+            _context.Update(feedback);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "✅ Feedback affiché avec succès !";
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Feedback/Delete/5
@@ -110,6 +174,9 @@ namespace DiversityPub.Controllers
             var feedback = await _context.Feedbacks
                 .Include(f => f.Campagne)
                     .ThenInclude(c => c.Client)
+                .Include(f => f.Activation)
+                    .ThenInclude(a => a.Campagne)
+                        .ThenInclude(c => c.Client)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (feedback == null)

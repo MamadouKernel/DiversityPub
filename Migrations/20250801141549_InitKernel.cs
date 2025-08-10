@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DiversityPub.Migrations
 {
     /// <inheritdoc />
-    public partial class initCreat : Migration
+    public partial class InitKernel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -290,7 +290,13 @@ namespace DiversityPub.Migrations
                     Commentaire = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateFeedback = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CampagneId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ActivationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ActivationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ReponseAdmin = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateReponseAdmin = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AdminRepondant = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EstMasque = table.Column<bool>(type: "bit", nullable: false),
+                    DateMasquage = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AdminMasquant = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -299,13 +305,14 @@ namespace DiversityPub.Migrations
                         name: "FK_Feedbacks_Activations_ActivationId",
                         column: x => x.ActivationId,
                         principalTable: "Activations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Feedbacks_Campagnes_CampagneId",
                         column: x => x.CampagneId,
                         principalTable: "Campagnes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -320,7 +327,7 @@ namespace DiversityPub.Migrations
                     DateCreation = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateResolution = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CommentaireResolution = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AgentTerrainId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AgentTerrainId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ActivationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -379,7 +386,7 @@ namespace DiversityPub.Migrations
             migrationBuilder.InsertData(
                 table: "Utilisateurs",
                 columns: new[] { "Id", "Email", "MotDePasse", "Nom", "Prenom", "Role", "Supprimer" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$azpwM1Erkw6qdtOrdZGKbe8EuEQJ6/3EGtlUdVqvzOT8ug15Ao/jy", "Super", "Admin", 1, 0 });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$IzPWBx9M16eZpNp3j8pbXuIzXsSUyE25LDaHpXHB2.dg.94KL0tPC", "Super", "Admin", 1, 0 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActivationAgentTerrain_AgentsTerrainId",

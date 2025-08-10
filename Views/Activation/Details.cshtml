@@ -1,227 +1,361 @@
 @model DiversityPub.Models.Activation
+
 @{
     ViewData["Title"] = "Détails de l'Activation";
 }
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-map-marker-alt"></i> Détails de l'Activation
-                </h4>
-                <div>
-                    <a href="@Url.Action("Edit", "Activation", new { id = Model.Id })" class="btn btn-warning me-2">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <a href="@Url.Action("Index", "Activation")" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour
-                    </a>
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background: #fafbfc;
+    }
+
+    .info-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-section h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-section h6 i {
+        color: #667eea;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 150px;
+    }
+
+    .info-value {
+        color: #6c757d;
+        text-align: right;
+        flex: 1;
+        margin-left: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+    }
+
+    .status-planifiee {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-encours {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .status-terminee {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-suspendue {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .agents-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .agent-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i> Détails de l'Activation
+                    </h4>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h5 class="text-primary mb-3">
-                            <i class="fas fa-info-circle"></i> Informations Générales
-                        </h5>
-                        <table class="table table-borderless">
-                            <tr>
-                                <td><strong>Nom :</strong></td>
-                                <td>@Model.Nom</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Statut :</strong></td>
-                                <td>
-                                    @switch (Model.Statut)
-                                    {
-                                        case DiversityPub.Models.enums.StatutActivation.Planifiee:
-                                            <span class="badge bg-warning">Planifiée</span>
-                                            break;
-                                        case DiversityPub.Models.enums.StatutActivation.EnCours:
-                                            <span class="badge bg-success">En Cours</span>
-                                            break;
-                                        case DiversityPub.Models.enums.StatutActivation.Suspendue:
-                                            <span class="badge bg-warning">Suspendue</span>
-                                            break;
-                                        case DiversityPub.Models.enums.StatutActivation.Terminee:
-                                            <span class="badge bg-info">Terminée</span>
-                                            break;
-                                    }
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Date :</strong></td>
-                                <td>
-                                    <i class="fas fa-calendar text-muted"></i> 
-                                    @Model.DateActivation.ToString("dd/MM/yyyy")
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Horaires :</strong></td>
-                                <td>
-                                    <i class="fas fa-clock text-muted"></i> 
-                                    @Model.HeureDebut.ToString(@"hh\:mm") - @Model.HeureFin.ToString(@"hh\:mm")
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Lieu :</strong></td>
-                                <td>
-                                    @if (Model.Lieu != null)
-                                    {
-                                        <i class="fas fa-map-marker-alt text-muted"></i> @Model.Lieu.Nom
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Non défini</span>
-                                    }
-                                </td>
-                            </tr>
-                            @if (!string.IsNullOrEmpty(Model.Description))
-                            {
-                                <tr>
-                                    <td><strong>Description :</strong></td>
-                                    <td>@Model.Description</td>
-                                </tr>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.Instructions))
-                            {
-                                <tr>
-                                    <td><strong>Instructions :</strong></td>
-                                    <td>@Model.Instructions</td>
-                                </tr>
-                            }
-                        </table>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        @if (Model.Campagne != null)
+                <div class="card-body">
+                    <!-- Informations générales -->
+                    <div class="info-section">
+                        <h6>
+                            <i class="fas fa-info-circle"></i> Informations générales
+                        </h6>
+                        <div class="info-row">
+                            <span class="info-label">Nom de l'activation</span>
+                            <span class="info-value">@Model.Nom</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Statut</span>
+                            <span class="info-value">
+                                <span class="status-badge status-@Model.Statut.ToString().ToLower()">
+                                    @Model.Statut
+                                </span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date de création</span>
+                            <span class="info-value">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Description))
                         {
-                            <h5 class="text-success mb-3">
-                                <i class="fas fa-bullhorn"></i> Campagne
-                            </h5>
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">@Model.Campagne.Nom</h6>
-                                    <p class="card-text">
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar"></i> 
-                                            @Model.Campagne.DateDebut.ToString("dd/MM/yyyy") - @Model.Campagne.DateFin.ToString("dd/MM/yyyy")
-                                        </small>
-                                    </p>
-                                    @if (Model.Campagne.Client != null)
-                                    {
-                                        <p class="card-text">
-                                            <small class="text-muted">
-                                                <i class="fas fa-building"></i> @(Model.Campagne.Client?.RaisonSociale ?? "Client supprimé")
-                                            </small>
-                                        </p>
-                                    }
-                                </div>
+                            <div class="info-row">
+                                <span class="info-label">Description</span>
+                                <span class="info-value">@Model.Description</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Instructions))
+                        {
+                            <div class="info-row">
+                                <span class="info-label">Instructions</span>
+                                <span class="info-value">@Model.Instructions</span>
                             </div>
                         }
                     </div>
-                </div>
 
-                @if (Model.AgentsTerrain != null && Model.AgentsTerrain.Any())
-                {
-                    <div class="mt-4">
-                        <h5 class="text-info mb-3">
-                            <i class="fas fa-users"></i> Agents Terrain (@Model.AgentsTerrain.Count)
-                        </h5>
-                        
+                    <!-- Informations de campagne -->
+                    <div class="info-section">
+                        <h6>
+                            <i class="fas fa-bullhorn"></i> Campagne associée
+                        </h6>
+                        <div class="info-row">
+                            <span class="info-label">Nom de la campagne</span>
+                            <span class="info-value">@Model.Campagne?.Nom</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Client</span>
+                            <span class="info-value">@Model.Campagne?.Client?.RaisonSociale</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Période de la campagne</span>
+                            <span class="info-value">
+                                @Model.Campagne?.DateDebut.ToString("dd/MM/yyyy") - @Model.Campagne?.DateFin.ToString("dd/MM/yyyy")
+                            </span>
+                        </div>
+                    </div>
 
-                        <div class="row">
-                            @foreach (var agent in Model.AgentsTerrain)
+                    <!-- Informations de lieu -->
+                    <div class="info-section">
+                        <h6>
+                            <i class="fas fa-map-marker-alt"></i> Lieu d'activation
+                        </h6>
+                        <div class="info-row">
+                            <span class="info-label">Nom du lieu</span>
+                            <span class="info-value">@Model.Lieu?.Nom</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Adresse</span>
+                            <span class="info-value">@Model.Lieu?.Adresse</span>
+                        </div>
+                    </div>
+
+                    <!-- Informations temporelles -->
+                    <div class="info-section">
+                        <h6>
+                            <i class="fas fa-calendar-alt"></i> Planification temporelle
+                        </h6>
+                        <div class="info-row">
+                            <span class="info-label">Date d'activation</span>
+                            <span class="info-value">@Model.DateActivation.ToString("dd/MM/yyyy")</span>
+                        </div>
+                                                 <div class="info-row">
+                             <span class="info-label">Heure de début</span>
+                             <span class="info-value">@Model.HeureDebut.ToString(@"hh\:mm")</span>
+                         </div>
+                         <div class="info-row">
+                             <span class="info-label">Heure de fin</span>
+                             <span class="info-value">@Model.HeureFin.ToString(@"hh\:mm")</span>
+                         </div>
+                    </div>
+
+                    <!-- Responsable -->
+                    @if (Model.Responsable != null)
+                    {
+                        <div class="info-section">
+                            <h6>
+                                <i class="fas fa-user-tie"></i> Responsable
+                            </h6>
+                            <div class="info-row">
+                                <span class="info-label">Nom complet</span>
+                                <span class="info-value">@Model.Responsable.Utilisateur.Prenom @Model.Responsable.Utilisateur.Nom</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">@Model.Responsable.Utilisateur.Email</span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Agents terrain -->
+                    <div class="info-section">
+                        <h6>
+                            <i class="fas fa-users"></i> Agents terrain (@Model.AgentsTerrain?.Count ?? 0)
+                        </h6>
+                        @if (Model.AgentsTerrain != null && Model.AgentsTerrain.Any())
+                        {
+                            <div class="agents-list">
+                                @foreach (var agent in Model.AgentsTerrain)
+                                {
+                                    <span class="agent-badge">
+                                        <i class="fas fa-user me-1"></i>
+                                        @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
+                                    </span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>Aucun agent terrain assigné à cette activation</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour à la liste
+                            </a>
+                        </div>
+                        <div>
+                            @if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Planifiee)
                             {
-                                var isResponsable = Model.ResponsableId == agent.Id;
-                                <div class="col-md-4 mb-3">
-                                    <div class="card @(isResponsable ? "border-warning" : "")" style="@(isResponsable ? "box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); background-color: #fff3cd;" : "")">
-                                        <div class="card-body text-center">
-                                            <div class="avatar mb-2">
-                                                <i class="fas @(isResponsable ? "fa-crown fa-2x text-warning" : "fa-user-tie fa-2x text-primary")"></i>
-                                            </div>
-                                            <h6 class="card-title @(isResponsable ? "text-warning fw-bold" : "")">
-                                                @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                @if (isResponsable)
-                                                {
-                                                    <br><small class="badge bg-warning text-dark fw-bold">👑 RESPONSABLE</small>
-                                                }
-                                            </h6>
-                                            <p class="card-text">
-                                                <small class="text-muted">
-                                                    <i class="fas fa-phone"></i> @agent.Telephone<br>
-                                                    <i class="fas fa-envelope"></i> @agent.Email
-                                                </small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <form asp-action="ChangerStatut" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <input type="hidden" name="nouveauStatut" value="@DiversityPub.Models.enums.StatutActivation.EnCours" />
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-play"></i> Démarrer
+                                    </button>
+                                </form>
+                            }
+                            else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.EnCours)
+                            {
+                                <form asp-action="ChangerStatut" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <input type="hidden" name="nouveauStatut" value="@DiversityPub.Models.enums.StatutActivation.Terminee" />
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Terminer
+                                    </button>
+                                </form>
                             }
                         </div>
                     </div>
-                }
-                else
-                {
-                    <div class="mt-4">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Aucun agent :</strong> Cette activation n'a pas encore d'agents assignés.
-                        </div>
-                    </div>
-                }
-
-                @if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
-                {
-                    <div class="mt-4">
-                        <h5 class="text-success mb-3">
-                            <i class="fas fa-check-circle"></i> Activation Terminée
-                        </h5>
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle"></i>
-                            <strong>Félicitations !</strong> Cette activation a été menée à bien.
-                        </div>
-                    </div>
-                }
-                else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.EnCours)
-                {
-                    <div class="mt-4">
-                        <h5 class="text-warning mb-3">
-                            <i class="fas fa-play-circle"></i> Activation en Cours
-                        </h5>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-clock"></i>
-                            <strong>En cours :</strong> Cette activation est actuellement en cours d'exécution.
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="mt-4">
-                        <h5 class="text-info mb-3">
-                            <i class="fas fa-calendar-check"></i> Activation Planifiée
-                        </h5>
-                        <div class="alert alert-info">
-                            <i class="fas fa-calendar"></i>
-                            <strong>Planifiée :</strong> Cette activation est programmée pour le @Model.DateActivation.ToString("dd/MM/yyyy").
-                        </div>
-                    </div>
-                }
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .card.border-warning {
-        border-width: 3px !important;
-        border-color: #ffc107 !important;
-    }
-    .badge.bg-warning {
-        font-size: 0.8em;
-        padding: 0.5em 0.8em;
-    }
-    .card-title.text-warning {
-        color: #856404 !important;
-    }
-</style> 

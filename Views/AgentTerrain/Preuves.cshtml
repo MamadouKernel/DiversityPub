@@ -225,6 +225,12 @@
                 <p class="page-subtitle">@(agent?.Utilisateur != null ? $"{agent.Utilisateur.Prenom} {agent.Utilisateur.Nom}" : "Agent")</p>
             </div>
         </div>
+        <div class="header-buttons">
+            <a href="@Url.Action("EnvoyerPreuve", "AgentTerrain")" class="header-btn">
+                <i class="fas fa-plus"></i>
+                Nouvelle Preuve
+            </a>
+        </div>
     </div>
 </div>
 
@@ -247,6 +253,15 @@
             <div class="stat-number">@documents</div>
             <div class="stat-label">Documents</div>
         </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #A32D18, #EDAC00); color: white; border: none;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                <a href="@Url.Action("EnvoyerPreuve", "AgentTerrain")" 
+                   style="color: white; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-plus fa-2x"></i>
+                    <span style="font-weight: 600;">Nouvelle Preuve</span>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -254,7 +269,13 @@
 @if (Model != null && Model.Any())
 {
     <div class="content-card">
-        <h3 class="page-title">Liste des Preuves</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 class="page-title" style="margin: 0;">Liste des Preuves</h3>
+            <a href="@Url.Action("EnvoyerPreuve", "AgentTerrain")" class="cta-button">
+                <i class="fas fa-plus"></i>
+                Ajouter une Preuve
+            </a>
+        </div>
         <div class="row">
             @foreach (var media in Model)
             {
@@ -262,9 +283,14 @@
                     <div class="content-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0">@media.Description</h6>
-                            <span class="badge @GetTypeBadgeClass(media.Type)">
-                                @GetTypeText(media.Type)
-                            </span>
+                            <div class="d-flex gap-2">
+                                <span class="badge @GetTypeBadgeClass(media.Type)">
+                                    @GetTypeText(media.Type)
+                                </span>
+                                <span class="badge @GetValidationBadgeClass(media.Valide)">
+                                    @GetValidationText(media.Valide)
+                                </span>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
@@ -276,6 +302,13 @@
                                 <i class="fas fa-clock text-warning me-2"></i>
                                 <strong>@media.DateUpload.ToString("HH:mm")</strong>
                             </div>
+                            @if (media.Activation != null)
+                            {
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <small class="text-muted">@media.Activation.Nom</small>
+                                </div>
+                            }
                         </div>
                         
                         @if (!string.IsNullOrEmpty(media.Description))
@@ -287,9 +320,9 @@
                         }
                         
                         <div class="d-flex gap-2">
-                            <a href="@Url.Action("Details", "AgentTerrain", new { id = media.Id })" 
+                            <a href="@Url.Action("DetailsPreuve", "AgentTerrain", new { id = media.Id })" 
                                class="btn btn-primary-custom flex-fill">
-                                <i class="fas fa-eye"></i> Voir
+                                <i class="fas fa-eye"></i> Voir Détails
                             </a>
                         </div>
                     </div>
@@ -332,5 +365,15 @@ else
             DiversityPub.Models.enums.TypeMedia.Document => "Document",
             _ => "Inconnu"
         };
+    }
+
+    public string GetValidationBadgeClass(bool valide)
+    {
+        return valide ? "bg-success" : "bg-warning";
+    }
+
+    public string GetValidationText(bool valide)
+    {
+        return valide ? "Validé" : "En attente";
     }
 } 

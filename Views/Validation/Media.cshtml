@@ -57,6 +57,10 @@
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Lieu:</strong> @media.Activation?.Lieu?.Nom
+                                                @if (!string.IsNullOrEmpty(media.Activation?.Lieu?.Adresse))
+                                                {
+                                                    <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> @media.Activation.Lieu.Adresse</small>
+                                                }
                                             </div>
                                             <div class="mb-3">
                                                 <strong>Agent:</strong> @media.AgentTerrain?.Utilisateur?.Nom @media.AgentTerrain?.Utilisateur?.Prenom

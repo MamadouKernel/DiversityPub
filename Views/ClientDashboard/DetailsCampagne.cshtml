@@ -4,21 +4,33 @@
 }
 
 <style>
+    :root {
+        --primary-color: #A32D18;
+        --secondary-color: #EDAC00;
+        --accent-color: #59311F;
+        --light-accent: #A26D55;
+        --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        --header-gradient: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+    }
+
     body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background: var(--bg-gradient);
         min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .main-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        background: var(--card-gradient);
         border-radius: 25px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         margin: 2rem 0;
+        transition: all 0.3s ease;
     }
 
     .page-header {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        background: var(--header-gradient);
         color: white;
         padding: 3rem 2rem;
         text-align: center;
@@ -54,11 +66,10 @@
 
     .content-section {
         padding: 3rem 2rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     }
 
     .info-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        background: var(--card-gradient);
         border: none;
         border-radius: 20px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
@@ -66,11 +77,7 @@
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.8);
         margin-bottom: 2rem;
-    }
-
-    .info-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        position: relative;
     }
 
     .info-card::before {
@@ -80,9 +87,14 @@
         left: 0;
         right: 0;
         height: 5px;
-        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
         background-size: 200% 100%;
         animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     }
 
     @@keyframes gradientShift {
@@ -91,7 +103,7 @@
     }
 
     .info-header {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        background: var(--header-gradient);
         color: white;
         padding: 2rem;
         position: relative;
@@ -133,7 +145,7 @@
     .info-item:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        border-color: #A32D18;
+        border-color: var(--primary-color);
     }
 
     .info-icon {
@@ -150,21 +162,10 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
-    .info-icon.campaign {
-        background: linear-gradient(135deg, #A32D18, #c94a3a);
-    }
-
-    .info-icon.date {
-        background: linear-gradient(135deg, #28a745, #20c997);
-    }
-
-    .info-icon.status {
-        background: linear-gradient(135deg, #17a2b8, #6f42c1);
-    }
-
-    .info-icon.description {
-        background: linear-gradient(135deg, #ffc107, #fd7e14);
-    }
+    .info-icon.campaign { background: linear-gradient(135deg, var(--primary-color), #c94a3a); }
+    .info-icon.date { background: linear-gradient(135deg, #28a745, #20c997); }
+    .info-icon.status { background: linear-gradient(135deg, #17a2b8, #6f42c1); }
+    .info-icon.description { background: linear-gradient(135deg, #ffc107, #fd7e14); }
 
     .info-text {
         flex: 1;
@@ -194,7 +195,7 @@
     }
 
     .stat-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        background: var(--card-gradient);
         border: none;
         border-radius: 20px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
@@ -213,7 +214,7 @@
         left: 0;
         right: 0;
         height: 5px;
-        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
         background-size: 200% 100%;
         animation: gradientShift 3s ease-in-out infinite;
     }
@@ -226,7 +227,7 @@
     .stat-icon {
         font-size: 2.5rem;
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -236,7 +237,7 @@
         font-size: 2.5rem;
         font-weight: 900;
         margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #A32D18, #EDAC00);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -252,7 +253,7 @@
     }
 
     .table-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        background: var(--card-gradient);
         border-radius: 20px;
         box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
         overflow: hidden;
@@ -265,7 +266,7 @@
     }
 
     .table thead th {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
+        background: var(--header-gradient);
         color: white;
         border: none;
         padding: 1.5rem 1rem;
@@ -329,10 +330,15 @@
         display: inline-block;
         min-width: 100px;
         text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .status-badge:hover {
+        transform: scale(1.1);
     }
 
     .feedback-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        background: var(--card-gradient);
         border: none;
         border-radius: 20px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
@@ -422,15 +428,17 @@
         align-items: center;
         gap: 0.5rem;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
     }
 
     .btn-custom:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        text-decoration: none;
     }
 
     .btn-primary-custom {
-        background: linear-gradient(135deg, #A32D18, #c94a3a);
+        background: linear-gradient(135deg, var(--primary-color), #c94a3a);
         color: white;
     }
 
@@ -450,6 +458,23 @@
         padding: 0 2rem;
     }
 
+    /* Animations */
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    /* Responsive */
     @@media (max-width: 768px) {
         .page-title {
             font-size: 2rem;
@@ -486,7 +511,7 @@
 
         <div class="content-section">
             <!-- Informations Générales -->
-            <div class="info-card">
+            <div class="info-card fade-in">
                 <div class="info-header">
                     <h2 class="info-title">
                         <i class="fas fa-info-circle"></i>
@@ -549,7 +574,7 @@
             </div>
 
             <!-- Statistiques -->
-            <div class="info-card">
+            <div class="info-card fade-in">
                 <div class="info-header">
                     <h2 class="info-title">
                         <i class="fas fa-chart-bar"></i>
@@ -588,7 +613,7 @@
             </div>
 
             <!-- Activations -->
-            <div class="info-card">
+            <div class="info-card fade-in">
                 <div class="info-header">
                     <h2 class="info-title">
                         <i class="fas fa-map-marker-alt"></i>
@@ -615,7 +640,7 @@
                                     <tbody>
                                         @foreach (var activation in Model.Activations.OrderBy(a => a.DateActivation))
                                         {
-                                            <tr>
+                                            <tr class="fade-in">
                                                 <td>
                                                     <div class="activation-name">@activation.Nom</div>
                                                     @if (!string.IsNullOrEmpty(activation.Description))
@@ -672,7 +697,7 @@
             </div>
 
             <!-- Feedbacks -->
-            <div class="info-card">
+            <div class="info-card fade-in">
                 <div class="info-header">
                     <h2 class="info-title">
                         <i class="fas fa-comments"></i>
@@ -685,7 +710,7 @@
                     {
                         @foreach (var feedback in Model.Feedbacks)
                         {
-                            <div class="feedback-card">
+                            <div class="feedback-card fade-in">
                                 <div class="feedback-header">
                                     <div class="stars-container">
                                         @for (int i = 1; i <= 5; i++)

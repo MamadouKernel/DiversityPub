@@ -1,62 +1,257 @@
 @model IEnumerable<DiversityPub.Models.Campagne>
 @{
     ViewData["Title"] = "Mes Campagnes";
+    var totalCampagnes = Model.Count();
+    var campagnesEnCours = Model.Count(c => c.Statut == DiversityPub.Models.enums.StatutCampagne.EnCours);
+    var campagnesTerminees = Model.Count(c => c.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee);
+    var campagnesAvecFeedback = Model.Count(c => c.Feedbacks?.Any() == true);
 }
 
-<div class="row">
+<div class="row mb-4">
+    <!-- Statistiques -->
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@totalCampagnes</h4>
+                        <small>Total Campagnes</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-bullhorn fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@campagnesEnCours</h4>
+                        <small>En Cours</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-play-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@campagnesTerminees</h4>
+                        <small>Terminées</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@campagnesAvecFeedback</h4>
+                        <small>Avec Feedback</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
     <div class="col-12">
-        
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-bullhorn"></i> Mes Campagnes
-                </h4>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0">
+                            <i class="fas fa-bullhorn"></i> Mes Campagnes
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <!-- Contrôles de vue -->
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary active" data-view="table" onclick="switchView('table')">
+                                <i class="fas fa-table"></i> Table
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-view="cards" onclick="switchView('cards')">
+                                <i class="fas fa-th-large"></i> Cartes
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-view="compact" onclick="switchView('compact')">
+                                <i class="fas fa-list"></i> Compact
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
+                <!-- Barre de recherche et filtres -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Rechercher une campagne..." onkeyup="filterTable()">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter" onchange="filterTable()">
+                            <option value="">Tous les statuts</option>
+                            <option value="EnPreparation">En Préparation</option>
+                            <option value="EnCours">En Cours</option>
+                            <option value="Terminee">Terminée</option>
+                            <option value="Annulee">Annulée</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="feedbackFilter" onchange="filterTable()">
+                            <option value="">Tous les feedbacks</option>
+                            <option value="with">Avec feedback</option>
+                            <option value="without">Sans feedback</option>
+                            <option value="pending">Feedback en attente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
                 @if (Model.Any())
                 {
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>
-                                        <i class="fas fa-bullhorn"></i> Nom
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-calendar"></i> Période
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-tasks"></i> Statut
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-map-marker-alt"></i> Activations
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-comments"></i> Feedback
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-cogs"></i> Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model)
-                                {
+                    <!-- Vue Table -->
+                    <div id="tableView" class="view-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="campagnesTable">
+                                <thead class="table-dark">
                                     <tr>
-                                        <td>
-                                            <strong>@item.Nom</strong>
-                                            @if (!string.IsNullOrEmpty(item.Description))
-                                            {
-                                                <br><small class="text-muted">@item.Description</small>
-                                            }
-                                        </td>
-                                        <td>
-                                            <small>
-                                                Du @item.DateDebut.ToString("dd/MM/yyyy")<br>
-                                                Au @item.DateFin.ToString("dd/MM/yyyy")
-                                            </small>
-                                        </td>
-                                        <td>
+                                        <th class="sortable" data-sort="nom">
+                                            <i class="fas fa-bullhorn"></i> Nom
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="periode">
+                                            <i class="fas fa-calendar"></i> Période
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="statut">
+                                            <i class="fas fa-tasks"></i> Statut
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="activations">
+                                            <i class="fas fa-map-marker-alt"></i> Activations
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="feedback">
+                                            <i class="fas fa-comments"></i> Feedback
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-cogs"></i> Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr data-status="@item.Statut" data-feedback="@(item.Feedbacks?.Any() == true ? "with" : (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee ? "pending" : "without"))" data-activations="@(item.Activations?.Count ?? 0)">
+                                            <td>
+                                                <strong>@item.Nom</strong>
+                                                @if (!string.IsNullOrEmpty(item.Description))
+                                                {
+                                                    <br><small class="text-muted">@item.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    Du @item.DateDebut.ToString("dd/MM/yyyy")<br>
+                                                    Au @item.DateFin.ToString("dd/MM/yyyy")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(item.Statut switch {
+                                                    DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
+                                                    DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
+                                                    DiversityPub.Models.enums.StatutCampagne.Terminee => "info",
+                                                    DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
+                                                    _ => "secondary"
+                                                })">@item.Statut</span>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var activationCount = item.Activations?.Count ?? 0;
+                                                    var badgeClass = activationCount > 0 ? "bg-success" : "bg-secondary";
+                                                }
+                                                <span class="badge @badgeClass">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    @activationCount activation(s)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (item.Feedbacks?.Any() == true)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-star"></i> Feedback donné
+                                                    </span>
+                                                }
+                                                else if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                                                {
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-exclamation-circle"></i> Feedback en attente
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-clock"></i> Campagne active
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("DetailsCampagne", "ClientDashboard", new { id = item.Id })" 
+                                                       class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !item.Feedbacks?.Any() == true)
+                                                    {
+                                                        <a href="@Url.Action("CreateFeedback", "ClientDashboard")" 
+                                                           class="btn btn-sm btn-outline-success" title="Laisser un feedback">
+                                                            <i class="fas fa-comment"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Vue Cartes -->
+                    <div id="cardsView" class="view-content" style="display: none;">
+                        <div class="row" id="cardsContainer">
+                            @foreach (var item in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-3" data-status="@item.Statut" data-feedback="@(item.Feedbacks?.Any() == true ? "with" : (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee ? "pending" : "without"))" data-activations="@(item.Activations?.Count ?? 0)">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">@item.Nom</h6>
                                             <span class="badge bg-@(item.Statut switch {
                                                 DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
                                                 DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
@@ -64,56 +259,142 @@
                                                 DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
                                                 _ => "secondary"
                                             })">@item.Statut</span>
-                                        </td>
-                                        <td>
-                                            @{
-                                                var activationCount = item.Activations?.Count ?? 0;
-                                                var badgeClass = activationCount > 0 ? "bg-success" : "bg-secondary";
-                                            }
-                                            <span class="badge @badgeClass">
-                                                <i class="fas fa-map-marker-alt"></i>
-                                                @activationCount activation(s)
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if (item.Feedbacks?.Any() == true)
+                                        </div>
+                                        <div class="card-body">
+                                            @if (!string.IsNullOrEmpty(item.Description))
                                             {
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-star"></i> Feedback donné
-                                                </span>
+                                                <p class="card-text small">@item.Description</p>
                                             }
-                                            else if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
-                                            {
-                                                <span class="badge bg-warning">
-                                                    <i class="fas fa-exclamation-circle"></i> Feedback en attente
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">
-                                                    <i class="fas fa-clock"></i> En cours
-                                                </span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
+                                            <div class="row text-center">
+                                                <div class="col-6">
+                                                    <small class="text-muted">Période</small><br>
+                                                    <strong>@item.DateDebut.ToString("dd/MM") - @item.DateFin.ToString("dd/MM")</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Activations</small><br>
+                                                    <strong>@(item.Activations?.Count ?? 0)</strong>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                @if (item.Feedbacks?.Any() == true)
+                                                {
+                                                    <span class="badge bg-success w-100">
+                                                        <i class="fas fa-star"></i> Feedback donné
+                                                    </span>
+                                                }
+                                                else if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                                                {
+                                                    <span class="badge bg-warning w-100">
+                                                        <i class="fas fa-exclamation-circle"></i> Feedback en attente
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary w-100">
+                                                        <i class="fas fa-clock"></i> Campagne active
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="btn-group w-100" role="group">
                                                 <a href="@Url.Action("DetailsCampagne", "ClientDashboard", new { id = item.Id })" 
-                                                   class="btn btn-sm btn-outline-primary" title="Voir les détails">
-                                                    <i class="fas fa-eye"></i>
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Détails
                                                 </a>
                                                 @if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !item.Feedbacks?.Any() == true)
                                                 {
                                                     <a href="@Url.Action("CreateFeedback", "ClientDashboard")" 
-                                                       class="btn btn-sm btn-outline-success" title="Laisser un feedback">
-                                                        <i class="fas fa-comment"></i>
+                                                       class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-comment"></i> Feedback
                                                     </a>
                                                 }
                                             </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Vue Compact -->
+                    <div id="compactView" class="view-content" style="display: none;">
+                        <div class="list-group" id="compactContainer">
+                            @foreach (var item in Model)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center" data-status="@item.Statut" data-feedback="@(item.Feedbacks?.Any() == true ? "with" : (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee ? "pending" : "without"))" data-activations="@(item.Activations?.Count ?? 0)">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="badge bg-@(item.Statut switch {
+                                                DiversityPub.Models.enums.StatutCampagne.EnPreparation => "warning",
+                                                DiversityPub.Models.enums.StatutCampagne.EnCours => "success",
+                                                DiversityPub.Models.enums.StatutCampagne.Terminee => "info",
+                                                DiversityPub.Models.enums.StatutCampagne.Annulee => "danger",
+                                                _ => "secondary"
+                                            })">@item.Statut</span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">@item.Nom</h6>
+                                            <small class="text-muted">
+                                                @item.DateDebut.ToString("dd/MM/yyyy") - @item.DateFin.ToString("dd/MM/yyyy") | 
+                                                @(item.Activations?.Count ?? 0) activation(s)
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        @if (item.Feedbacks?.Any() == true)
+                                        {
+                                            <span class="badge bg-success me-2">
+                                                <i class="fas fa-star"></i> Feedback
+                                            </span>
+                                        }
+                                        else if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee)
+                                        {
+                                            <span class="badge bg-warning me-2">
+                                                <i class="fas fa-exclamation-circle"></i> En attente
+                                            </span>
+                                        }
+                                        <div class="btn-group">
+                                            <a href="@Url.Action("DetailsCampagne", "ClientDashboard", new { id = item.Id })" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (item.Statut == DiversityPub.Models.enums.StatutCampagne.Terminee && !item.Feedbacks?.Any() == true)
+                                            {
+                                                <a href="@Url.Action("CreateFeedback", "ClientDashboard")" 
+                                                   class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-comment"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2">Afficher:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" id="pageSize" onchange="changePageSize()">
+                                    <option value="5" selected>5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="ms-2">éléments par page</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Pagination">
+                                <ul class="pagination justify-content-end mb-0" id="pagination">
+                                    <!-- Généré par JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 }
                 else
@@ -133,6 +414,29 @@
     .table th {
         font-weight: 600;
         background-color: #f8f9fa;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .table th:hover {
+        background-color: #e9ecef;
+    }
+    
+    .sortable {
+        position: relative;
+    }
+    
+    .sortable i.fa-sort {
+        opacity: 0.5;
+    }
+    
+    .sortable.sort-asc i.fa-sort {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+    
+    .sortable.sort-desc i.fa-sort {
+        opacity: 1;
     }
     
     .btn-group .btn {
@@ -142,4 +446,439 @@
     .badge {
         font-size: 0.8rem;
     }
-</style> 
+    
+    .view-content {
+        min-height: 400px;
+    }
+    
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .list-group-item {
+        transition: background-color 0.2s;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .pagination .page-link {
+        color: #A32D18;
+        border-color: #dee2e6;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #A32D18;
+        border-color: #A32D18;
+    }
+    
+    .pagination .page-link:hover {
+        color: #A32D18;
+        background-color: #f8f9fa;
+    }
+    
+    .btn-outline-primary {
+        border-color: #A32D18;
+        color: #A32D18;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #A32D18;
+        border-color: #A32D18;
+    }
+    
+    .btn-outline-success {
+        border-color: #28a745;
+        color: #28a745;
+    }
+    
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+</style>
+
+<script>
+    let currentView = 'table';
+    let currentPage = 1;
+    let pageSize = 5;
+    let currentSort = { column: '', direction: 'asc' };
+    let allData = [];
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTable();
+        updatePagination();
+    });
+    
+    function initializeTable() {
+        // Récupérer toutes les données
+        const table = document.getElementById('campagnesTable');
+        if (table) {
+            const rows = table.querySelectorAll('tbody tr');
+            allData = Array.from(rows).map(row => {
+                const nomElement = row.querySelector('td:nth-child(1) strong');
+                const periodeElement = row.querySelector('td:nth-child(2)');
+                const statutElement = row.querySelector('td:nth-child(3) .badge');
+                const activationsElement = row.querySelector('td:nth-child(4) .badge');
+                const feedbackElement = row.querySelector('td:nth-child(5) .badge');
+                
+                return {
+                    element: row,
+                    nom: nomElement ? nomElement.textContent.trim() : '',
+                    periode: periodeElement ? periodeElement.textContent.trim() : '',
+                    statut: row.dataset.status || '',
+                    activations: parseInt(row.dataset.activations) || 0,
+                    feedback: row.dataset.feedback || '',
+                    // Données brutes pour le tri
+                    statutText: statutElement ? statutElement.textContent.trim() : '',
+                    activationsText: activationsElement ? activationsElement.textContent.trim() : '',
+                    feedbackText: feedbackElement ? feedbackElement.textContent.trim() : ''
+                };
+            });
+            
+            console.log('Données initialisées:', allData.length, 'éléments');
+            console.log('Exemple de données:', allData[0]);
+        }
+    }
+    
+    function switchView(view) {
+        // Masquer toutes les vues
+        document.querySelectorAll('.view-content').forEach(v => v.style.display = 'none');
+        
+        // Afficher la vue sélectionnée
+        document.getElementById(view + 'View').style.display = 'block';
+        
+        // Mettre à jour les boutons
+        document.querySelectorAll('[data-view]').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        
+        currentView = view;
+        filterTable();
+    }
+    
+    function filterTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const feedbackFilter = document.getElementById('feedbackFilter').value;
+        
+        console.log('Filtrage avec:', { searchTerm, statusFilter, feedbackFilter });
+        console.log('Données disponibles:', allData.length);
+        
+        let filteredData = allData.filter(item => {
+            const matchesSearch = item.nom.toLowerCase().includes(searchTerm) || 
+                                item.periode.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || item.statut === statusFilter;
+            const matchesFeedback = !feedbackFilter || item.feedback === feedbackFilter;
+            
+            return matchesSearch && matchesStatus && matchesFeedback;
+        });
+        
+        console.log('Données filtrées:', filteredData.length);
+        
+        // Appliquer le tri
+        if (currentSort.column) {
+            console.log('Application du tri:', currentSort);
+            filteredData.sort((a, b) => {
+                let aVal = a[currentSort.column];
+                let bVal = b[currentSort.column];
+                
+                console.log('Comparaison:', { aVal, bVal, column: currentSort.column });
+                
+                // Gestion spéciale pour les différents types de données
+                if (currentSort.column === 'activations') {
+                    aVal = parseInt(aVal) || 0;
+                    bVal = parseInt(bVal) || 0;
+                } else if (currentSort.column === 'statut') {
+                    // Ordre de priorité pour les statuts
+                    const statutOrder = {
+                        'EnPreparation': 1,
+                        'EnCours': 2,
+                        'Terminee': 3,
+                        'Annulee': 4
+                    };
+                    aVal = statutOrder[aVal] || 999;
+                    bVal = statutOrder[bVal] || 999;
+                } else if (currentSort.column === 'feedback') {
+                    // Ordre de priorité pour les feedbacks
+                    const feedbackOrder = {
+                        'with': 1,
+                        'pending': 2,
+                        'without': 3
+                    };
+                    aVal = feedbackOrder[aVal] || 999;
+                    bVal = feedbackOrder[bVal] || 999;
+                } else {
+                    // Tri alphabétique pour les autres colonnes
+                    aVal = (aVal || '').toString().toLowerCase();
+                    bVal = (bVal || '').toString().toLowerCase();
+                }
+                
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            console.log('Tri appliqué, premier élément:', filteredData[0]?.nom);
+        }
+        
+        // Appliquer la pagination
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        
+        console.log('Pagination:', { startIndex, endIndex, pageSize, currentPage });
+        console.log('Données paginées:', paginatedData.length);
+        
+        // Afficher les données filtrées
+        displayFilteredData(paginatedData);
+        updatePagination(filteredData.length);
+    }
+    
+    function displayFilteredData(data) {
+        if (currentView === 'table') {
+            const tbody = document.querySelector('#campagnesTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.appendChild(item.element.cloneNode(true));
+            });
+        } else if (currentView === 'cards') {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            data.forEach(item => {
+                const cardElement = createCardFromRow(item.element);
+                container.appendChild(cardElement);
+            });
+        } else if (currentView === 'compact') {
+            const container = document.getElementById('compactContainer');
+            container.innerHTML = '';
+            data.forEach(item => {
+                const compactElement = createCompactFromRow(item.element);
+                container.appendChild(compactElement);
+            });
+        }
+    }
+    
+    function createCardFromRow(row) {
+        // Créer une carte à partir d'une ligne de tableau
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4 mb-3';
+        card.dataset.status = row.dataset.status;
+        card.dataset.feedback = row.dataset.feedback;
+        card.dataset.activations = row.dataset.activations;
+        
+        const cells = row.querySelectorAll('td');
+        const nom = cells[0].querySelector('strong')?.textContent || '';
+        const description = cells[0].querySelector('small')?.textContent || '';
+        const periode = cells[1].textContent;
+        const statut = cells[2].querySelector('.badge')?.textContent || '';
+        const statutClass = cells[2].querySelector('.badge')?.className || '';
+        const activations = cells[3].textContent;
+        const feedback = cells[4].innerHTML;
+        const actions = cells[5].innerHTML;
+        
+        card.innerHTML = `
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">${nom}</h6>
+                    <span class="badge ${statutClass}">${statut}</span>
+                </div>
+                <div class="card-body">
+                    ${description ? `<p class="card-text small">${description}</p>` : ''}
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted">Période</small><br>
+                            <strong>${periode}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Activations</small><br>
+                            <strong>${activations}</strong>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        ${feedback}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        ${actions}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    function createCompactFromRow(row) {
+        // Créer un élément compact à partir d'une ligne de tableau
+        const compact = document.createElement('div');
+        compact.className = 'list-group-item d-flex justify-content-between align-items-center';
+        compact.dataset.status = row.dataset.status;
+        compact.dataset.feedback = row.dataset.feedback;
+        compact.dataset.activations = row.dataset.activations;
+        
+        const cells = row.querySelectorAll('td');
+        const nom = cells[0].querySelector('strong')?.textContent || '';
+        const periode = cells[1].textContent;
+        const statut = cells[2].querySelector('.badge')?.textContent || '';
+        const statutClass = cells[2].querySelector('.badge')?.className || '';
+        const activations = cells[3].textContent;
+        const feedback = cells[4].innerHTML;
+        const actions = cells[5].innerHTML;
+        
+        compact.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <span class="badge ${statutClass}">${statut}</span>
+                </div>
+                <div>
+                    <h6 class="mb-0">${nom}</h6>
+                    <small class="text-muted">${periode} | ${activations}</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                ${feedback}
+                <div class="btn-group">
+                    ${actions}
+                </div>
+            </div>
+        `;
+        
+        return compact;
+    }
+    
+    function sortTable(column) {
+        console.log('Tri demandé pour la colonne:', column);
+        
+        const header = document.querySelector(`[data-sort="${column}"]`);
+        if (!header) {
+            console.error('En-tête de colonne non trouvé:', column);
+            return;
+        }
+        
+        // Réinitialiser tous les en-têtes
+        document.querySelectorAll('.sortable').forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc');
+        });
+        
+        // Mettre à jour la direction de tri
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        console.log('Tri configuré:', currentSort);
+        
+        // Ajouter la classe de tri
+        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        
+        // Réinitialiser la pagination
+        currentPage = 1;
+        
+        // Appliquer le filtre
+        filterTable();
+    }
+    
+    function changePageSize() {
+        pageSize = parseInt(document.getElementById('pageSize').value);
+        currentPage = 1;
+        filterTable();
+    }
+    
+    function updatePagination(totalItems = allData.length) {
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const pagination = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // Bouton précédent
+        paginationHTML += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})">Précédent</a>
+            </li>
+        `;
+        
+        // Pages
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        
+        if (startPage > 1) {
+            paginationHTML += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1)">1</a></li>';
+            if (startPage > 2) {
+                paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+                </li>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${totalPages})">${totalPages}</a></li>`;
+        }
+        
+        // Bouton suivant
+        paginationHTML += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})">Suivant</a>
+            </li>
+        `;
+        
+        pagination.innerHTML = paginationHTML;
+    }
+    
+    function goToPage(page) {
+        const totalPages = Math.ceil(allData.length / pageSize);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            filterTable();
+        }
+    }
+    
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('feedbackFilter').value = '';
+        currentPage = 1;
+        filterTable();
+    }
+    
+    // Ajouter les événements de tri
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initialisation des événements de tri...');
+        const sortableHeaders = document.querySelectorAll('.sortable');
+        console.log('En-têtes triables trouvés:', sortableHeaders.length);
+        
+        sortableHeaders.forEach(header => {
+            console.log('Ajout d\'événement pour:', header.dataset.sort);
+            header.addEventListener('click', function(e) {
+                e.preventDefault();
+                const column = this.dataset.sort;
+                console.log('Clic sur en-tête:', column);
+                sortTable(column);
+            });
+        });
+    });
+</script> 

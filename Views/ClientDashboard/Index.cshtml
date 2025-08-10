@@ -90,6 +90,42 @@
             </div>
         </div>
 
+        <!-- Actions rapides -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt"></i> Actions Rapides
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="@Url.Action("Campagnes", "ClientDashboard")" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                                    <span>Mes Campagnes</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="@Url.Action("Activations", "ClientDashboard")" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                                    <span>Mes Activations</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="@Url.Action("CreateFeedback", "ClientDashboard")" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fas fa-comments fa-2x mb-2"></i>
+                                    <span>Laisser un Feedback</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Campagnes récentes -->
         <div class="row mb-4">
             <div class="col-md-6">

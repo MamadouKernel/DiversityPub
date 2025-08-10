@@ -11,8 +11,8 @@ namespace DiversityPub.Models
         public DateTime? DateResolution { get; set; }
         public string? CommentaireResolution { get; set; }
 
-        public Guid AgentTerrainId { get; set; }
-        public AgentTerrain AgentTerrain { get; set; } = null!;
+        public Guid? AgentTerrainId { get; set; }
+        public AgentTerrain? AgentTerrain { get; set; }
 
         public Guid? ActivationId { get; set; }
         public Activation? Activation { get; set; }

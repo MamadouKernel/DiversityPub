@@ -326,6 +326,12 @@ namespace DiversityPub.Migrations
                     b.Property<Guid?>("ActivationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AdminMasquant")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AdminRepondant")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("CampagneId")
                         .HasColumnType("uniqueidentifier");
 
@@ -336,8 +342,20 @@ namespace DiversityPub.Migrations
                     b.Property<DateTime>("DateFeedback")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateMasquage")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateReponseAdmin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("EstMasque")
+                        .HasColumnType("bit");
+
                     b.Property<int>("Note")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReponseAdmin")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -357,7 +375,7 @@ namespace DiversityPub.Migrations
                     b.Property<Guid?>("ActivationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AgentTerrainId")
+                    b.Property<Guid?>("AgentTerrainId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CommentaireResolution")
@@ -527,7 +545,7 @@ namespace DiversityPub.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Email = "admin@diversitypub.ci",
-                            MotDePasse = "$2a$11$azpwM1Erkw6qdtOrdZGKbe8EuEQJ6/3EGtlUdVqvzOT8ug15Ao/jy",
+                            MotDePasse = "$2a$11$IzPWBx9M16eZpNp3j8pbXuIzXsSUyE25LDaHpXHB2.dg.94KL0tPC",
                             Nom = "Super",
                             Prenom = "Admin",
                             Role = 1,
@@ -663,13 +681,14 @@ namespace DiversityPub.Migrations
             modelBuilder.Entity("DiversityPub.Models.Feedback", b =>
                 {
                     b.HasOne("DiversityPub.Models.Activation", "Activation")
-                        .WithMany()
-                        .HasForeignKey("ActivationId");
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("ActivationId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DiversityPub.Models.Campagne", "Campagne")
                         .WithMany("Feedbacks")
                         .HasForeignKey("CampagneId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Activation");
 
@@ -685,8 +704,7 @@ namespace DiversityPub.Migrations
                     b.HasOne("DiversityPub.Models.AgentTerrain", "AgentTerrain")
                         .WithMany("Incidents")
                         .HasForeignKey("AgentTerrainId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Activation");
 
@@ -729,6 +747,8 @@ namespace DiversityPub.Migrations
 
             modelBuilder.Entity("DiversityPub.Models.Activation", b =>
                 {
+                    b.Navigation("Feedbacks");
+
                     b.Navigation("Incidents");
 
                     b.Navigation("Medias");

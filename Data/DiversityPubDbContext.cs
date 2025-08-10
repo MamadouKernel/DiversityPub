@@ -114,7 +114,15 @@ namespace DiversityPub.Data
                 .HasOne(f => f.Campagne)
                 .WithMany(c => c.Feedbacks)
                 .HasForeignKey(f => f.CampagneId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Feedback>()
+                .HasOne(f => f.Activation)
+                .WithMany(a => a.Feedbacks)
+                .HasForeignKey(f => f.ActivationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
 
             // ✅ Relations DemandeActivation
             modelBuilder.Entity<DemandeActivation>()

@@ -39,5 +39,8 @@ namespace DiversityPub.Models
         // Navigation vers les médias et incidents
         public ICollection<Media> Medias { get; set; } = new List<Media>();
         public ICollection<Incident> Incidents { get; set; } = new List<Incident>();
+        
+        // Navigation vers les feedbacks
+        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     }
 } 

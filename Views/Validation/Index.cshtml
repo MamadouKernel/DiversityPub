@@ -137,6 +137,10 @@
                                             {
                                                 <div class="mb-3">
                                                     <strong>Lieu:</strong> @activation.Lieu.Nom
+                                                    @if (!string.IsNullOrEmpty(activation.Lieu.Adresse))
+                                                    {
+                                                        <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> @activation.Lieu.Adresse</small>
+                                                    }
                                                 </div>
                                             }
                                             

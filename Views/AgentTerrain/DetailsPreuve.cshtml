@@ -1,0 +1,390 @@
+@model DiversityPub.Models.Media
+@{
+    Layout = "_AgentLayout";
+    ViewData["Title"] = "Détails de la Preuve";
+    var agent = ViewBag.Agent as DiversityPub.Models.AgentTerrain;
+}
+
+<style>
+    /* Header personnalisé */
+    .page-header {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        color: white;
+        padding: 2rem 1.5rem;
+        margin: -1.5rem -1.5rem 2rem -1.5rem;
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .page-title-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .page-icon {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .page-title {
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .header-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .header-btn {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .header-btn:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    /* Carte de détails */
+    .details-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .detail-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .detail-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .validation-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .validation-valid {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .validation-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .validation-rejected {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .file-preview {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .file-download {
+        background: #A32D18;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .file-download:hover {
+        background: #8a2514;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    @@media (max-width: 768px) {
+        .page-header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .header-buttons {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .info-row {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+    }
+</style>
+
+<!-- Header personnalisé -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-title-section">
+            <i class="fas fa-image page-icon"></i>
+            <div>
+                <h1 class="page-title">Détails de la Preuve</h1>
+                <p class="page-subtitle">@(agent?.Utilisateur != null ? $"{agent.Utilisateur.Prenom} {agent.Utilisateur.Nom}" : "Agent")</p>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <a href="@Url.Action("Preuves", "AgentTerrain")" class="header-btn">
+                <i class="fas fa-arrow-left"></i>
+                ← Retour aux Preuves
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Contenu principal -->
+<div class="details-card">
+    <!-- Section Statut de Validation -->
+    <div class="detail-section">
+        <h3 class="section-title">
+            <i class="fas fa-check-circle"></i>
+            Statut de Validation
+        </h3>
+        
+        <div class="text-center">
+            @if (Model.Valide)
+            {
+                <div class="validation-badge validation-valid">
+                    <i class="fas fa-check-circle"></i> Preuve Validée
+                </div>
+                @if (Model.DateValidation.HasValue)
+                {
+                    <p class="mt-3 text-muted">
+                        <i class="fas fa-calendar"></i> Validé le @Model.DateValidation.Value.ToString("dd/MM/yyyy à HH:mm")
+                    </p>
+                }
+                @if (!string.IsNullOrEmpty(Model.CommentaireValidation))
+                {
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <strong>Commentaire :</strong><br>
+                        @Model.CommentaireValidation
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="validation-badge validation-pending">
+                    <i class="fas fa-clock"></i> En Attente de Validation
+                </div>
+                <p class="mt-3 text-muted">
+                    Votre preuve est en cours de vérification par l'équipe de validation.
+                </p>
+            }
+        </div>
+    </div>
+    
+    <!-- Section Informations Générales -->
+    <div class="detail-section">
+        <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            Informations Générales
+        </h3>
+        
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-align-left text-primary"></i> Description :
+            </span>
+            <span class="info-value">@Model.Description</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-file text-info"></i> Type :
+            </span>
+            <span class="info-value">
+                @switch (Model.Type)
+                {
+                    case DiversityPub.Models.enums.TypeMedia.Photo:
+                        <span class="badge bg-success">Photo</span>
+                        break;
+                    case DiversityPub.Models.enums.TypeMedia.Video:
+                        <span class="badge bg-info">Vidéo</span>
+                        break;
+                    case DiversityPub.Models.enums.TypeMedia.Document:
+                        <span class="badge bg-warning">Document</span>
+                        break;
+                    default:
+                        <span class="badge bg-secondary">Inconnu</span>
+                        break;
+                }
+            </span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">
+                <i class="fas fa-calendar text-warning"></i> Date d'envoi :
+            </span>
+            <span class="info-value">@Model.DateUpload.ToString("dd/MM/yyyy à HH:mm")</span>
+        </div>
+    </div>
+    
+    @if (Model.Activation != null)
+    {
+        <!-- Section Mission Associée -->
+        <div class="detail-section">
+            <h3 class="section-title">
+                <i class="fas fa-map-marker-alt"></i>
+                Mission Associée
+            </h3>
+            
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-map-marker-alt text-primary"></i> Nom de la mission :
+                </span>
+                <span class="info-value">@Model.Activation.Nom</span>
+            </div>
+            
+            @if (Model.Activation.Campagne != null)
+            {
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-bullhorn text-success"></i> Campagne :
+                    </span>
+                    <span class="info-value">@Model.Activation.Campagne.Nom</span>
+                </div>
+            }
+            
+            @if (Model.Activation.Lieu != null)
+            {
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-map-marker-alt text-danger"></i> Lieu :
+                    </span>
+                    <span class="info-value">
+                        @Model.Activation.Lieu.Nom
+                        @if (!string.IsNullOrEmpty(Model.Activation.Lieu.Adresse))
+                        {
+                            <br><small class="text-muted">@Model.Activation.Lieu.Adresse</small>
+                        }
+                    </span>
+                </div>
+            }
+            
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-calendar text-info"></i> Date de la mission :
+                </span>
+                <span class="info-value">@Model.Activation.DateActivation.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+    }
+    
+    <!-- Section Fichier -->
+    <div class="detail-section">
+        <h3 class="section-title">
+            <i class="fas fa-file-download"></i>
+            Fichier
+        </h3>
+        
+        @if (!string.IsNullOrEmpty(Model.Url))
+        {
+            <div class="text-center">
+                @if (Model.Type == DiversityPub.Models.enums.TypeMedia.Photo)
+                {
+                    <img src="@Model.Url" alt="@Model.Description" class="file-preview mb-3" />
+                }
+                
+                <div>
+                    <a href="@Model.Url" class="file-download" download>
+                        <i class="fas fa-download"></i>
+                        Télécharger le fichier
+                    </a>
+                </div>
+                
+                @if (Model.Type != DiversityPub.Models.enums.TypeMedia.Photo)
+                {
+                    <p class="mt-3 text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Cliquez sur le bouton ci-dessus pour télécharger et voir le fichier.
+                    </p>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <p>Fichier non disponible</p>
+            </div>
+        }
+    </div>
+</div>

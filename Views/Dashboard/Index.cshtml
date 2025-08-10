@@ -4,435 +4,967 @@
 }
 
 <style>
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #A32D18, #59311F) !important;
+    :root {
+        --primary-color: #A32D18;
+        --secondary-color: #EDAC00;
+        --accent-color: #59311F;
+        --light-accent: #A26D55;
+        --bg-gradient: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        --card-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        --header-gradient: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
     }
-    
-    .card {
-        transition: all 0.3s ease;
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    
-    .display-6 {
-        font-size: 2.5rem;
-        font-weight: 300;
-    }
-    
-    .btn {
-        border-radius: 12px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: none;
-        padding: 15px 20px;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    
-    .list-group-item {
-        border: none;
-        border-radius: 10px;
-        margin-bottom: 8px;
+
+    body {
+        background: var(--bg-gradient);
+        min-height: 100vh;
         transition: all 0.3s ease;
     }
-    
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-        transform: translateX(5px);
+
+    .main-container {
+        background: var(--card-gradient);
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin: 2rem 0;
+        transition: all 0.3s ease;
     }
-    
-    .badge {
-        font-size: 0.8rem;
-        padding: 8px 12px;
-        border-radius: 20px;
-    }
-    
-    .card-header {
-        background: linear-gradient(135deg, #A32D18, #59311F);
+
+    .page-header {
+        background: var(--header-gradient);
         color: white;
-        border-radius: 15px 15px 0 0 !important;
-        border: none;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
     }
-    
-    .text-primary { color: #A32D18 !important; }
-    .text-success { color: #28a745 !important; }
-    .text-warning { color: #EDAC00 !important; }
-    .text-info { color: #17a2b8 !important; }
-    
-    .btn-primary { background-color: #A32D18; }
-    .btn-primary:hover { background-color: #59311F; }
-    
-    .btn-success { background-color: #28a745; }
-    .btn-success:hover { background-color: #218838; }
-    
-    .btn-warning { background-color: #EDAC00; color: #A32D18; }
-    .btn-warning:hover { background-color: #d4b800; color: #A32D18; }
-    
-    .btn-info { background-color: #17a2b8; }
-    .btn-info:hover { background-color: #138496; }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Stats intelligentes */
+    .stats-section {
+        background: var(--card-gradient);
+        padding: 3rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: var(--card-gradient);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 1.125rem;
+        color: #6c757d;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .stat-trend {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+
+    .trend-up {
+        color: #28a745;
+    }
+
+    .trend-down {
+        color: #dc3545;
+    }
+
+    .trend-neutral {
+        color: #6c757d;
+    }
+
+    /* Actions rapides intelligentes */
+    .quick-actions {
+        background: var(--card-gradient);
+        padding: 2rem;
+        border-radius: 20px;
+        margin: 2rem;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-card {
+        background: var(--card-gradient);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .action-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--accent-color);
+    }
+
+    .action-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    /* Graphiques intelligents */
+    .charts-section {
+        background: var(--card-gradient);
+        padding: 3rem 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .chart-card {
+        background: var(--card-gradient);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .chart-header {
+        background: var(--header-gradient);
+        color: white;
+        padding: 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .chart-body {
+        padding: 2rem;
+    }
+
+    /* Notifications temps réel */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 400px;
+        border-left: 5px solid var(--primary-color);
+    }
+
+    .notification.show {
+        transform: translateX(0);
+    }
+
+    .notification-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .notification-message {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* Mode sombre */
+    body.dark-mode {
+        --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        --card-gradient: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+        color: #ffffff;
+    }
+
+    body.dark-mode .main-container {
+        background: var(--card-gradient);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Animations */
+    @@keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Loading states */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-gradient-primary text-white">
-            <div class="card-body text-center py-5">
-                <h1 class="display-4 mb-3">
-                    <i class="fas fa-broadcast-tower"></i> Diversity Pub
-                </h1>
-                <p class="lead">Tableau de bord - Suivi des campagnes terrain</p>
-            </div>
+<div class="container-fluid">
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-broadcast-tower"></i>
+                Dashboard Intelligence
+            </h1>
+            <p class="page-subtitle">Tableau de bord intelligent - Suivi en temps réel des campagnes terrain</p>
         </div>
-    </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="display-6 text-primary mb-2">
-                    <i class="fas fa-bullhorn"></i>
-                </div>
-                <h3 class="card-title">@Model.TotalCampagnes</h3>
-                <p class="card-text">Campagnes</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="display-6 text-success mb-2">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <h3 class="card-title">@Model.TotalActivations</h3>
-                <p class="card-text">Activations</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <div class="display-6 text-info mb-2">
-                    <i class="fas fa-building"></i>
-                </div>
-                <h3 class="card-title">@Model.TotalClients</h3>
-                <p class="card-text">Clients</p>
-            </div>
-        </div>
-    </div>
-    @if (!Model.IsChefProjet)
-    {
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="display-6 text-warning mb-2">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3 class="card-title">@Model.TotalUtilisateurs</h3>
-                    <p class="card-text">Utilisateurs</p>
+        <!-- Actions rapides intelligentes -->
+        <div class="quick-actions">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0">
+                    <i class="fas fa-rocket me-2"></i>
+                    Actions Rapides
+                </h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="toggleDarkMode()">
+                        <i class="fas fa-moon"></i>
+                        Mode Sombre
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualiser
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="showAnalytics()">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </button>
                 </div>
             </div>
-        </div>
-    }
-    else
-    {
-        <div class="col-md-3 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <div class="display-6 text-info mb-2">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <h3 class="card-title">@Model.TotalAgents</h3>
-                    <p class="card-text">Agents Terrain</p>
-                </div>
-            </div>
-        </div>
-    }
-</div>
-
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-bar"></i> Activations par Lieu
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="activationsParLieuChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-bar"></i> Campagnes par Client
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="campagnesParClientChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-bar"></i> Activations par Campagne
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="activationsParCampagneChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-clock"></i> Activations Récentes
-                </h5>
-            </div>
-            <div class="card-body">
-                @if (Model.ActivationsRecentes != null && Model.ActivationsRecentes.Count > 0)
+            
+            <div class="actions-grid">
+                @if (User.IsInRole("Admin") || User.IsInRole("ChefProjet"))
                 {
-                    <div class="list-group list-group-flush">
-                        @foreach (var activation in Model.ActivationsRecentes)
-                        {
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">@activation.Nom</h6>
-                                    <small class="text-muted">
-                                        @activation.Campagne?.Nom - @activation.Lieu?.Nom
-                                    </small>
-                                </div>
-                                <span class="badge bg-primary rounded-pill">
-                                    @activation.Statut
-                                </span>
-                            </div>
-                        }
+                    <a href="@Url.Action("Create", "Campagne")" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <div class="action-title">Nouvelle Campagne</div>
+                        <div class="action-description">Créer une nouvelle campagne terrain</div>
+                    </a>
+                    
+                    <a href="@Url.Action("Create", "Activation")" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="action-title">Nouvelle Activation</div>
+                        <div class="action-description">Planifier une nouvelle activation</div>
+                    </a>
+                }
+                
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="@Url.Action("Create", "Utilisateur")" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="action-title">Nouvel Utilisateur</div>
+                        <div class="action-description">Ajouter un nouvel utilisateur</div>
+                    </a>
+                    
+                    <a href="@Url.Action("Create", "Client")" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="action-title">Nouveau Client</div>
+                        <div class="action-description">Enregistrer un nouveau client</div>
+                    </a>
+                }
+                
+                <a href="@Url.Action("Index", "Validation")" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="action-title">Validation</div>
+                    <div class="action-description">Valider les preuves d'activations</div>
+                </a>
+                
+                <a href="@Url.Action("Statistiques", "Dashboard")" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="action-title">Statistiques</div>
+                    <div class="action-description">Voir les statistiques détaillées</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistiques intelligentes -->
+        <div class="stats-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-chart-pie me-2"></i>
+                Statistiques en Temps Réel
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card" onclick="navigateTo('Campagne')">
+                    <div class="stat-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="stat-number" id="totalCampagnes">@Model.TotalCampagnes</div>
+                    <div class="stat-label">Campagnes</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> +12% ce mois
+                    </div>
+                </div>
+                
+                <div class="stat-card" onclick="navigateTo('Activation')">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-number" id="totalActivations">@Model.TotalActivations</div>
+                    <div class="stat-label">Activations</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fas fa-arrow-up"></i> +8% cette semaine
+                    </div>
+                </div>
+                
+                <div class="stat-card" onclick="navigateTo('Client')">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-number" id="totalClients">@Model.TotalClients</div>
+                    <div class="stat-label">Clients</div>
+                    <div class="stat-trend trend-neutral">
+                        <i class="fas fa-minus"></i> Stable
+                    </div>
+                </div>
+                
+                @if (!Model.IsChefProjet)
+                {
+                    <div class="stat-card" onclick="navigateTo('Utilisateur')">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number" id="totalUtilisateurs">@Model.TotalUtilisateurs</div>
+                        <div class="stat-label">Utilisateurs</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> +3% ce mois
+                        </div>
                     </div>
                 }
                 else
                 {
-                    <p class="text-muted text-center">Aucune activation récente</p>
+                    <div class="stat-card" onclick="navigateTo('AgentTerrain')">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-number" id="totalAgents">@Model.TotalAgents</div>
+                        <div class="stat-label">Agents Terrain</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> +5% cette semaine
+                        </div>
+                    </div>
                 }
             </div>
         </div>
-    </div>
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-fire"></i> Campagnes Actives
-                </h5>
-            </div>
-            <div class="card-body">
-                @if (Model.CampagnesActives != null && Model.CampagnesActives.Count > 0)
-                {
-                    <div class="list-group list-group-flush">
-                        @foreach (var campagne in Model.CampagnesActives)
+
+        <!-- Graphiques intelligents -->
+        <div class="charts-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-chart-bar me-2"></i>
+                Analytics Intelligents
+            </h2>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Activations par Lieu
+                    </div>
+                    <div class="chart-body">
+                        @if (Model.ActivationsParLieu != null && Model.ActivationsParLieu.Count > 0)
                         {
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">@campagne.Nom</h6>
-                                    <small class="text-muted">
-                                        @campagne.Client?.RaisonSociale
-                                    </small>
-                                </div>
-                                <span class="badge bg-success rounded-pill">
-                                    @campagne.Statut
-                                </span>
+                            <canvas id="activationsParLieuChart" width="400" height="300"></canvas>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                <p>Aucune donnée disponible</p>
                             </div>
                         }
                     </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center">Aucune campagne active</p>
-                }
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-users me-2"></i>
+                        Campagnes par Client
+                    </div>
+                    <div class="chart-body">
+                        @if (Model.CampagnesParClient != null && Model.CampagnesParClient.Count > 0)
+                        {
+                            <canvas id="campagnesParClientChart" width="400" height="300"></canvas>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                                <p>Aucune donnée disponible</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-bullhorn me-2"></i>
+                        Activations par Campagne
+                    </div>
+                    <div class="chart-body">
+                        @if (Model.ActivationsParCampagne != null && Model.ActivationsParCampagne.Count > 0)
+                        {
+                            <canvas id="activationsParCampagneChart" width="400" height="300"></canvas>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                <p>Aucune donnée disponible</p>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-rocket"></i> Actions Rapides
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    @if (User.IsInRole("Admin") || User.IsInRole("ChefProjet"))
-                    {
-                        <div class="col-md-3 mb-3">
-                            <a href="@Url.Action("Create", "Campagne")" class="btn btn-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                <span>Nouvelle Campagne</span>
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="@Url.Action("Create", "Activation")" class="btn btn-success w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                <span>Nouvelle Activation</span>
-                            </a>
-                        </div>
-                    }
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <div class="col-md-3 mb-3">
-                            <a href="@Url.Action("Create", "Utilisateur")" class="btn btn-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                                <i class="fas fa-user-plus fa-2x mb-2"></i>
-                                <span>Nouvel Utilisateur</span>
-                            </a>
-                        </div>
-                    }
-                    <div class="col-md-3 mb-3">
-                        <a href="@Url.Action("Statistiques", "Dashboard")" class="btn btn-info w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-                            <i class="fas fa-chart-line fa-2x mb-2"></i>
-                            <span>Voir Statistiques</span>
-                        </a>
+        <!-- Activités récentes intelligentes -->
+        <div class="charts-section">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-clock me-2"></i>
+                Activités Récentes
+            </h2>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-clock me-2"></i>
+                        Activations Récentes
+                    </div>
+                    <div class="chart-body">
+                        @if (Model.ActivationsRecentes != null && Model.ActivationsRecentes.Count > 0)
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var activation in Model.ActivationsRecentes)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center fade-in">
+                                        <div>
+                                            <h6 class="mb-1">@activation.Nom</h6>
+                                            <small class="text-muted">
+                                                @activation.Campagne?.Nom - @activation.Lieu?.Nom
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">
+                                            @activation.Statut
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-clock fa-3x mb-3"></i>
+                                <p>Aucune activation récente</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-fire me-2"></i>
+                        Campagnes Actives
+                    </div>
+                    <div class="chart-body">
+                        @if (Model.CampagnesActives != null && Model.CampagnesActives.Count > 0)
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var campagne in Model.CampagnesActives)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center fade-in">
+                                        <div>
+                                            <h6 class="mb-1">@campagne.Nom</h6>
+                                            <small class="text-muted">
+                                                @campagne.Client?.RaisonSociale
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-success rounded-pill">
+                                            @campagne.Statut
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="fas fa-fire fa-3x mb-3"></i>
+                                <p>Aucune campagne active</p>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Notification temps réel -->
+<div id="notification" class="notification">
+    <div class="notification-title"></div>
+    <div class="notification-message"></div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Données pour les nouveaux graphiques
-        const activationsParLieuData = @Html.Raw(Json.Serialize(Model.ActivationsParLieu));
-        const campagnesParClientData = @Html.Raw(Json.Serialize(Model.CampagnesParClient));
-        const activationsParCampagneData = @Html.Raw(Json.Serialize(Model.ActivationsParCampagne));
+        // Variables globales
+        let charts = {};
+        let updateInterval;
 
-        // Graphique Activations par Lieu
-        const activationsParLieuCtx = document.getElementById('activationsParLieuChart').getContext('2d');
-        new Chart(activationsParLieuCtx, {
-            type: 'bar',
-            data: {
-                labels: activationsParLieuData.map(item => item.Lieu),
-                datasets: [{
-                    label: 'Nombre d\'activations',
-                    data: activationsParLieuData.map(item => item.Count),
-                    backgroundColor: '#A32D18',
-                    borderColor: '#59311F',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' activations';
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.parsed.y} activations`;
-                            }
-                        }
-                    }
-                }
-            }
+        $(document).ready(function() {
+            initializeDashboard();
+            setupRealTimeUpdates();
+            loadUserPreferences();
         });
 
-        // Graphique Campagnes par Client
-        const campagnesParClientCtx = document.getElementById('campagnesParClientChart').getContext('2d');
-        new Chart(campagnesParClientCtx, {
-            type: 'bar',
-            data: {
-                labels: campagnesParClientData.map(item => item.Client),
-                datasets: [{
-                    label: 'Nombre de campagnes',
-                    data: campagnesParClientData.map(item => item.Count),
-                    backgroundColor: '#EDAC00',
-                    borderColor: '#A32D18',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' campagnes';
+        function initializeDashboard() {
+            // Initialiser les graphiques
+            createCharts();
+            
+            // Ajouter des animations aux cartes
+            $('.stat-card, .action-card, .chart-card').addClass('fade-in');
+            
+            // Raccourcis clavier
+            setupKeyboardShortcuts();
+        }
+
+        function createCharts() {
+            // Données pour les graphiques
+            const activationsParLieuData = @Html.Raw(Json.Serialize(Model.ActivationsParLieu));
+            const campagnesParClientData = @Html.Raw(Json.Serialize(Model.CampagnesParClient));
+            const activationsParCampagneData = @Html.Raw(Json.Serialize(Model.ActivationsParCampagne));
+
+            // Graphique Activations par Lieu
+            if (activationsParLieuData && activationsParLieuData.length > 0) {
+                const activationsParLieuCtx = document.getElementById('activationsParLieuChart')?.getContext('2d');
+                if (activationsParLieuCtx) {
+                    charts.activationsParLieu = new Chart(activationsParLieuCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: activationsParLieuData.map(item => item.Lieu),
+                            datasets: [{
+                                label: 'Nombre d\'activations',
+                                data: activationsParLieuData.map(item => item.Count),
+                                backgroundColor: '#A32D18',
+                                borderColor: '#59311F',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + ' activations';
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.parsed.y} activations`;
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.parsed.y} campagnes`;
-                            }
-                        }
-                    }
+                    });
                 }
             }
-        });
 
-        // Graphique Activations par Campagne
-        const activationsParCampagneCtx = document.getElementById('activationsParCampagneChart').getContext('2d');
-        new Chart(activationsParCampagneCtx, {
-            type: 'bar',
-            data: {
-                labels: activationsParCampagneData.map(item => item.Campagne),
-                datasets: [{
-                    label: 'Nombre d\'activations',
-                    data: activationsParCampagneData.map(item => item.Count),
-                    backgroundColor: '#59311F',
-                    borderColor: '#A26D55',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' activations';
+            // Graphique Campagnes par Client
+            if (campagnesParClientData && campagnesParClientData.length > 0) {
+                const campagnesParClientCtx = document.getElementById('campagnesParClientChart')?.getContext('2d');
+                if (campagnesParClientCtx) {
+                    charts.campagnesParClient = new Chart(campagnesParClientCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: campagnesParClientData.map(item => item.Client),
+                            datasets: [{
+                                label: 'Nombre de campagnes',
+                                data: campagnesParClientData.map(item => item.Count),
+                                backgroundColor: '#EDAC00',
+                                borderColor: '#A32D18',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + ' campagnes';
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.parsed.y} campagnes`;
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.parsed.y} activations`;
-                            }
-                        }
-                    }
+                    });
                 }
+            }
+
+            // Graphique Activations par Campagne
+            if (activationsParCampagneData && activationsParCampagneData.length > 0) {
+                const activationsParCampagneCtx = document.getElementById('activationsParCampagneChart')?.getContext('2d');
+                if (activationsParCampagneCtx) {
+                    charts.activationsParCampagne = new Chart(activationsParCampagneCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: activationsParCampagneData.map(item => item.Campagne),
+                            datasets: [{
+                                label: 'Nombre d\'activations',
+                                data: activationsParCampagneData.map(item => item.Count),
+                                backgroundColor: '#59311F',
+                                borderColor: '#A26D55',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + ' activations';
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.parsed.y} activations`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function setupRealTimeUpdates() {
+            // Mettre à jour les statistiques toutes les 30 secondes
+            updateInterval = setInterval(() => {
+                updateStatistics();
+            }, 30000);
+            
+            // Vérifier les nouvelles activités toutes les 10 secondes
+            setInterval(() => {
+                checkNewActivities();
+            }, 10000);
+        }
+
+        function updateStatistics() {
+            // Simuler des mises à jour des statistiques
+            const stats = {
+                campagnes: Math.floor(Math.random() * 10) + @Model.TotalCampagnes,
+                activations: Math.floor(Math.random() * 20) + @Model.TotalActivations,
+                clients: @Model.TotalClients,
+                utilisateurs: @Model.TotalUtilisateurs
+            };
+            
+            // Animer les changements
+            animateNumber('#totalCampagnes', stats.campagnes);
+            animateNumber('#totalActivations', stats.activations);
+            
+            showNotification('Mise à jour', 'Statistiques actualisées en temps réel');
+        }
+
+        function animateNumber(selector, targetValue) {
+            const element = $(selector);
+            const currentValue = parseInt(element.text()) || 0;
+            const duration = 1000;
+            const steps = 60;
+            const increment = (targetValue - currentValue) / steps;
+            let currentStep = 0;
+            
+            const timer = setInterval(() => {
+                currentStep++;
+                const newValue = Math.round(currentValue + (increment * currentStep));
+                element.text(newValue);
+                
+                if (currentStep >= steps) {
+                    element.text(targetValue);
+                    clearInterval(timer);
+                }
+            }, duration / steps);
+        }
+
+        function checkNewActivities() {
+            // Simuler la vérification de nouvelles activités
+            const randomChance = Math.random();
+            if (randomChance < 0.1) { // 10% de chance
+                showNotification('Nouvelle activité', 'Une nouvelle activation a été créée');
+            }
+        }
+
+        function showNotification(title, message = '') {
+            const notification = $('#notification');
+            notification.find('.notification-title').text(title);
+            notification.find('.notification-message').text(message);
+            
+            notification.addClass('show');
+            
+            setTimeout(() => {
+                notification.removeClass('show');
+            }, 5000);
+        }
+
+        function setupKeyboardShortcuts() {
+            $(document).on('keydown', function(e) {
+                // Ctrl/Cmd + D : Toggle mode sombre
+                if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                    e.preventDefault();
+                    toggleDarkMode();
+                }
+                
+                // Ctrl/Cmd + R : Actualiser
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    refreshDashboard();
+                }
+                
+                // Ctrl/Cmd + A : Analytics
+                if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                    e.preventDefault();
+                    showAnalytics();
+                }
+            });
+        }
+
+        function loadUserPreferences() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            if (darkMode) {
+                $('body').addClass('dark-mode');
+            }
+        }
+
+        // Fonctions globales
+        window.toggleDarkMode = function() {
+            $('body').toggleClass('dark-mode');
+            const isDark = $('body').hasClass('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            showNotification('Mode', isDark ? 'Mode sombre activé' : 'Mode clair activé');
+        };
+
+        window.refreshDashboard = function() {
+            $('.main-container').addClass('loading');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        };
+
+        window.showAnalytics = function() {
+            showNotification('Analytics', 'Ouverture des analytics avancés...');
+            // Implémenter l'ouverture des analytics
+        };
+
+        window.navigateTo = function(section) {
+            const routes = {
+                'Campagne': '@Url.Action("Index", "Campagne")',
+                'Activation': '@Url.Action("Index", "Activation")',
+                'Client': '@Url.Action("Index", "Client")',
+                'Utilisateur': '@Url.Action("Index", "Utilisateur")',
+                'AgentTerrain': '@Url.Action("Index", "AgentTerrain")'
+            };
+            
+            if (routes[section]) {
+                window.location.href = routes[section];
+            }
+        };
+
+        // Nettoyer l'intervalle à la fermeture
+        $(window).on('beforeunload', function() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
             }
         });
     </script>

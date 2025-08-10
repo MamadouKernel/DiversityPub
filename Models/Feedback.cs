@@ -14,5 +14,15 @@ namespace DiversityPub.Models
         // Feedback sur activation (optionnel)
         public Guid? ActivationId { get; set; }
         public Activation? Activation { get; set; }
+
+        // Réponse de l'admin/chef projet
+        public string? ReponseAdmin { get; set; }
+        public DateTime? DateReponseAdmin { get; set; }
+        public string? AdminRepondant { get; set; }
+
+        // Masquage du feedback
+        public bool EstMasque { get; set; } = false;
+        public DateTime? DateMasquage { get; set; }
+        public string? AdminMasquant { get; set; }
     }
 } 

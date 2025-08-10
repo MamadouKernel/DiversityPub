@@ -1,463 +1,373 @@
 @model IEnumerable<DiversityPub.Models.Activation>
 @{
     ViewData["Title"] = "Mes Activations";
+    var totalActivations = Model.Count();
+    var activationsPlanifiees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Planifiee);
+    var activationsEnCours = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.EnCours);
+    var activationsTerminees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Terminee);
 }
 
-@Html.AntiForgeryToken()
-
-<style>
-    body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        min-height: 100vh;
-    }
-
-    .main-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 25px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        margin: 2rem 0;
-    }
-
-    .page-header {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
-        color: white;
-        padding: 3rem 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .page-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
-
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        position: relative;
-        z-index: 2;
-    }
-
-    .page-subtitle {
-        font-size: 1.125rem;
-        opacity: 0.9;
-        position: relative;
-        z-index: 2;
-    }
-
-    .stats-section {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        padding: 3rem 2rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    .stat-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        text-align: center;
-        padding: 2.5rem 2rem;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
-        background-size: 200% 100%;
-        animation: gradientShift 3s ease-in-out infinite;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    }
-
-    .stat-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #A32D18, #EDAC00);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stat-number {
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #A32D18, #EDAC00);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1;
-    }
-
-    .stat-label {
-        font-size: 1.125rem;
-        color: #6c757d;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-    .activations-section {
-        padding: 3rem 2rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    }
-
-    .section-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 2rem;
-        text-align: center;
-        position: relative;
-    }
-
-    .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, #A32D18, #EDAC00);
-        border-radius: 2px;
-    }
-
-    .table-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 20px;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .table {
-        margin-bottom: 0;
-    }
-
-    .table thead th {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
-        color: white;
-        border: none;
-        padding: 1.5rem 1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.875rem;
-    }
-
-    .table tbody tr {
-        transition: all 0.3s ease;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .table tbody tr:hover {
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .table tbody td {
-        padding: 1.5rem 1rem;
-        vertical-align: middle;
-        border: none;
-        font-weight: 500;
-    }
-
-    .activation-name {
-        font-weight: 700;
-        color: #2c3e50;
-        font-size: 1.1rem;
-    }
-
-    .activation-campaign {
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .activation-location {
-        color: #495057;
-        font-weight: 600;
-    }
-
-    .activation-date {
-        color: #6c757d;
-        font-weight: 600;
-    }
-
-    .activation-time {
-        color: #495057;
-        font-weight: 600;
-    }
-
-    .activation-agents {
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        display: inline-block;
-        min-width: 100px;
-        text-align: center;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 6rem 3rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border-radius: 30px;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
-        margin: 2rem 0;
-    }
-
-    .empty-icon {
-        font-size: 8rem;
-        color: #dee2e6;
-        margin-bottom: 2rem;
-        animation: float 4s ease-in-out infinite;
-    }
-
-    @@keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-15px); }
-    }
-
-    .empty-title {
-        font-size: 2.5rem;
-        color: #6c757d;
-        margin-bottom: 1.5rem;
-        font-weight: 800;
-    }
-
-    .empty-subtitle {
-        color: #adb5bd;
-        font-size: 1.25rem;
-        line-height: 1.6;
-        font-weight: 500;
-    }
-
-    .container-fluid {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    @@keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    @@media (max-width: 768px) {
-        .page-title {
-            font-size: 2rem;
-        }
-        
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .container-fluid {
-            padding: 0 1rem;
-        }
-        
-        .table-responsive {
-            border-radius: 15px;
-        }
-    }
-</style>
-
-<div class="container-fluid">
-    <div class="main-container">
-        <div class="page-header">
-            <h1 class="page-title">
-                <i class="fas fa-map-marker-alt"></i>
-                Mes Activations
-            </h1>
-            <p class="page-subtitle">Suivez l'évolution de vos campagnes et activations</p>
+<div class="row mb-4">
+    <!-- Statistiques -->
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@totalActivations</h4>
+                        <small>Total Activations</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-map-marker-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        @if (Model?.Any() == true)
-        {
-            <div class="stats-section">
-                @{
-                    var totalActivations = Model.Count();
-                    var activationsPlanifiees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Planifiee);
-                    var activationsEnCours = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.EnCours);
-                    var activationsTerminees = Model.Count(a => a.Statut == DiversityPub.Models.enums.StatutActivation.Terminee);
-                }
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-number">@totalActivations</div>
-                        <div class="stat-label">Total Activations</div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@activationsPlanifiees</h4>
+                        <small>Planifiées</small>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-number">@activationsPlanifiees</div>
-                        <div class="stat-label">Planifiées</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-play-circle"></i>
-                        </div>
-                        <div class="stat-number">@activationsEnCours</div>
-                        <div class="stat-label">En Cours</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-number">@activationsTerminees</div>
-                        <div class="stat-label">Terminées</div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
                     </div>
                 </div>
             </div>
-
-            <div class="activations-section">
-                <h2 class="section-title">Liste des Activations</h2>
-                
-                <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-tasks me-2"></i>Activation</th>
-                                    <th><i class="fas fa-bullhorn me-2"></i>Campagne</th>
-                                    <th><i class="fas fa-map-pin me-2"></i>Lieu</th>
-                                    <th><i class="fas fa-calendar me-2"></i>Date</th>
-                                    <th><i class="fas fa-clock me-2"></i>Horaires</th>
-                                    <th><i class="fas fa-users me-2"></i>Agents</th>
-                                    <th><i class="fas fa-info-circle me-2"></i>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model)
-                                {
-                                    <tr>
-                                        <td>
-                                            <div class="activation-name">@item.Nom</div>
-                                            @if (!string.IsNullOrEmpty(item.Description))
-                                            {
-                                                <small class="text-muted">@item.Description</small>
-                                            }
-                                        </td>
-                                        <td>
-                                            <div class="activation-campaign">@item.Campagne?.Nom</div>
-                                        </td>
-                                        <td>
-                                            <div class="activation-location">@item.Lieu?.Nom</div>
-                                        </td>
-                                        <td>
-                                            <div class="activation-date">@item.DateActivation.ToString("dd/MM/yyyy")</div>
-                                        </td>
-                                        <td>
-                                            <div class="activation-time">
-                                                @(item.HeureDebut.Hours.ToString("00") + ":" + item.HeureDebut.Minutes.ToString("00")) - 
-                                                @(item.HeureFin.Hours.ToString("00") + ":" + item.HeureFin.Minutes.ToString("00"))
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="activation-agents">
-                                                @(item.AgentsTerrain?.Count ?? 0) agent(s)
-                                                @if (item.AgentsTerrain?.Any() == true)
-                                                {
-                                                    <br><small class="text-muted">
-                                                        Responsable: @(item.Responsable?.Utilisateur?.Prenom) @(item.Responsable?.Utilisateur?.Nom)
-                                                    </small>
-                                                }
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="status-badge @GetStatusBadgeClass(item.Statut)">
-                                                @GetStatusText(item.Statut)
-                                            </span>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@activationsEnCours</h4>
+                        <small>En Cours</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-play-circle fa-2x"></i>
                     </div>
                 </div>
             </div>
-        }
-        else
-        {
-            <div class="activations-section">
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-map-marker-alt"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">@activationsTerminees</h4>
+                        <small>Terminées</small>
                     </div>
-                    <h3 class="empty-title">Aucune activation trouvée</h3>
-                    <p class="empty-subtitle">
-                        Vous n'avez pas encore d'activations associées à vos campagnes.<br>
-                        Les activations apparaîtront ici une fois qu'elles seront créées par l'administrateur.
-                    </p>
-                    
-                    <!-- Bouton pour créer des données de test -->
-                    <div class="text-center mt-4">
-                        <button id="createTestDataBtn" class="btn btn-warning btn-lg" style="background: linear-gradient(135deg, #ffc107, #fd7e14); border: none; color: white; padding: 1rem 2rem; border-radius: 25px; font-weight: 700; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); transition: all 0.3s ease;">
-                            <i class="fas fa-magic me-2"></i>
-                            Créer des Données de Test
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0">
+                            <i class="fas fa-map-marker-alt"></i> Mes Activations
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <!-- Contrôles de vue -->
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary active" data-view="table" onclick="switchView('table')">
+                                <i class="fas fa-table"></i> Table
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-view="cards" onclick="switchView('cards')">
+                                <i class="fas fa-th-large"></i> Cartes
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" data-view="compact" onclick="switchView('compact')">
+                                <i class="fas fa-list"></i> Compact
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Barre de recherche et filtres -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Rechercher une activation..." onkeyup="filterTable()">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter" onchange="filterTable()">
+                            <option value="">Tous les statuts</option>
+                            <option value="Planifiee">Planifiées</option>
+                            <option value="EnCours">En Cours</option>
+                            <option value="Suspendue">Suspendues</option>
+                            <option value="Terminee">Terminées</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="campaignFilter" onchange="filterTable()">
+                            <option value="">Toutes les campagnes</option>
+                            @foreach (var campagne in Model.Select(a => a.Campagne).Distinct())
+                            {
+                                <option value="@campagne.Nom">@campagne.Nom</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="lieuFilter" onchange="filterTable()">
+                            <option value="">Tous les lieux</option>
+                            @foreach (var lieu in Model.Select(a => a.Lieu).Distinct().Where(l => l != null))
+                            {
+                                <option value="@($"{lieu.Nom} - {lieu.Adresse}")">@lieu.Nom - @lieu.Adresse</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Réinitialiser
                         </button>
                     </div>
                 </div>
+
+                @if (Model.Any())
+                {
+                    <!-- Vue Table -->
+                    <div id="tableView" class="view-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="activationsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="sortable" data-sort="nom">
+                                            <i class="fas fa-map-marker-alt"></i> Activation
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="campagne">
+                                            <i class="fas fa-bullhorn"></i> Campagne
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="lieu">
+                                            <i class="fas fa-map-pin"></i> Lieu
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="date">
+                                            <i class="fas fa-calendar"></i> Date
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="statut">
+                                            <i class="fas fa-tasks"></i> Statut
+                                            <i class="fas fa-sort ms-1"></i>
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-cogs"></i> Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr data-status="@item.Statut" data-campagne="@item.Campagne?.Nom" data-lieu="@($"{item.Lieu?.Nom} - {item.Lieu?.Adresse}")" data-date="@item.DateActivation.ToString("yyyy-MM-dd")" data-agents="@(item.AgentsTerrain?.Count ?? 0)">
+                                            <td>
+                                                <strong>@item.Nom</strong>
+                                                @if (!string.IsNullOrEmpty(item.Description))
+                                                {
+                                                    <br><small class="text-muted">@item.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@item.Campagne?.Nom</span>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-pin text-muted"></i>
+                                                @item.Lieu?.Nom
+                                                @if (!string.IsNullOrEmpty(item.Lieu?.Adresse))
+                                                {
+                                                    <br><small class="text-muted">@item.Lieu.Adresse</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    @item.DateActivation.ToString("dd/MM/yyyy")<br>
+                                                    <i class="fas fa-clock text-muted"></i>
+                                                    @(item.HeureDebut.Hours.ToString("00") + ":" + item.HeureDebut.Minutes.ToString("00")) - 
+                                                    @(item.HeureFin.Hours.ToString("00") + ":" + item.HeureFin.Minutes.ToString("00"))
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(item.Statut switch {
+                                                    DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
+                                                    DiversityPub.Models.enums.StatutActivation.EnCours => "success",
+                                                    DiversityPub.Models.enums.StatutActivation.Suspendue => "danger",
+                                                    DiversityPub.Models.enums.StatutActivation.Terminee => "info",
+                                                    _ => "secondary"
+                                                })">@GetStatusText(item.Statut)</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("DetailsActivation", "ClientDashboard", new { id = item.Id })" 
+                                                       class="btn btn-sm btn-outline-primary" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Vue Cartes -->
+                    <div id="cardsView" class="view-content" style="display: none;">
+                        <div class="row" id="cardsContainer">
+                            @foreach (var item in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-3" data-status="@item.Statut" data-campagne="@item.Campagne?.Nom" data-lieu="@($"{item.Lieu?.Nom} - {item.Lieu?.Adresse}")" data-date="@item.DateActivation.ToString("yyyy-MM-dd")" data-agents="@(item.AgentsTerrain?.Count ?? 0)">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">@item.Nom</h6>
+                                            <span class="badge bg-@(item.Statut switch {
+                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
+                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
+                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "danger",
+                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
+                                                _ => "secondary"
+                                            })">@GetStatusText(item.Statut)</span>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (!string.IsNullOrEmpty(item.Description))
+                                            {
+                                                <p class="card-text small">@item.Description</p>
+                                            }
+                                            <div class="row text-center">
+                                                <div class="col-6">
+                                                    <small class="text-muted">Campagne</small><br>
+                                                    <strong>@item.Campagne?.Nom</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Agents</small><br>
+                                                    <strong>@(item.AgentsTerrain?.Count ?? 0)</strong>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-pin"></i> @item.Lieu?.Nom
+                                                    @if (!string.IsNullOrEmpty(item.Lieu?.Adresse))
+                                                    {
+                                                        <span> - @item.Lieu.Adresse</span>
+                                                    }<br>
+                                                    <i class="fas fa-calendar"></i> @item.DateActivation.ToString("dd/MM/yyyy")<br>
+                                                    <i class="fas fa-clock"></i> @(item.HeureDebut.Hours.ToString("00") + ":" + item.HeureDebut.Minutes.ToString("00")) - @(item.HeureFin.Hours.ToString("00") + ":" + item.HeureFin.Minutes.ToString("00"))
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="btn-group w-100" role="group">
+                                                <a href="@Url.Action("DetailsActivation", "ClientDashboard", new { id = item.Id })" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Détails
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Vue Compact -->
+                    <div id="compactView" class="view-content" style="display: none;">
+                        <div class="list-group" id="compactContainer">
+                            @foreach (var item in Model)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center" data-status="@item.Statut" data-campagne="@item.Campagne?.Nom" data-lieu="@($"{item.Lieu?.Nom} - {item.Lieu?.Adresse}")" data-date="@item.DateActivation.ToString("yyyy-MM-dd")" data-agents="@(item.AgentsTerrain?.Count ?? 0)">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="badge bg-@(item.Statut switch {
+                                                DiversityPub.Models.enums.StatutActivation.Planifiee => "warning",
+                                                DiversityPub.Models.enums.StatutActivation.EnCours => "success",
+                                                DiversityPub.Models.enums.StatutActivation.Suspendue => "danger",
+                                                DiversityPub.Models.enums.StatutActivation.Terminee => "info",
+                                                _ => "secondary"
+                                            })">@GetStatusText(item.Statut)</span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">@item.Nom</h6>
+                                                                                <small class="text-muted">
+                                        <i class="fas fa-bullhorn"></i> @item.Campagne?.Nom | 
+                                        <i class="fas fa-map-pin"></i> @item.Lieu?.Nom@(!string.IsNullOrEmpty(item.Lieu?.Adresse) ? " - " + item.Lieu.Adresse : "") | 
+                                        <i class="fas fa-users"></i> @(item.AgentsTerrain?.Count ?? 0) agent(s)
+                                    </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-3">${date}</small>
+                                        <div class="btn-group">
+                                            <a href="@Url.Action("DetailsActivation", "ClientDashboard", new { id = item.Id })" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2">Afficher:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" id="pageSize" onchange="changePageSize()">
+                                    <option value="5" selected>5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="ms-2">éléments par page</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Pagination">
+                                <ul class="pagination justify-content-end mb-0" id="pagination">
+                                    <!-- Généré par JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucune activation trouvée</h5>
+                        <p class="text-muted">Vous n'avez pas encore d'activations associées à vos campagnes.</p>
+                        <a href="#" id="createTestDataBtn" class="btn btn-primary">
+                            <i class="fas fa-magic"></i>
+                            Créer des Données de Test
+                        </a>
+                    </div>
+                }
             </div>
-        }
+        </div>
     </div>
 </div>
 
 @functions {
-    public string GetStatusBadgeClass(DiversityPub.Models.enums.StatutActivation statut)
-    {
-        return statut switch
-        {
-            DiversityPub.Models.enums.StatutActivation.Planifiee => "bg-warning",
-            DiversityPub.Models.enums.StatutActivation.EnCours => "bg-success",
-            DiversityPub.Models.enums.StatutActivation.Suspendue => "bg-warning",
-            DiversityPub.Models.enums.StatutActivation.Terminee => "bg-info",
-            _ => "bg-secondary"
-        };
-    }
-
     public string GetStatusText(DiversityPub.Models.enums.StatutActivation statut)
     {
         return statut switch
@@ -471,77 +381,487 @@
     }
 }
 
+<style>
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .table th:hover {
+        background-color: #e9ecef;
+    }
+    
+    .sortable {
+        position: relative;
+    }
+    
+    .sortable i.fa-sort {
+        opacity: 0.5;
+    }
+    
+    .sortable.sort-asc i.fa-sort {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+    
+    .sortable.sort-desc i.fa-sort {
+        opacity: 1;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+    
+    .view-content {
+        min-height: 400px;
+    }
+    
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .list-group-item {
+        transition: background-color 0.2s;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .pagination .page-link {
+        color: #A32D18;
+        border-color: #dee2e6;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #A32D18;
+        border-color: #A32D18;
+    }
+    
+    .pagination .page-link:hover {
+        color: #A32D18;
+        background-color: #f8f9fa;
+    }
+    
+    .btn-outline-primary {
+        border-color: #A32D18;
+        color: #A32D18;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #A32D18;
+        border-color: #A32D18;
+    }
+    
+    .btn-outline-success {
+        border-color: #28a745;
+        color: #28a745;
+    }
+    
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+</style>
+
 <script>
-$(document).ready(function() {
-    // Gestion du bouton de création de données de test
-    $('#createTestDataBtn').click(function() {
-        var button = $(this);
-        var originalText = button.html();
-        
-        // Désactiver le bouton et changer le texte
-        button.prop('disabled', true);
-        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Création en cours...');
-        
-        // Appel AJAX pour créer les données de test
-        $.ajax({
-            url: '@Url.Action("CreateTestData", "ClientDashboard")',
-            type: 'POST',
-            data: {
-                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Afficher un message de succès
-                    Swal.fire({
-                        title: '✅ Succès !',
-                        text: response.message,
-                        icon: 'success',
-                        confirmButtonText: 'Recharger la page',
-                        confirmButtonColor: '#A32D18'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            location.reload();
-                        }
-                    });
-                } else {
-                    // Afficher un message d'erreur
-                    Swal.fire({
-                        title: '❌ Erreur',
-                        text: response.message,
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#A32D18'
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                // Afficher un message d'erreur
-                Swal.fire({
-                    title: '❌ Erreur',
-                    text: 'Une erreur est survenue lors de la création des données de test.',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#A32D18'
-                });
-            },
-            complete: function() {
-                // Réactiver le bouton et restaurer le texte
-                button.prop('disabled', false);
-                button.html(originalText);
-            }
-        });
+    let currentView = 'table';
+    let currentPage = 1;
+    let pageSize = 5;
+    let currentSort = { column: '', direction: 'asc' };
+    let allData = [];
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTable();
+        updatePagination();
     });
     
-    // Animation au survol du bouton
-    $('#createTestDataBtn').hover(
-        function() {
-            $(this).css('transform', 'translateY(-3px) scale(1.05)');
-            $(this).css('box-shadow', '0 12px 35px rgba(0, 0, 0, 0.2)');
-        },
-        function() {
-            $(this).css('transform', 'translateY(0) scale(1)');
-            $(this).css('box-shadow', '0 8px 25px rgba(0, 0, 0, 0.15)');
+    function initializeTable() {
+        // Récupérer toutes les données
+        const table = document.getElementById('activationsTable');
+        if (table) {
+            const rows = table.querySelectorAll('tbody tr');
+            allData = Array.from(rows).map(row => {
+                const nomElement = row.querySelector('td:nth-child(1) strong');
+                const campagneElement = row.querySelector('td:nth-child(2) .badge');
+                const lieuElement = row.querySelector('td:nth-child(3)');
+                const dateElement = row.querySelector('td:nth-child(4)');
+                const statutElement = row.querySelector('td:nth-child(5) .badge');
+                
+                return {
+                    element: row,
+                    nom: nomElement ? nomElement.textContent.trim() : '',
+                    campagne: row.dataset.campagne || '',
+                    lieu: row.dataset.lieu || '',
+                    date: row.dataset.date || '',
+                    statut: row.dataset.status || '',
+                    agents: parseInt(row.dataset.agents) || 0,
+                    // Données brutes pour le tri
+                    campagneText: campagneElement ? campagneElement.textContent.trim() : '',
+                    lieuText: lieuElement ? lieuElement.textContent.trim() : '',
+                    dateText: dateElement ? dateElement.textContent.trim() : '',
+                    statutText: statutElement ? statutElement.textContent.trim() : ''
+                };
+            });
+            
+            console.log('Données initialisées:', allData.length, 'éléments');
+            console.log('Exemple de données:', allData[0]);
         }
-    );
-});
+    }
+    
+    function switchView(view) {
+        // Masquer toutes les vues
+        document.querySelectorAll('.view-content').forEach(v => v.style.display = 'none');
+        
+        // Afficher la vue sélectionnée
+        document.getElementById(view + 'View').style.display = 'block';
+        
+        // Mettre à jour les boutons
+        document.querySelectorAll('[data-view]').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        
+        currentView = view;
+        filterTable();
+    }
+    
+    function filterTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const campaignFilter = document.getElementById('campaignFilter').value;
+        const lieuFilter = document.getElementById('lieuFilter').value;
+        
+        console.log('Filtrage avec:', { searchTerm, statusFilter, campaignFilter, lieuFilter });
+        console.log('Données disponibles:', allData.length);
+        
+        let filteredData = allData.filter(item => {
+            const matchesSearch = item.nom.toLowerCase().includes(searchTerm) || 
+                                item.campagne.toLowerCase().includes(searchTerm) ||
+                                item.lieu.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || item.statut === statusFilter;
+            const matchesCampaign = !campaignFilter || item.campagne === campaignFilter;
+            const matchesLieu = !lieuFilter || item.lieu === lieuFilter;
+            
+            return matchesSearch && matchesStatus && matchesCampaign && matchesLieu;
+        });
+        
+        console.log('Données filtrées:', filteredData.length);
+        
+        // Appliquer le tri
+        if (currentSort.column) {
+            console.log('Application du tri:', currentSort);
+            filteredData.sort((a, b) => {
+                let aVal = a[currentSort.column];
+                let bVal = b[currentSort.column];
+                
+                console.log('Comparaison:', { aVal, bVal, column: currentSort.column });
+                
+                // Gestion spéciale pour les différents types de données
+                if (currentSort.column === 'agents') {
+                    aVal = parseInt(aVal) || 0;
+                    bVal = parseInt(bVal) || 0;
+                } else if (currentSort.column === 'statut') {
+                    // Ordre de priorité pour les statuts
+                    const statutOrder = {
+                        'Planifiee': 1,
+                        'EnCours': 2,
+                        'Suspendue': 3,
+                        'Terminee': 4
+                    };
+                    aVal = statutOrder[aVal] || 999;
+                    bVal = statutOrder[bVal] || 999;
+                } else if (currentSort.column === 'date') {
+                    // Tri par date
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                } else {
+                    // Tri alphabétique pour les autres colonnes
+                    aVal = (aVal || '').toString().toLowerCase();
+                    bVal = (bVal || '').toString().toLowerCase();
+                }
+                
+                if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            console.log('Tri appliqué, premier élément:', filteredData[0]?.nom);
+        }
+        
+        // Appliquer la pagination
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedData = filteredData.slice(startIndex, endIndex);
+        
+        console.log('Pagination:', { startIndex, endIndex, pageSize, currentPage });
+        console.log('Données paginées:', paginatedData.length);
+        
+        // Afficher les données filtrées
+        displayFilteredData(paginatedData);
+        updatePagination(filteredData.length);
+    }
+    
+    function displayFilteredData(data) {
+        if (currentView === 'table') {
+            const tbody = document.querySelector('#activationsTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                tbody.appendChild(item.element.cloneNode(true));
+            });
+        } else if (currentView === 'cards') {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            data.forEach(item => {
+                const cardElement = createCardFromRow(item.element);
+                container.appendChild(cardElement);
+            });
+        } else if (currentView === 'compact') {
+            const container = document.getElementById('compactContainer');
+            container.innerHTML = '';
+            data.forEach(item => {
+                const compactElement = createCompactFromRow(item.element);
+                container.appendChild(compactElement);
+            });
+        }
+    }
+    
+    function createCardFromRow(row) {
+        // Créer une carte à partir d'une ligne de tableau
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4 mb-3';
+        card.dataset.status = row.dataset.status;
+        card.dataset.campagne = row.dataset.campagne;
+        card.dataset.lieu = row.dataset.lieu;
+        card.dataset.date = row.dataset.date;
+        card.dataset.agents = row.dataset.agents;
+        
+        const cells = row.querySelectorAll('td');
+        const nom = cells[0].querySelector('strong')?.textContent || '';
+        const description = cells[0].querySelector('small')?.textContent || '';
+        const campagne = cells[1].querySelector('.badge')?.textContent || '';
+        const lieu = cells[2].textContent;
+        const date = cells[3].textContent;
+        const statut = cells[4].querySelector('.badge')?.textContent || '';
+        const statutClass = cells[4].querySelector('.badge')?.className || '';
+        const actions = cells[5].innerHTML;
+        
+        card.innerHTML = `
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">${nom}</h6>
+                    <span class="badge ${statutClass}">${statut}</span>
+                </div>
+                <div class="card-body">
+                    ${description ? `<p class="card-text small">${description}</p>` : ''}
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted">Campagne</small><br>
+                            <strong>${campagne}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Agents</small><br>
+                            <strong>${row.dataset.agents || 0}</strong>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-map-pin"></i> ${lieu}<br>
+                            <i class="fas fa-calendar"></i> ${date}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        ${actions}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    function createCompactFromRow(row) {
+        // Créer un élément compact à partir d'une ligne de tableau
+        const compact = document.createElement('div');
+        compact.className = 'list-group-item d-flex justify-content-between align-items-center';
+        compact.dataset.status = row.dataset.status;
+        compact.dataset.campagne = row.dataset.campagne;
+        compact.dataset.lieu = row.dataset.lieu;
+        compact.dataset.date = row.dataset.date;
+        compact.dataset.agents = row.dataset.agents;
+        
+        const cells = row.querySelectorAll('td');
+        const nom = cells[0].querySelector('strong')?.textContent || '';
+        const campagne = cells[1].querySelector('.badge')?.textContent || '';
+        const lieu = cells[2].textContent;
+        const date = cells[3].textContent;
+        const statut = cells[4].querySelector('.badge')?.textContent || '';
+        const statutClass = cells[4].querySelector('.badge')?.className || '';
+        const actions = cells[5].innerHTML;
+        
+        compact.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <span class="badge ${statutClass}">${statut}</span>
+                </div>
+                <div>
+                    <h6 class="mb-0">${nom}</h6>
+                    <small class="text-muted">
+                        <i class="fas fa-bullhorn"></i> ${campagne} | 
+                        <i class="fas fa-map-pin"></i> ${lieu} | 
+                        <i class="fas fa-users"></i> ${row.dataset.agents || 0} agent(s)
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <small class="text-muted me-3">${date}</small>
+                <div class="btn-group">
+                    ${actions}
+                </div>
+            </div>
+        `;
+        
+        return compact;
+    }
+    
+    function sortTable(column) {
+        console.log('Tri demandé pour la colonne:', column);
+        
+        const header = document.querySelector(`[data-sort="${column}"]`);
+        if (!header) {
+            console.error('En-tête de colonne non trouvé:', column);
+            return;
+        }
+        
+        // Réinitialiser tous les en-têtes
+        document.querySelectorAll('.sortable').forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc');
+        });
+        
+        // Mettre à jour la direction de tri
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        console.log('Tri configuré:', currentSort);
+        
+        // Ajouter la classe de tri
+        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+        
+        // Réinitialiser la pagination
+        currentPage = 1;
+        
+        // Appliquer le filtre
+        filterTable();
+    }
+    
+    function changePageSize() {
+        pageSize = parseInt(document.getElementById('pageSize').value);
+        currentPage = 1;
+        filterTable();
+    }
+    
+    function updatePagination(totalItems = allData.length) {
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const pagination = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // Bouton précédent
+        paginationHTML += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})">Précédent</a>
+            </li>
+        `;
+        
+        // Pages
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        
+        if (startPage > 1) {
+            paginationHTML += '<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1)">1</a></li>';
+            if (startPage > 2) {
+                paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+                </li>
+            `;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${totalPages})">${totalPages}</a></li>`;
+        }
+        
+        // Bouton suivant
+        paginationHTML += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})">Suivant</a>
+            </li>
+        `;
+        
+        pagination.innerHTML = paginationHTML;
+    }
+    
+    function goToPage(page) {
+        const totalPages = Math.ceil(allData.length / pageSize);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            filterTable();
+        }
+    }
+    
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('campaignFilter').value = '';
+        document.getElementById('lieuFilter').value = '';
+        currentPage = 1;
+        filterTable();
+    }
+    
+    // Ajouter les événements de tri
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initialisation des événements de tri...');
+        const sortableHeaders = document.querySelectorAll('.sortable');
+        console.log('En-têtes triables trouvés:', sortableHeaders.length);
+        
+        sortableHeaders.forEach(header => {
+            console.log('Ajout d\'événement pour:', header.dataset.sort);
+            header.addEventListener('click', function(e) {
+                e.preventDefault();
+                const column = this.dataset.sort;
+                console.log('Clic sur en-tête:', column);
+                sortTable(column);
+            });
+        });
+    });
 </script>

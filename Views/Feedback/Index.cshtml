@@ -26,13 +26,16 @@
                                         <i class="fas fa-comment"></i> Commentaire
                                     </th>
                                     <th>
-                                        <i class="fas fa-bullhorn"></i> Campagne
+                                        <i class="fas fa-bullhorn"></i> Élément évalué
                                     </th>
                                     <th>
                                         <i class="fas fa-building"></i> Client
                                     </th>
                                     <th>
                                         <i class="fas fa-calendar"></i> Date
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-reply"></i> Réponse
                                     </th>
                                     <th>
                                         <i class="fas fa-cogs"></i> Actions
@@ -42,7 +45,7 @@
                             <tbody>
                                 @foreach (var item in Model)
                                 {
-                                    <tr>
+                                    <tr class="@(item.EstMasque ? "table-secondary" : "")">
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 @for (int i = 1; i <= 5; i++)
@@ -72,13 +75,47 @@
                                             }
                                         </td>
                                         <td>
-                                            <span class="badge bg-info">@item.Campagne?.Nom</span>
+                                            @if (item.Campagne != null)
+                                            {
+                                                <span class="badge bg-info">Campagne</span>
+                                                <br />
+                                                <small>@item.Campagne.Nom</small>
+                                            }
+                                            else if (item.Activation != null)
+                                            {
+                                                <span class="badge bg-success">Activation</span>
+                                                <br />
+                                                <small>@item.Activation.Nom</small>
+                                            }
                                         </td>
                                         <td>
-                                            <span class="badge bg-secondary">@item.Campagne?.Client?.RaisonSociale</span>
+                                            @if (item.Campagne?.Client != null)
+                                            {
+                                                <span class="badge bg-secondary">@item.Campagne.Client.RaisonSociale</span>
+                                            }
+                                            else if (item.Activation?.Campagne?.Client != null)
+                                            {
+                                                <span class="badge bg-secondary">@item.Activation.Campagne.Client.RaisonSociale</span>
+                                            }
                                         </td>
                                         <td>
                                             <small class="text-muted">@item.DateFeedback.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.ReponseAdmin))
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Répondu
+                                                </span>
+                                                <br />
+                                                <small class="text-muted">@item.DateReponseAdmin?.ToString("dd/MM/yyyy")</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock"></i> En attente
+                                                </span>
+                                            }
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
@@ -86,10 +123,28 @@
                                                    class="btn btn-sm btn-outline-primary" title="Voir les détails">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="@Url.Action("Edit", "Feedback", new { id = item.Id })" 
-                                                   class="btn btn-sm btn-outline-warning" title="Modifier">
-                                                    <i class="fas fa-edit"></i>
+                                                <a href="@Url.Action("Repondre", "Feedback", new { id = item.Id })" 
+                                                   class="btn btn-sm btn-outline-info" title="Répondre">
+                                                    <i class="fas fa-reply"></i>
                                                 </a>
+                                                @if (item.EstMasque)
+                                                {
+                                                    <form asp-action="Afficher" method="post" style="display: inline;">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Afficher">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form asp-action="Masquer" method="post" style="display: inline;">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Masquer">
+                                                            <i class="fas fa-eye-slash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
                                                 <a href="@Url.Action("Delete", "Feedback", new { id = item.Id })" 
                                                    class="btn btn-sm btn-outline-danger" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
@@ -133,5 +188,9 @@
     
     .badge {
         font-size: 0.8rem;
+    }
+    
+    .table-secondary {
+        opacity: 0.6;
     }
 </style> 

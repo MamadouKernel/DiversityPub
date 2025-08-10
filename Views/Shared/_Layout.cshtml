@@ -231,6 +231,10 @@
                                         <li><a class="dropdown-item" href="@Url.Action("Index", "Incident")">
                                             <i class="fas fa-exclamation-triangle"></i> Incidents
                                         </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="@Url.Action("Statistiques", "Dashboard")">
+                                            <i class="fas fa-chart-bar"></i> Tableaux de Bord
+                                        </a></li>
                                     </ul>
                                 </li>
                             }
@@ -265,14 +269,7 @@
                                     </a>
                                 </li>
                             }
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="@Url.Action("Statistiques", "Dashboard")">
-                                        <i class="fas fa-chart-bar"></i> Statistiques
-                                    </a>
-                                </li>
-                            }
+
                            
                         </ul>
                         
@@ -378,6 +375,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
         // Initialiser et afficher les toasts seulement s'ils existent

@@ -1,0 +1,576 @@
+@model DiversityPub.Models.Activation
+
+@{
+    ViewData["Title"] = "Détails de l'activation - Validation";
+}
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .card-header h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+        background: #fafbfc;
+    }
+
+    .info-badge {
+        background: linear-gradient(135deg, #59311F 0%, #A26D55 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    .media-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .media-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .media-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .media-preview img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .media-preview video {
+        width: 100%;
+        height: 150px;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .validation-controls {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        color: white;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .incident-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #dc3545;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-ouvert { background: #fff3cd; color: #856404; }
+    .status-encours { background: #d1ecf1; color: #0c5460; }
+    .status-resolu { background: #d4edda; color: #155724; }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label i {
+        color: #A32D18;
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #A32D18;
+        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
+        background: white;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- En-tête de l'activation -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i> Validation de l'activation
+                        </h4>
+                        <div class="d-flex gap-2">
+                            <span class="info-badge">
+                                <i class="fas fa-calendar"></i>
+                                @Model.DateActivation.ToString("dd/MM/yyyy")
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-clock"></i>
+                                @($"{Model.HeureDebut.Hours:D2}:{Model.HeureDebut.Minutes:D2}") - @($"{Model.HeureFin.Hours:D2}:{Model.HeureFin.Minutes:D2}")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle text-primary me-2"></i>Informations de l'activation</h5>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-tag me-1"></i> Nom :</strong> @Model.Nom
+                            </div>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-bullhorn me-1"></i> Campagne :</strong> @Model.Campagne?.Nom
+                            </div>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-1"></i> Lieu :</strong> @Model.Lieu?.Nom - @Model.Lieu?.Adresse
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-align-left me-1"></i> Description :</strong><br>
+                                    @Model.Description
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Instructions))
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-list-check me-1"></i> Instructions :</strong><br>
+                                    @Model.Instructions
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-users text-primary me-2"></i>Équipe</h5>
+                            @if (Model.Responsable != null)
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-user-tie me-1"></i> Responsable :</strong>
+                                    @Model.Responsable.Utilisateur.Prenom @Model.Responsable.Utilisateur.Nom
+                                </div>
+                            }
+                            @if (Model.AgentsTerrain != null && Model.AgentsTerrain.Any())
+                            {
+                                <div class="mb-3">
+                                    <strong><i class="fas fa-users me-1"></i> Agents terrain :</strong>
+                                    <ul class="list-unstyled ms-3 mt-2">
+                                        @foreach (var agent in Model.AgentsTerrain)
+                                        {
+                                            <li><i class="fas fa-user me-1"></i> @agent.Utilisateur.Prenom @agent.Utilisateur.Nom</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            <div class="mb-3">
+                                <strong><i class="fas fa-info-circle me-1"></i> Statut :</strong>
+                                <span class="badge bg-success">@Model.Statut</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions de validation globale -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h5><i class="fas fa-gavel text-primary me-2"></i>Actions de validation</h5>
+                        <div class="d-flex gap-3">
+                            <button type="button" class="btn btn-success" onclick="validerActivation('@Model.Id', true)">
+                                <i class="fas fa-check"></i> Valider toutes les preuves
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="validerActivation('@Model.Id', false)">
+                                <i class="fas fa-times"></i> Rejeter toutes les preuves
+                            </button>
+                            <a href="@Url.Action("Index", "Validation")" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Retour à la liste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Médias à valider -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-images me-2"></i> Médias à valider 
+                        @if (Model.Medias != null)
+                        {
+                            <span class="badge bg-warning">@Model.Medias.Count(m => !m.Valide)</span>
+                        }
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Medias != null && Model.Medias.Any(m => !m.Valide))
+                    {
+                        <div class="media-gallery">
+                            @foreach (var media in Model.Medias.Where(m => !m.Valide))
+                            {
+                                <div class="media-item" id="media-@media.Id">
+                                    <div class="media-preview">
+                                        @if (media.Type == DiversityPub.Models.enums.TypeMedia.Photo)
+                                        {
+                                            <img src="@media.Url" alt="Preuve" class="img-fluid" />
+                                        }
+                                        else if (media.Type == DiversityPub.Models.enums.TypeMedia.Video)
+                                        {
+                                            <video controls class="w-100">
+                                                <source src="@media.Url" type="video/mp4">
+                                                Votre navigateur ne supporte pas la lecture vidéo.
+                                            </video>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-center p-4">
+                                                <i class="fas fa-file fa-3x text-muted"></i>
+                                                <p class="mt-2">Document</p>
+                                                <a href="@media.Url" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-download"></i> Télécharger
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="media-info">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            @media.DateUpload.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                        @if (!string.IsNullOrEmpty(media.Description))
+                                        {
+                                            <p class="mt-2 mb-2"><strong>Description :</strong> @media.Description</p>
+                                        }
+                                    </div>
+                                    <div class="validation-controls">
+                                        <button type="button" class="btn btn-success btn-sm" onclick="validerMedia('@media.Id', true)">
+                                            <i class="fas fa-check"></i> Valider
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="validerMedia('@media.Id', false)">
+                                            <i class="fas fa-times"></i> Rejeter
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Aucun média en attente de validation pour cette activation.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Incidents ouverts -->
+            @if (Model.Incidents != null && Model.Incidents.Any(i => i.Statut == "Ouvert" || i.Statut == "EnCours"))
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Incidents en cours
+                            <span class="badge bg-danger">@Model.Incidents.Count(i => i.Statut == "Ouvert" || i.Statut == "EnCours")</span>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var incident in Model.Incidents.Where(i => i.Statut == "Ouvert" || i.Statut == "EnCours"))
+                        {
+                            <div class="incident-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6><i class="fas fa-bug me-1"></i> @incident.Titre</h6>
+                                    <span class="status-badge status-@incident.Statut.ToLower()">@incident.Statut</span>
+                                </div>
+                                <p class="mb-2">@incident.Description</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i> @incident.DateCreation.ToString("dd/MM/yyyy HH:mm")
+                                    @if (incident.AgentTerrain != null)
+                                    {
+                                        <span class="ms-3">
+                                            <i class="fas fa-user me-1"></i> @incident.AgentTerrain.Utilisateur.Prenom @incident.AgentTerrain.Utilisateur.Nom
+                                        </span>
+                                    }
+                                </small>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-success btn-sm" onclick="resoudreIncident('@incident.Id', 'Resolu')">
+                                        <i class="fas fa-check"></i> Marquer comme résolu
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="resoudreIncident('@incident.Id', 'EnCours')">
+                                        <i class="fas fa-hourglass-half"></i> Marquer en cours
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour commentaires -->
+<div class="modal fade" id="commentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un commentaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="commentaire" class="form-label">
+                        <i class="fas fa-comment"></i> Commentaire (optionnel)
+                    </label>
+                    <textarea class="form-control" id="commentaire" rows="3" placeholder="Ajoutez un commentaire..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="confirmerAction">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentAction = null;
+
+    function validerMedia(mediaId, valide) {
+        currentAction = () => {
+            const commentaire = document.getElementById('commentaire').value;
+            
+            fetch('@Url.Action("ValiderMedia", "Validation")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `mediaId=${mediaId}&valide=${valide}&commentaire=${encodeURIComponent(commentaire)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Masquer le média validé
+                    document.getElementById(`media-${mediaId}`).style.display = 'none';
+                    
+                    // Afficher un message de succès
+                    showAlert(data.message, 'success');
+                    
+                    // Fermer le modal
+                    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showAlert('Une erreur est survenue lors de la validation.', 'danger');
+            });
+        };
+
+        // Réinitialiser le commentaire
+        document.getElementById('commentaire').value = '';
+        
+        // Afficher le modal
+        new bootstrap.Modal(document.getElementById('commentModal')).show();
+    }
+
+    function validerActivation(activationId, validee) {
+        currentAction = () => {
+            const commentaire = document.getElementById('commentaire').value;
+            
+            fetch('@Url.Action("ValiderActivation", "Validation")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `activationId=${activationId}&validee=${validee}&commentaire=${encodeURIComponent(commentaire)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    
+                    // Rediriger vers la liste après un délai
+                    setTimeout(() => {
+                        window.location.href = '@Url.Action("Index", "Validation")';
+                    }, 2000);
+                    
+                    // Fermer le modal
+                    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showAlert('Une erreur est survenue lors de la validation.', 'danger');
+            });
+        };
+
+        // Réinitialiser le commentaire
+        document.getElementById('commentaire').value = '';
+        
+        // Afficher le modal
+        new bootstrap.Modal(document.getElementById('commentModal')).show();
+    }
+
+    function resoudreIncident(incidentId, statut) {
+        currentAction = () => {
+            const commentaire = document.getElementById('commentaire').value;
+            
+            fetch('@Url.Action("ResoudreIncident", "Validation")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `incidentId=${incidentId}&statut=${statut}&commentaire=${encodeURIComponent(commentaire)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    
+                    // Recharger la page après un délai
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                    
+                    // Fermer le modal
+                    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showAlert('Une erreur est survenue lors de la mise à jour.', 'danger');
+            });
+        };
+
+        // Réinitialiser le commentaire
+        document.getElementById('commentaire').value = '';
+        
+        // Afficher le modal
+        new bootstrap.Modal(document.getElementById('commentModal')).show();
+    }
+
+    // Gestionnaire pour le bouton de confirmation du modal
+    document.getElementById('confirmerAction').addEventListener('click', function() {
+        if (currentAction) {
+            currentAction();
+        }
+    });
+
+    function showAlert(message, type) {
+        // Créer et afficher une alerte
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insérer l'alerte en haut de la page
+        document.querySelector('.container-fluid').prepend(alertDiv);
+        
+        // Supprimer l'alerte après 5 secondes
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+</script>

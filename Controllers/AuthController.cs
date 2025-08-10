@@ -257,7 +257,7 @@ namespace DiversityPub.Controllers
 
         // GET: Auth/CheckConnectionStatus - Vérifier le statut de connexion d'un agent
         [HttpGet]
-        [Authorize(Roles = "AgentTerrain")]
+        [Authorize(Roles = "AgentTerrain,Admin,ChefProjet")]
         public async Task<IActionResult> CheckConnectionStatus()
         {
             try

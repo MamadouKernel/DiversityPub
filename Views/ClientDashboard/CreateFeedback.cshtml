@@ -4,424 +4,921 @@
 }
 
 <style>
-    body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    .feedback-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
         min-height: 100vh;
     }
 
-    .main-container {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 25px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
+    .feedback-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        border-radius: 20px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(163, 45, 24, 0.2);
+    }
+
+    .feedback-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .feedback-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.95;
+    }
+
+    .selection-section {
         margin: 2rem 0;
     }
 
-    .page-header {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
-        color: white;
-        padding: 3rem 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .page-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
-
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        position: relative;
-        z-index: 2;
-    }
-
-    .page-subtitle {
-        font-size: 1.125rem;
-        opacity: 0.9;
-        position: relative;
-        z-index: 2;
-    }
-
-    .content-section {
-        padding: 3rem 2rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    }
-
-    .feedback-form {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-    }
-
-    .feedback-form::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #A32D18, #EDAC00, #59311F);
-        background-size: 200% 100%;
-        animation: gradientShift 3s ease-in-out infinite;
-    }
-
-    @@keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-
-    .form-header {
-        background: linear-gradient(135deg, #A32D18 0%, #c94a3a 100%);
-        color: white;
-        padding: 2rem;
-        position: relative;
-    }
-
-    .form-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-subtitle {
-        opacity: 0.9;
-        font-size: 1rem;
-    }
-
-    .form-content {
-        padding: 2rem;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 700;
         color: #2c3e50;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
     }
 
-    .form-group {
-        margin-bottom: 1.5rem;
+    .section-title i {
+        margin-right: 0.5rem;
+        color: #A32D18;
     }
 
-    .form-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .selection-card {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .selection-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-color: #A32D18;
+    }
+
+    .selection-card.selected {
+        border-color: #A32D18;
+        background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+        box-shadow: 0 8px 25px rgba(163, 45, 24, 0.15);
+    }
+
+    .selection-card.selected::before {
+        content: '✓';
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: #A32D18;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
     }
 
-    .form-control, .form-select {
-        border-radius: 10px;
-        border: 2px solid #e9ecef;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
     }
 
-    .form-control:focus, .form-select:focus {
-        border-color: #A32D18;
-        box-shadow: 0 0 0 0.2rem rgba(163, 45, 24, 0.25);
-        transform: translateY(-2px);
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 1rem;
     }
 
-    .form-text {
-        font-size: 0.875rem;
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .card-subtitle {
         color: #6c757d;
-        margin-top: 0.25rem;
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+    }
+
+    .card-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .detail-item i {
+        margin-right: 0.5rem;
+        color: #A32D18;
+    }
+
+    .rating-section {
+        text-align: center;
+        margin: 3rem 0;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .rating-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .rating-stars {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+
+    .rating-star {
+        font-size: 3rem;
+        color: #dee2e6;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .rating-star:hover,
+    .rating-star.active {
+        color: #EDAC00;
+        transform: scale(1.2);
+        text-shadow: 0 0 20px rgba(237, 172, 0, 0.5);
+    }
+
+    .rating-description {
+        font-size: 1.2rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #A32D18;
+    }
+
+    .comment-section {
+        margin: 2rem 0;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .comment-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 1.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        font-size: 1rem;
+        resize: vertical;
+        transition: border-color 0.3s ease;
+    }
+
+    .comment-textarea:focus {
+        outline: none;
+        border-color: #A32D18;
+        box-shadow: 0 0 0 3px rgba(163, 45, 24, 0.1);
+    }
+
+    .submit-section {
+        text-align: center;
+        margin: 3rem 0;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #A32D18 0%, #EDAC00 100%);
+        color: white;
+        border: none;
+        padding: 1rem 3rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(163, 45, 24, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(163, 45, 24, 0.4);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 2rem;
     }
 
     .alert {
-        border-radius: 15px;
-        border: none;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
     }
 
-    .alert-info {
-        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-        color: #0c5460;
-        border-left: 4px solid #17a2b8;
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 300px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
-    .alert-danger {
-        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-        color: #721c24;
-        border-left: 4px solid #dc3545;
-    }
-
-    .btn-custom {
-        padding: 0.75rem 2rem;
-        border-radius: 25px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        border: none;
-        display: inline-flex;
+    .modal-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        display: none;
         align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        justify-content: center;
     }
 
-    .btn-custom:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    .modal-content-custom {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 90%;
+        max-height: 90%;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        position: relative;
     }
 
-    .btn-primary-custom {
-        background: linear-gradient(135deg, #A32D18, #c94a3a);
-        color: white;
-    }
-
-    .btn-secondary-custom {
-        background: linear-gradient(135deg, #6c757d, #495057);
-        color: white;
-    }
-
-    .btn-info-custom {
-        background: linear-gradient(135deg, #17a2b8, #138496);
-        color: white;
-    }
-
-    .action-buttons {
+    .modal-header-custom {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border-top: 1px solid #e9ecef;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
     }
 
-    .container-fluid {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
+    .modal-title-custom {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
     }
 
-    @@media (max-width: 768px) {
-        .page-title {
-            font-size: 2rem;
-        }
-        
-        .container-fluid {
-            padding: 0 1rem;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-            gap: 1rem;
-        }
+    .btn-close-custom {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-close-custom:hover {
+        background: #f8f9fa;
+        color: #A32D18;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #A32D18;
+        color: #A32D18;
+        background: transparent;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: #A32D18;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(163, 45, 24, 0.3);
     }
 </style>
 
-<div class="container-fluid">
-    <div class="main-container">
-        <div class="page-header">
-            <h1 class="page-title">
-                <i class="fas fa-comment"></i>
-                Nouveau Feedback
+<div class="feedback-container">
+    <!-- En-tête -->
+    <div class="feedback-header">
+        <h1 class="feedback-title">
+            <i class="fas fa-comment-dots"></i> Nouveau Feedback
             </h1>
-            <p class="page-subtitle">Partagez votre expérience</p>
+        <p class="feedback-subtitle">
+            Partagez votre expérience sur nos campagnes et activations
+        </p>
+    </div>
+
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle"></i>
+            <strong>Information :</strong> @TempData["Info"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Erreur :</strong> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Debug des données ViewBag -->
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-bug"></i>
+        <strong>Debug :</strong> 
+        Campagnes: @(ViewBag.Campagnes?.Count ?? 0), 
+        Activations: @(ViewBag.Activations?.Count ?? 0)
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form asp-action="CreateFeedback" method="post" id="feedbackForm">
+        <input type="hidden" name="CampagneId" id="selectedCampagneId" />
+        <input type="hidden" name="ActivationId" id="selectedActivationId" />
+        <input type="hidden" name="Note" id="selectedNote" />
+        <input type="hidden" name="Commentaire" id="selectedCommentaire" />
+        <input type="hidden" name="__RequestVerificationToken" value="@Html.AntiForgeryToken()" />
+
+        <!-- Section de sélection -->
+        <div class="selection-section">
+            <h2 class="section-title">
+                <i class="fas fa-list"></i> Sélectionnez un élément à évaluer
+            </h2>
+            <p class="text-muted mb-4">
+                Choisissez une campagne ou une activation pour donner votre feedback
+            </p>
+
+            <!-- Activations -->
+            @if (ViewBag.Activations != null && ((List<DiversityPub.Models.Activation>)ViewBag.Activations).Any())
+            {
+                <h3 class="section-title">
+                    <i class="fas fa-map-marker-alt"></i> Activations
+                </h3>
+                <div class="cards-grid" id="activationsGrid">
+                    @foreach (var activation in ((List<DiversityPub.Models.Activation>)ViewBag.Activations).Take(5))
+                    {
+                        <div class="selection-card" data-type="activation" data-id="@activation.Id">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title">@activation.Nom</h3>
+                                    <p class="card-subtitle">Campagne: @(activation.Campagne?.Nom ?? "N/A")</p>
+                                </div>
+                            </div>
+                            <div class="card-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>@activation.DateActivation.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>@activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>@(activation.Lieu?.Nom ?? "N/A")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
         </div>
 
-        <div class="content-section">
-            <div class="feedback-form">
-                @if (TempData["Warning"] != null)
+                @if (((List<DiversityPub.Models.Activation>)ViewBag.Activations).Count > 5)
                 {
-                    <div class="alert alert-info">
-                        <i class="fas fa-exclamation-circle"></i> @TempData["Warning"]
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="showAllActivations()">
+                            <i class="fas fa-eye"></i> Voir toutes les activations (@(((List<DiversityPub.Models.Activation>)ViewBag.Activations).Count))
+                        </button>
                     </div>
                 }
-                @if (TempData["Error"] != null)
-                {
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle"></i> @TempData["Error"]
+            }
+
+            <!-- Campagnes -->
+            @if (ViewBag.Campagnes != null && ((List<DiversityPub.Models.Campagne>)ViewBag.Campagnes).Any())
+            {
+                <h3 class="section-title">
+                    <i class="fas fa-bullhorn"></i> Campagnes
+                </h3>
+                <div class="cards-grid" id="campagnesGrid">
+                    @foreach (var campagne in ((List<DiversityPub.Models.Campagne>)ViewBag.Campagnes).Take(5))
+                    {
+                        <div class="selection-card" data-type="campagne" data-id="@campagne.Id">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title">@campagne.Nom</h3>
+                                    <p class="card-subtitle">Client: @(campagne.Client?.RaisonSociale ?? "N/A")</p>
+                                </div>
+                            </div>
+                            <div class="card-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>@(campagne.Description ?? "Aucune description")</span>
+                                </div>
+                            </div>
                     </div>
                 }
-
-                <div class="form-header">
-                    <h2 class="form-title">
-                        <i class="fas fa-comment"></i>
-                        Formulaire de Feedback
-                    </h2>
-                    <p class="form-subtitle">Évaluez votre satisfaction sur nos services</p>
                 </div>
+                
+                @if (((List<DiversityPub.Models.Campagne>)ViewBag.Campagnes).Count > 5)
+                {
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="showAllCampagnes()">
+                            <i class="fas fa-eye"></i> Voir toutes les campagnes (@(((List<DiversityPub.Models.Campagne>)ViewBag.Campagnes).Count))
+                        </button>
+                    </div>
+                }
+            }
 
-                <div class="form-content">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Information :</strong> Vous pouvez laisser un feedback sur les campagnes ou activations terminées.
+            <!-- État vide -->
+            @if ((ViewBag.Activations == null || !((List<DiversityPub.Models.Activation>)ViewBag.Activations).Any()) && 
+                 (ViewBag.Campagnes == null || !((List<DiversityPub.Models.Campagne>)ViewBag.Campagnes).Any()))
+            {
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Aucun élément disponible</h3>
+                    <p>Vous n'avez pas encore d'activations ou de campagnes à évaluer.</p>
+                    <button type="button" class="btn-submit" onclick="createTestData()">
+                        <i class="fas fa-magic"></i> Créer des données de test
+                    </button>
+                </div>
+            }
                     </div>
 
-                    <form asp-action="CreateFeedback" method="post">
-                        <div class="form-section">
-                            <h3 class="section-title">
-                                <i class="fas fa-bullhorn"></i>
-                                Sélection de l'élément à évaluer
-                            </h3>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="CampagneId" class="form-label">
-                                            <i class="fas fa-bullhorn"></i> Campagne
-                                        </label>
-                                        <select asp-for="CampagneId" class="form-select">
-                                            <option value="">Sélectionner une campagne terminée</option>
-                                            @if (ViewBag.Campagnes != null)
-                                            {
-                                                @foreach (var campagne in ViewBag.Campagnes)
-                                                {
-                                                    <option value="@campagne.Id">
-                                                        @campagne.Nom (@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy"))
-                                                    </option>
-                                                }
-                                            }
-                                        </select>
-                                        <small class="form-text">Choisissez une campagne terminée (optionnel si vous sélectionnez une activation)</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="ActivationId" class="form-label">
-                                            <i class="fas fa-map-marker-alt"></i> Activation
-                                        </label>
-                                        <select asp-for="ActivationId" class="form-select">
-                                            <option value="">Sélectionner une activation terminée</option>
-                                            @if (ViewBag.Activations != null)
-                                            {
-                                                @foreach (var activation in ViewBag.Activations)
-                                                {
-                                                    <option value="@activation.Id">
-                                                        @activation.Nom - @activation.Campagne.Nom (@activation.DateActivation.ToString("dd/MM/yyyy"))
-                                                    </option>
-                                                }
-                                            }
-                                        </select>
-                                        <small class="form-text">Choisissez une activation terminée (optionnel si vous sélectionnez une campagne)</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Section d'évaluation -->
+        <div class="rating-section" id="ratingSection" style="display: none;">
+            <h2 class="rating-title">
+                <i class="fas fa-star"></i> Votre évaluation
+            </h2>
+            <p class="text-muted mb-4">
+                Donnez une note à l'élément sélectionné
+            </p>
 
-                        <div class="form-section">
-                            <h3 class="section-title">
-                                <i class="fas fa-star"></i>
-                                Évaluation
-                            </h3>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="Note" class="form-label">
-                                            <i class="fas fa-star"></i> Note (1-5)
-                                        </label>
-                                        <select asp-for="Note" class="form-select" required>
-                                            <option value="">Sélectionner une note</option>
-                                            <option value="1">1 - Très insatisfait</option>
-                                            <option value="2">2 - Insatisfait</option>
-                                            <option value="3">3 - Neutre</option>
-                                            <option value="4">4 - Satisfait</option>
-                                            <option value="5">5 - Très satisfait</option>
-                                        </select>
-                                        <small class="form-text">Évaluez votre satisfaction globale</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label asp-for="Commentaire" class="form-label">
-                                            <i class="fas fa-comment"></i> Commentaire
-                                        </label>
-                                        <textarea asp-for="Commentaire" class="form-control" rows="5" 
-                                                  placeholder="Partagez votre expérience, vos impressions, vos suggestions d'amélioration..."></textarea>
-                                        <small class="form-text">Votre avis détaillé nous aide à améliorer nos services</small>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="rating-stars">
+                <div class="rating-star" data-rating="1"><i class="fas fa-star"></i></div>
+                <div class="rating-star" data-rating="2"><i class="fas fa-star"></i></div>
+                <div class="rating-star" data-rating="3"><i class="fas fa-star"></i></div>
+                <div class="rating-star" data-rating="4"><i class="fas fa-star"></i></div>
+                <div class="rating-star" data-rating="5"><i class="fas fa-star"></i></div>
                         </div>
-
-                        <div class="action-buttons">
-                            <a href="@Url.Action("Index", "ClientDashboard")" class="btn btn-secondary-custom btn-custom">
-                                <i class="fas fa-arrow-left"></i>
-                                Retour au dashboard
-                            </a>
-                            <div>
-                                <a href="@Url.Action("Feedbacks", "ClientDashboard")" class="btn btn-info-custom btn-custom me-2">
-                                    <i class="fas fa-list"></i>
-                                    Mes feedbacks
-                                </a>
-                                <button type="submit" class="btn btn-primary-custom btn-custom">
-                                    <i class="fas fa-paper-plane"></i>
-                                    Envoyer le feedback
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                        
+            <div class="rating-description" id="ratingDescription">
+                Sélectionnez votre note
             </div>
+                                    </div>
+
+        <!-- Section de commentaire -->
+        <div class="comment-section" id="commentSection" style="display: none;">
+            <h2 class="section-title">
+                <i class="fas fa-comment"></i> Votre commentaire
+            </h2>
+            <p class="text-muted mb-4">
+                Partagez votre expérience et vos impressions (optionnel)
+            </p>
+            <textarea 
+                class="comment-textarea" 
+                id="commentTextarea" 
+                placeholder="Décrivez votre expérience, vos impressions, vos suggestions..."
+                maxlength="1000"></textarea>
+            <div class="text-muted text-end mt-2">
+                <span id="charCount">0</span>/1000 caractères
+                                    </div>
+                                </div>
+
+        <!-- Section de soumission -->
+        <div class="submit-section">
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                <i class="fas fa-paper-plane"></i> Envoyer le Feedback
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal pour toutes les activations -->
+<div class="modal-custom" id="modalActivations">
+    <div class="modal-content-custom">
+        <div class="modal-header-custom">
+            <h2 class="modal-title-custom">
+                <i class="fas fa-map-marker-alt"></i> Toutes les activations
+            </h2>
+            <button type="button" class="btn-close-custom" onclick="closeModal('modalActivations')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cards-grid" id="modalActivationsGrid">
+            @if (ViewBag.Activations != null)
+            {
+                @foreach (var activation in (List<DiversityPub.Models.Activation>)ViewBag.Activations)
+                {
+                    <div class="selection-card" data-type="activation" data-id="@activation.Id">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">@activation.Nom</h3>
+                                <p class="card-subtitle">Campagne: @(activation.Campagne?.Nom ?? "N/A")</p>
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@activation.DateActivation.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@(activation.Lieu?.Nom ?? "N/A")</span>
+                    </div>
+                        </div>
+                        </div>
+                }
+            }
+                        </div>
+                                    </div>
+                                </div>
+                    
+<!-- Modal pour toutes les campagnes -->
+<div class="modal-custom" id="modalCampagnes">
+    <div class="modal-content-custom">
+        <div class="modal-header-custom">
+            <h2 class="modal-title-custom">
+                <i class="fas fa-bullhorn"></i> Toutes les campagnes
+            </h2>
+            <button type="button" class="btn-close-custom" onclick="closeModal('modalCampagnes')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cards-grid" id="modalCampagnesGrid">
+            @if (ViewBag.Campagnes != null)
+            {
+                @foreach (var campagne in (List<DiversityPub.Models.Campagne>)ViewBag.Campagnes)
+                {
+                    <div class="selection-card" data-type="campagne" data-id="@campagne.Id">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">@campagne.Nom</h3>
+                                <p class="card-subtitle">Client: @(campagne.Client?.RaisonSociale ?? "N/A")</p>
+                            </div>
+                        </div>
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@campagne.DateDebut.ToString("dd/MM/yyyy") - @campagne.DateFin.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-info-circle"></i>
+                                <span>@(campagne.Description ?? "Aucune description")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
         </div>
     </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Validation personnalisée pour la note
-            const noteSelect = document.getElementById('Note');
-            noteSelect.addEventListener('change', function() {
-                const note = parseInt(this.value);
-                if (note < 1 || note > 5) {
-                    this.setCustomValidity('La note doit être comprise entre 1 et 5');
-                } else {
-                    this.setCustomValidity('');
-                }
-            });
+<script>
+    let selectedItem = null;
+    let selectedRating = 0;
+    let selectedComment = '';
+
+    // Gestion de la sélection des cartes
+    document.querySelectorAll('.selection-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // Désélectionner toutes les cartes
+            document.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
             
-            // Validation pour la sélection campagne ou activation
-            const campagneSelect = document.getElementById('CampagneId');
-            const activationSelect = document.getElementById('ActivationId');
+            // Sélectionner la carte cliquée
+            this.classList.add('selected');
             
-            function validateSelection() {
-                const campagneValue = campagneSelect.value;
-                const activationValue = activationSelect.value;
-                
-                if (!campagneValue && !activationValue) {
-                    campagneSelect.setCustomValidity('Veuillez sélectionner une campagne ou une activation');
-                    activationSelect.setCustomValidity('Veuillez sélectionner une campagne ou une activation');
-                } else if (campagneValue && activationValue) {
-                    campagneSelect.setCustomValidity('Veuillez sélectionner soit une campagne, soit une activation, pas les deux');
-                    activationSelect.setCustomValidity('Veuillez sélectionner soit une campagne, soit une activation, pas les deux');
-                } else {
-                    campagneSelect.setCustomValidity('');
-                    activationSelect.setCustomValidity('');
-                }
+            // Stocker les informations de l'élément sélectionné
+            selectedItem = {
+                type: this.dataset.type,
+                id: this.dataset.id
+            };
+            
+            // Afficher la section d'évaluation
+            document.getElementById('ratingSection').style.display = 'block';
+            
+            // Réinitialiser l'évaluation
+            resetRating();
+            
+            // Mettre à jour le bouton de soumission
+            updateSubmitButton();
+            
+            console.log('Élément sélectionné:', selectedItem);
+        });
+    });
+
+    // Gestion de l'évaluation par étoiles
+    document.querySelectorAll('.rating-star').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            setRating(rating);
+        });
+    });
+
+    function setRating(rating) {
+        selectedRating = rating;
+        
+        // Mettre à jour l'affichage des étoiles
+        document.querySelectorAll('.rating-star').forEach((star, index) => {
+            const starRating = index + 1;
+            if (starRating <= rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+        
+        // Mettre à jour la description
+        const descriptions = {
+            1: "Très insatisfait - L'expérience ne répondait pas du tout à mes attentes",
+            2: "Insatisfait - Il y a eu des problèmes significatifs",
+            3: "Moyen - L'expérience était acceptable mais pourrait être améliorée",
+            4: "Satisfait - L'expérience était bonne dans l'ensemble",
+            5: "Très satisfait - L'expérience a dépassé mes attentes"
+        };
+        
+        document.getElementById('ratingDescription').textContent = descriptions[rating] || "Sélectionnez votre note";
+        
+        // Afficher la section de commentaire
+        document.getElementById('commentSection').style.display = 'block';
+        
+        // Mettre à jour le bouton de soumission
+        updateSubmitButton();
+    }
+
+    function resetRating() {
+        selectedRating = 0;
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.classList.remove('active');
+        });
+        document.getElementById('ratingDescription').textContent = "Sélectionnez votre note";
+        document.getElementById('commentSection').style.display = 'none';
+    }
+
+    // Gestion du commentaire
+    document.getElementById('commentTextarea').addEventListener('input', function() {
+        selectedComment = this.value;
+        document.getElementById('charCount').textContent = this.value.length;
+        updateSubmitButton();
+    });
+
+    function updateSubmitButton() {
+        const submitBtn = document.getElementById('submitBtn');
+        const canSubmit = selectedItem && selectedRating > 0;
+        
+        submitBtn.disabled = !canSubmit;
+        
+        if (canSubmit) {
+            // Mettre à jour les champs cachés
+            if (selectedItem.type === 'campagne') {
+                document.getElementById('selectedCampagneId').value = selectedItem.id;
+                document.getElementById('selectedActivationId').value = '';
+            } else {
+                document.getElementById('selectedActivationId').value = selectedItem.id;
+                document.getElementById('selectedCampagneId').value = '';
             }
             
-            campagneSelect.addEventListener('change', validateSelection);
-            activationSelect.addEventListener('change', validateSelection);
+            document.getElementById('selectedNote').value = selectedRating;
+            document.getElementById('selectedCommentaire').value = selectedComment;
+        }
+    }
+
+    // Gestion de la soumission du formulaire
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+        if (!selectedItem || selectedRating === 0) {
+            e.preventDefault();
+            showToast('error', 'Veuillez sélectionner un élément et donner une note.');
+            return;
+        }
+        
+        // Afficher un message de confirmation
+        showToast('success', 'Envoi du feedback en cours...');
+    });
+
+    // Fonction pour créer des données de test
+    function createTestData() {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+        button.disabled = true;
+
+        fetch('@Url.Action("CreateTestData", "ClientDashboard")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', data.message);
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showToast('error', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('error', 'Erreur lors de la création des données de test.');
+        })
+        .finally(() => {
+            button.innerHTML = originalText;
+            button.disabled = false;
         });
-    </script>
-} 
+    }
+
+    // Fonction pour afficher les toasts
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = `toast alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <strong>${type === 'success' ? 'Succès' : 'Erreur'} :</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Supprimer le toast après 5 secondes
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 5000);
+    }
+
+    // Fonctions pour les modales
+    function showAllActivations() {
+        const modal = document.getElementById('modalActivations');
+        modal.style.display = 'flex';
+        
+        // Ajouter les événements de clic aux cartes de la modale
+        modal.querySelectorAll('.selection-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Fermer la modale
+                closeModal('modalActivations');
+                
+                // Sélectionner l'élément dans la vue principale
+                selectItemFromModal(this);
+            });
+        });
+    }
+
+    function showAllCampagnes() {
+        const modal = document.getElementById('modalCampagnes');
+        modal.style.display = 'flex';
+        
+        // Ajouter les événements de clic aux cartes de la modale
+        modal.querySelectorAll('.selection-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Fermer la modale
+                closeModal('modalCampagnes');
+                
+                // Sélectionner l'élément dans la vue principale
+                selectItemFromModal(this);
+            });
+        });
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+
+    function selectItemFromModal(modalCard) {
+        const type = modalCard.dataset.type;
+        const id = modalCard.dataset.id;
+        
+        // Désélectionner toutes les cartes dans la vue principale
+        document.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
+        
+        // Trouver et sélectionner la carte correspondante dans la vue principale
+        const mainCard = document.querySelector(`.selection-card[data-type="${type}"][data-id="${id}"]`);
+        if (mainCard) {
+            mainCard.classList.add('selected');
+            
+            // Mettre à jour les variables globales
+            selectedItem = { type, id };
+            
+            // Afficher la section d'évaluation
+            document.getElementById('ratingSection').style.display = 'block';
+            
+            // Réinitialiser l'évaluation
+            resetRating();
+            
+            // Mettre à jour le bouton de soumission
+            updateSubmitButton();
+            
+            // Afficher un message de confirmation
+            showToast('success', 'Élément sélectionné avec succès !');
+        }
+    }
+
+    // Fermer les modales en cliquant à l'extérieur
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal-custom')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    // Fermer les modales avec la touche Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal-custom').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+    });
+</script> 

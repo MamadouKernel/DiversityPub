@@ -1,208 +1,617 @@
 @model IEnumerable<DiversityPub.Models.Activation>
+
 @{
     ViewData["Title"] = "Gestion des Activations";
+    Layout = "_Layout";
 }
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-map-marker-alt"></i> Gestion des Activations
-                </h4>
-                <a href="@Url.Action("Create", "Activation")" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nouvelle Activation
-                </a>
+<style>
+    :root {
+        --primary: #A32D18; /* rouge brique */
+        --primary-600: #902816;
+        --secondary: #EDAC00; /* or */
+        --ink: #1F2937; /* gris foncé lisible */
+        --muted: #6B7280;
+        --line: #E5E7EB;
+        --bg: #F8FAFC;
+        --white: #fff;
+        --success: #10B981;
+        --info: #3B82F6;
+        --warning: #F59E0B;
+        --danger: #EF4444;
+    }
+
+    /* Reset + base */
+    * {
+        box-sizing: border-box
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    }
+
+    .container-fluid {
+        padding: 1.25rem
+    }
+
+    /* Page header */
+    .page-header {
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 1.25rem 1rem;
+        margin: 0 0 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        position: sticky;
+        top: 0.5rem;
+        z-index: 5;
+        backdrop-filter: saturate(1.2) blur(2px)
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0
+    }
+
+        .page-title i {
+            color: var(--secondary)
+        }
+
+    .page-actions {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        border: 1px solid var(--line);
+        background: var(--white);
+        padding: .55rem .8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .08s ease, box-shadow .2s ease
+    }
+
+        .btn:active {
+            transform: translateY(1px)
+        }
+
+    .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff
+    }
+
+        .btn-primary:hover {
+            background: var(--primary-600)
+        }
+
+    .btn-outline {
+        background: #fff
+    }
+
+    /* Card */
+    .card {
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 14px
+    }
+
+    .card-body {
+        padding: 1rem
+    }
+
+    .card-header {
+        padding: .8rem 1rem;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem
+    }
+
+    .card-title {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem
+    }
+
+    /* Filters */
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: .75rem
+    }
+
+    .f-col-3 {
+        grid-column: span 3
+    }
+
+    .f-col-2 {
+        grid-column: span 2
+    }
+
+    .f-col-4 {
+        grid-column: span 4
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: .35rem
+    }
+
+        .field label {
+            font-size: .8rem;
+            color: var(--muted)
+        }
+
+    .input, select {
+        height: 38px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: .45rem .65rem;
+        font-size: .95rem;
+        background: var(--white);
+        color: var(--ink)
+    }
+
+        .input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(163,45,24,.12);
+            border-color: var(--primary)
+        }
+
+    .toolbar {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap
+    }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        height: 28px;
+        padding: 0 .6rem;
+        border-radius: 999px;
+        background: #F3F4F6;
+        color: #111827;
+        font-size: .82rem
+    }
+
+    /* Table */
+    .table-wrap {
+        overflow: auto
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: linear-gradient(180deg,#fff, #F9FAFB);
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #374151;
+        padding: .6rem .6rem
+    }
+
+    tbody td {
+        border-bottom: 1px solid var(--line);
+        padding: .6rem .6rem;
+        vertical-align: middle;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        font-size: .94rem
+    }
+
+    tbody tr:hover {
+        background: #FCFCFD
+    }
+
+    .col-actions {
+        white-space: nowrap
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .2rem .45rem;
+        border-radius: 8px
+    }
+
+    .b-plan {
+        background: #FEF3C7;
+        color: #92400E
+    }
+
+    .b-run {
+        background: #D1FAE5;
+        color: #065F46
+    }
+
+    .b-done {
+        background: #DBEAFE;
+        color: #1E40AF
+    }
+
+    .b-hold {
+        background: #FEE2E2;
+        color: #991B1B
+    }
+
+    /* Icon buttons */
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        display: inline-grid;
+        place-items: center;
+        background: #fff
+    }
+
+        .icon-btn:hover {
+            box-shadow: 0 1px 0 rgba(0,0,0,.04)
+        }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .f-col-3
+
+    {
+        grid-column: span 6
+    }
+
+    .f-col-2 {
+        grid-column: span 6
+    }
+
+    .f-col-4 {
+        grid-column: span 12
+    }
+
+    }
+    @@media (max-width: 640px) {
+        .page-header
+
+    {
+        flex-direction: column;
+        align-items: flex-start
+    }
+
+    .filters-grid {
+        grid-template-columns: repeat(6,1fr)
+    }
+
+    .f-col-3 {
+        grid-column: span 6
+    }
+
+    .f-col-2 {
+        grid-column: span 3
+    }
+
+    .f-col-4 {
+        grid-column: span 6
+    }
+
+    thead th {
+        font-size: .68rem
+    }
+
+    tbody td {
+        font-size: .9rem
+    }
+
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-map-marker-alt"></i> Gestion des Activations</h1>
+        <div class="page-actions">
+            <a class="btn btn-outline" href="@Url.Action("Index", "Campagne")"><i class="fas fa-bullhorn"></i> Campagnes</a>
+            <a class="btn btn-outline" href="@Url.Action("Index", "Assignation")"><i class="fas fa-users"></i> Assignations</a>
+            <a class="btn btn-primary" href="@Url.Action("Create", "Activation")"><i class="fas fa-plus"></i> Nouvelle activation</a>
+        </div>
+    </div>
+
+    @if (Model?.Any() == true)
+    {
+        <!-- Filters -->
+        <div class="card" id="filtersCard">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-filter"></i> Filtres</div>
+                <div class="toolbar">
+                    <button class="btn btn-outline" onclick="clearFilters()"><i class="fas fa-eraser"></i> Effacer</button>
+                    <button class="btn btn-primary" onclick="applyFilters()"><i class="fas fa-search"></i> Rechercher</button>
+                </div>
             </div>
             <div class="card-body">
-                <div class="row">
-                    @foreach (var activation in Model.OrderByDescending(a => a.DateActivation))
-                    {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0">@activation.Nom</h6>
+                <div class="filters-grid">
+                    <div class="field f-col-4">
+                        <label for="searchInput">Recherche</label>
+                        <input id="searchInput" class="input" type="text" placeholder="Nom, campagne, lieu…" />
+                    </div>
+
+                    <div class="field f-col-2">
+                        <label for="statusFilter">Statut</label>
+                        <select id="statusFilter">
+                            <option value="">Tous</option>
+                            <option value="Planifiee">Planifiées</option>
+                            <option value="EnCours">En cours</option>
+                            <option value="Suspendue">Suspendues</option>
+                            <option value="Terminee">Terminées</option>
+                        </select>
+                    </div>
+
+                    <div class="field f-col-3">
+                        <label for="campaignFilter">Campagne</label>
+                        <select id="campaignFilter">
+                            <option value="">Toutes</option>
+                            @foreach (var campagne in Model.Select(a => a.Campagne).Distinct().OrderBy(c => c.Nom))
+                            {
+                                <option value="@campagne.Nom">@campagne.Nom</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="field f-col-3">
+                        <label for="locationFilter">Lieu</label>
+                        <select id="locationFilter">
+                            <option value="">Tous</option>
+                            @foreach (var lieu in Model.Select(a => a.Lieu).Distinct().OrderBy(l => l.Nom))
+                            {
+                                <option value="@lieu.Nom">@lieu.Nom</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="field f-col-3">
+                        <label for="dateStart">Du</label>
+                        <input id="dateStart" class="input" type="date" />
+                    </div>
+                    <div class="field f-col-3">
+                        <label for="dateEnd">Au</label>
+                        <input id="dateEnd" class="input" type="date" />
+                    </div>
+
+                    <div class="field f-col-3">
+                        <label for="agentsFilter">Agents</label>
+                        <select id="agentsFilter">
+                            <option value="">Tous</option>
+                            <option value="with-agents">Avec agents</option>
+                            <option value="without-agents">Sans agent</option>
+                        </select>
+                    </div>
+
+                    <div class="field f-col-3" style="align-self:end">
+                        <div class="chip" id="resultsChip" style="display:none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- List -->
+        <div class="card" style="margin-top:1rem">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-list"></i> Liste des activations</div>
+            </div>
+            <div class="card-body table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Activation</th>
+                            <th>Campagne</th>
+                            <th>Lieu</th>
+                            <th>Date</th>
+                            <th>Horaires</th>
+                            <th>Responsable / Agents</th>
+                            <th>Statut</th>
+                            <th class="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activationsTableBody">
+                        @foreach (var activation in Model)
+                        {
+                            <tr data-nom="@activation.Nom"
+                                data-campagne="@activation.Campagne.Nom"
+                                data-lieu="@activation.Lieu.Nom"
+                                data-statut="@activation.Statut"
+                                data-date="@activation.DateActivation.ToString("yyyy-MM-dd")"
+                                data-agents="@activation.AgentsTerrain.Count">
+                                <td>
+                                    <strong>@activation.Nom</strong>
+                                    @if (!string.IsNullOrEmpty(activation.Description))
+                                    {
+                                        <div style="color:var(--muted);font-size:.85rem">@activation.Description</div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@activation.Campagne.Nom</strong>
+                                    <div style="color:var(--muted);font-size:.85rem">@activation.Campagne.Client.RaisonSociale</div>
+                                </td>
+                                <td>
+                                    <strong>@activation.Lieu.Nom</strong>
+                                    <div style="color:var(--muted);font-size:.85rem">@activation.Lieu.Adresse</div>
+                                </td>
+                                <td>@activation.DateActivation.ToString("dd/MM/yyyy")</td>
+                                <td>@($"{activation.HeureDebut.Hours:D2}:{activation.HeureDebut.Minutes:D2}") - @($"{activation.HeureFin.Hours:D2}:{activation.HeureFin.Minutes:D2}")</td>
+                                <td>
+                                    @if (activation.Responsable != null)
+                                    {
+                                        <div><strong>@activation.Responsable.Utilisateur.Prenom @activation.Responsable.Utilisateur.Nom</strong></div>
+                                    }
+                                    else
+                                    {
+
+                                        <div style="color:var(--muted)">Aucun</div>
+                                    }
+                                    <div class="badge @(activation.AgentsTerrain.Count > 0 ? "b-run" : "b-hold")">@activation.AgentsTerrain.Count AGENT@(activation.AgentsTerrain.Count > 1 ? "S" : "")</div>
+                                </td>
+                                <td>
                                     @switch (activation.Statut)
                                     {
                                         case DiversityPub.Models.enums.StatutActivation.Planifiee:
-                                            <span class="badge bg-warning">Planifiée</span>
-                                            break;
+                                            <text><span class="badge b-plan">PLANIFIÉ</span></text>
+                                            ; break;
                                         case DiversityPub.Models.enums.StatutActivation.EnCours:
-                                            <span class="badge bg-success">En Cours</span>
-                                            break;
-                                        case DiversityPub.Models.enums.StatutActivation.Suspendue:
-                                            <span class="badge bg-warning">Suspendue</span>
-                                            break;
+                                            <text><span class="badge b-run">EN COURS</span></text>
+                                            ; break;
                                         case DiversityPub.Models.enums.StatutActivation.Terminee:
-                                            <span class="badge bg-info">Terminée</span>
-                                            break;
+                                            <text><span class="badge b-done">TERMINÉ</span></text>
+                                            ; break;
+                                        case DiversityPub.Models.enums.StatutActivation.Suspendue:
+                                            <text><span class="badge b-hold">SUSPENDU</span></text>
+                                            ; break;
                                     }
-                                </div>
-                                <div class="card-body">
-                                    @if (!string.IsNullOrEmpty(activation.Description))
-                                    {
-                                        <p class="card-text text-muted">@activation.Description</p>
-                                    }
-                                    
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar"></i> Date
-                                            </small>
-                                            <br>
-                                            <strong>@activation.DateActivation.ToString("dd/MM/yyyy")</strong>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock"></i> Heure
-                                            </small>
-                                            <br>
-                                            <strong>@activation.HeureDebut.ToString(@"hh\:mm") - @activation.HeureFin.ToString(@"hh\:mm")</strong>
-                                        </div>
-                                    </div>
-                                    
-                                    @if (activation.Campagne != null)
-                                    {
-                                        <div class="mb-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-bullhorn"></i> Campagne
-                                            </small>
-                                            <br>
-                                            <strong>@activation.Campagne.Nom</strong>
-                                        </div>
-                                    }
-                                    
-                                    @if (activation.Lieu != null)
-                                    {
-                                        <div class="mb-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-map-marker-alt"></i> Lieu
-                                            </small>
-                                            <br>
-                                            <strong>@activation.Lieu.Nom</strong>
-                                        </div>
-                                    }
-                                    
-                                    @if (activation.AgentsTerrain != null && activation.AgentsTerrain.Any())
-                                    {
-                                        <div class="mb-3">
-                                            <small class="text-muted">
-                                                <i class="fas fa-users"></i> Agents (@activation.AgentsTerrain.Count)
-                                            </small>
-                                            <br>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                @foreach (var agent in activation.AgentsTerrain.Take(3))
-                                                {
-                                                    var isResponsable = activation.ResponsableId == agent.Id;
-                                                    <span class="badge @(isResponsable ? "bg-warning" : "bg-secondary")" style="font-size: 0.75rem;">
-                                                        <i class="fas @(isResponsable ? "fa-crown" : "fa-user")"></i> 
-                                                        @agent.Utilisateur.Prenom @agent.Utilisateur.Nom
-                                                        @if (isResponsable)
-                                                        {
-                                                            <small class="ms-1">(Responsable)</small>
-                                                        }
-                                                    </span>
-                                                }
-                                                @if (activation.AgentsTerrain.Count > 3)
-                                                {
-                                                    <span class="badge bg-secondary">+@(activation.AgentsTerrain.Count - 3)</span>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                                <div class="card-footer">
-                                    <div class="btn-group w-100" role="group">
-                                        <a href="@Url.Action("Details", "Activation", new { id = activation.Id })" 
-                                           class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-eye"></i> Détails
-                                        </a>
-                                        <a href="@Url.Action("Edit", "Activation", new { id = activation.Id })" 
-                                           class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-edit"></i> Modifier
-                                        </a>
-                                        <a href="@Url.Action("Delete", "Activation", new { id = activation.Id })" 
-                                           class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i> Supprimer
-                                        </a>
-                                        @if (activation.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
-                                        {
-                                            <button onclick="redemarrerActivation('@activation.Id')" 
-                                                    class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-redo"></i> Redémarrer
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
+                                </td>
+                                <td class="col-actions">
+                                    <a class="icon-btn" href="@Url.Action("Details", new { id = activation.Id })" title="Détails"><i class="fas fa-eye"></i></a>
+                                    <a class="icon-btn" href="@Url.Action("Edit", new { id = activation.Id })" title="Modifier"><i class="fas fa-edit"></i></a>
+                                    <button class="icon-btn" type="button" title="Supprimer" onclick="confirmDelete('@activation.Id')"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body" style="text-align:center;padding:2rem">
+                <div style="font-size:2rem;color:var(--muted);margin-bottom:.5rem"><i class="fas fa-map-marker-alt"></i></div>
+                <h3 style="margin:.2rem 0 0.2rem">Aucune activation trouvée</h3>
+                <p style="color:var(--muted);margin:0 0 1rem">Commencez par créer votre première activation.</p>
+                <a class="btn btn-primary" href="@Url.Action("Create", "Activation")"><i class="fas fa-plus"></i> Créer une activation</a>
+            </div>
+        </div>
+    }
 </div>
 
-@if (!Model.Any())
-{
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
-                    <h5>Aucune activation trouvée</h5>
-                    <p class="text-muted">Commencez par créer votre première activation.</p>
-                    <a href="@Url.Action("Create", "Activation")" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Créer une activation
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<script>
+    // state
+    let originalData = [];
+    let filteredData = [];
 
-@section Scripts {
-    <script>
-        function redemarrerActivation(activationId) {
-            if (confirm('Êtes-vous sûr de vouloir redémarrer cette activation ? Cela démarrera également la campagne associée.')) {
-                $.ajax({
-                    url: '@Url.Action("RedemarrerActivation", "Activation")',
-                    type: 'POST',
-                    data: { activationId: activationId },
-                    success: function(response) {
-                        if (response.success) {
-                            showToast('success', response.message);
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            showToast('error', response.message);
-                        }
-                    },
-                    error: function() {
-                        showToast('error', 'Erreur lors du redémarrage de l\'activation');
-                    }
-                });
-            }
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+      cacheRows();
+      attachEvents();
+      applyFilters();
+    });
 
-        function showToast(type, message) {
-            const toastClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const iconClass = type === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle';
-            
-            const toast = $(`
-                <div class="alert ${toastClass} alert-dismissible fade show position-fixed" 
-                     style="top: 20px; right: 20px; z-index: 9999;">
-                    <i class="${iconClass}"></i> ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `);
-            
-            $('body').append(toast);
-            
-            setTimeout(function() {
-                toast.alert('close');
-            }, 5000);
+    function cacheRows(){
+      const rows = document.querySelectorAll('#activationsTableBody tr');
+      originalData = Array.from(rows).map(r=>({
+        element:r,
+        data:{
+          nom:r.dataset.nom||'',
+          campagne:r.dataset.campagne||'',
+          lieu:r.dataset.lieu||'',
+          statut:r.dataset.statut||'',
+          date:r.dataset.date||'',
+          agents:parseInt(r.dataset.agents)||0,
         }
-    </script>
-} 
+      }));
+      filteredData = [...originalData];
+    }
+
+    function attachEvents(){
+      on('#searchInput','input',debounce(applyFilters,250));
+      ['statusFilter','campaignFilter','locationFilter','agentsFilter','dateStart','dateEnd']
+        .forEach(id=>on('#'+id,'change',applyFilters));
+    }
+
+    function on(sel,ev,cb){ const el=document.querySelector(sel); if(el) el.addEventListener(ev,cb); }
+
+    function applyFilters(){
+      const q = (document.getElementById('searchInput')?.value||'').toLowerCase();
+      const fs = id=>document.getElementById(id)?.value||'';
+      const status=fs('statusFilter'), camp=fs('campaignFilter'), loc=fs('locationFilter'), ag=fs('agentsFilter');
+      const d1=fs('dateStart'), d2=fs('dateEnd');
+
+      filteredData = originalData.filter(it=>{
+        const t = `${it.data.nom} ${it.data.campagne} ${it.data.lieu}`.toLowerCase();
+        if(q && !t.includes(q)) return false;
+        if(status && it.data.statut!==status) return false;
+        if(camp && it.data.campagne!==camp) return false;
+        if(loc && it.data.lieu!==loc) return false;
+        if(ag==='with-agents' && it.data.agents<=0) return false;
+        if(ag==='without-agents' && it.data.agents>0) return false;
+        if(d1 || d2){
+          const dt = new Date(it.data.date);
+          if(d1 && dt < new Date(d1)) return false;
+          if(d2 && dt > new Date(d2)) return false;
+        }
+        return true;
+      });
+
+      renderRows();
+      updateChip();
+    }
+
+    function renderRows(){
+      const tbody = document.getElementById('activationsTableBody');
+      if(!tbody) return;
+      tbody.innerHTML='';
+      filteredData.forEach(it=>tbody.appendChild(it.element));
+    }
+
+    function updateChip(){
+      const chip = document.getElementById('resultsChip');
+      if(!chip) return;
+      const c=filteredData.length, t=originalData.length;
+      if(c===t){ chip.style.display='none'; return; }
+      chip.textContent = `${c} résultat${c>1?'s':''} / ${t}`;
+      chip.style.display='inline-flex';
+    }
+
+    function clearFilters(){
+      ['searchInput','statusFilter','campaignFilter','locationFilter','agentsFilter','dateStart','dateEnd']
+        .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+      applyFilters();
+    }
+
+    function confirmDelete(id){
+      if(confirm('Êtes-vous sûr de vouloir supprimer cette activation ?')){
+        window.location.href = '@Url.Action("Delete", "Activation")?id=' + id;
+      }
+    }
+
+    function debounce(fn,wait){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(null,a),wait); }; }
+</script>
