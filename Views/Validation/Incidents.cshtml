@@ -69,7 +69,7 @@
                                             </div>
                                             
                                             <div class="mb-3">
-                                                <strong>Lieu:</strong> @incident.Activation?.Lieu?.Nom
+                                                <strong>Lieu:</strong> @(incident.Activation?.Lieu != null ? $"{incident.Activation.Lieu.Nom} - {incident.Activation.Lieu.Adresse}" : "Non défini")
                                                 @if (!string.IsNullOrEmpty(incident.Activation?.Lieu?.Adresse))
                                                 {
                                                     <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> @incident.Activation.Lieu.Adresse</small>

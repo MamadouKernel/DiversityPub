@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DiversityPub.Migrations
 {
     [DbContext(typeof(DiversityPubDbContext))]
-    [Migration("20250801141549_InitKernel")]
-    partial class InitKernel
+    [Migration("20250811205348_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -548,7 +548,7 @@ namespace DiversityPub.Migrations
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Email = "admin@diversitypub.ci",
-                            MotDePasse = "$2a$11$IzPWBx9M16eZpNp3j8pbXuIzXsSUyE25LDaHpXHB2.dg.94KL0tPC",
+                            MotDePasse = "$2a$11$3EuiBTa8JYTS1DmxK1oA3.TX3wpuLZjDH2Dz2I.0r5U3.SQO4HNKW",
                             Nom = "Super",
                             Prenom = "Admin",
                             Role = 1,

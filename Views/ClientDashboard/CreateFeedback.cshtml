@@ -449,7 +449,7 @@
                                 </div>
                                 <div class="detail-item">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>@(activation.Lieu?.Nom ?? "N/A")</span>
+                                    <span>@(activation.Lieu != null ? $"{activation.Lieu.Nom} - {activation.Lieu.Adresse}" : "N/A")</span>
                                 </div>
                             </div>
                         </div>
@@ -610,7 +610,7 @@
                             </div>
                             <div class="detail-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span>@(activation.Lieu?.Nom ?? "N/A")</span>
+                                <span>@(activation.Lieu != null ? $"{activation.Lieu.Nom} - {activation.Lieu.Adresse}" : "N/A")</span>
                     </div>
                         </div>
                         </div>

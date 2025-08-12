@@ -395,7 +395,7 @@
                             <option value="">Tous</option>
                             @foreach (var lieu in Model.Select(a => a.Lieu).Distinct().OrderBy(l => l.Nom))
                             {
-                                <option value="@lieu.Nom">@lieu.Nom</option>
+                                <option value="@($"{lieu.Nom} - {lieu.Adresse}")">@lieu.Nom - @lieu.Adresse</option>
                             }
                         </select>
                     </div>
@@ -449,7 +449,7 @@
                         {
                             <tr data-nom="@activation.Nom"
                                 data-campagne="@activation.Campagne.Nom"
-                                data-lieu="@activation.Lieu.Nom"
+                                data-lieu="@($"{activation.Lieu.Nom} - {activation.Lieu.Adresse}")"
                                 data-statut="@activation.Statut"
                                 data-date="@activation.DateActivation.ToString("yyyy-MM-dd")"
                                 data-agents="@activation.AgentsTerrain.Count">

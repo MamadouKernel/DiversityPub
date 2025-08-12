@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DiversityPub.Migrations
 {
     /// <inheritdoc />
-    public partial class InitKernel : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -386,7 +386,7 @@ namespace DiversityPub.Migrations
             migrationBuilder.InsertData(
                 table: "Utilisateurs",
                 columns: new[] { "Id", "Email", "MotDePasse", "Nom", "Prenom", "Role", "Supprimer" },
-                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$IzPWBx9M16eZpNp3j8pbXuIzXsSUyE25LDaHpXHB2.dg.94KL0tPC", "Super", "Admin", 1, 0 });
+                values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), "admin@diversitypub.ci", "$2a$11$3EuiBTa8JYTS1DmxK1oA3.TX3wpuLZjDH2Dz2I.0r5U3.SQO4HNKW", "Super", "Admin", 1, 0 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActivationAgentTerrain_AgentsTerrainId",

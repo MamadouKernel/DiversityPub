@@ -129,13 +129,19 @@ namespace DiversityPub.Controllers
         {
             if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
             {
-                ViewBag.Error = "Tous les champs sont requis.";
+                ViewBag.Error = "Tous les champs sont obligatoires.";
                 return View();
             }
 
             if (newPassword != confirmPassword)
             {
                 ViewBag.Error = "Les nouveaux mots de passe ne correspondent pas.";
+                return View();
+            }
+
+            if (newPassword.Length < 6)
+            {
+                ViewBag.Error = "Le nouveau mot de passe doit contenir au moins 6 caractères.";
                 return View();
             }
 
@@ -148,15 +154,35 @@ namespace DiversityPub.Controllers
                 return NotFound();
             }
 
-            // Vérifier l'ancien mot de passe
-            if (utilisateur.MotDePasse != currentPassword)
+            // Vérifier l'ancien mot de passe (gérer les mots de passe hashés et non hashés)
+            bool currentPasswordValid = false;
+            
+            // D'abord essayer de vérifier si c'est un hash BCrypt
+            if (utilisateur.MotDePasse.StartsWith("$2a$") || utilisateur.MotDePasse.StartsWith("$2b$"))
+            {
+                try
+                {
+                    currentPasswordValid = BCrypt.Net.BCrypt.Verify(currentPassword, utilisateur.MotDePasse);
+                }
+                catch
+                {
+                    currentPasswordValid = false;
+                }
+            }
+            else
+            {
+                // Si ce n'est pas un hash BCrypt, comparer directement (pour les mots de passe en clair)
+                currentPasswordValid = utilisateur.MotDePasse == currentPassword;
+            }
+
+            if (!currentPasswordValid)
             {
                 ViewBag.Error = "L'ancien mot de passe est incorrect.";
                 return View();
             }
 
-            // Mettre à jour le mot de passe
-            utilisateur.MotDePasse = newPassword;
+            // Mettre à jour le mot de passe avec BCrypt
+            utilisateur.MotDePasse = BCrypt.Net.BCrypt.HashPassword(newPassword);
             _context.Update(utilisateur);
             await _context.SaveChangesAsync();
 

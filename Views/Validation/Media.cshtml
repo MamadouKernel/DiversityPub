@@ -56,7 +56,7 @@
                                                 <strong>Campagne:</strong> @media.Activation?.Campagne?.Nom
                                             </div>
                                             <div class="mb-3">
-                                                <strong>Lieu:</strong> @media.Activation?.Lieu?.Nom
+                                                <strong>Lieu:</strong> @(media.Activation?.Lieu != null ? $"{media.Activation.Lieu.Nom} - {media.Activation.Lieu.Adresse}" : "Non défini")
                                                 @if (!string.IsNullOrEmpty(media.Activation?.Lieu?.Adresse))
                                                 {
                                                     <br><small class="text-muted"><i class="fas fa-map-marker-alt"></i> @media.Activation.Lieu.Adresse</small>

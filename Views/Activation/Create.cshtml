@@ -742,9 +742,13 @@
             const nomCampagne = campagneOption.textContent.split(' (')[0];
             console.log('Nom campagne extrait:', nomCampagne);
             
-            // Extraire le nom du lieu (avant le premier tiret)
-            const nomLieu = lieuOption.textContent.split(' - ')[0];
+            // Extraire le nom du lieu et l'adresse
+            const lieuText = lieuOption.textContent;
+            const lieuParts = lieuText.split(' - ');
+            const nomLieu = lieuParts[0];
+            const adresseLieu = lieuParts[1] || ''; // L'adresse est après le tiret
             console.log('Nom lieu extrait:', nomLieu);
+            console.log('Adresse lieu extraite:', adresseLieu);
             
             // Récupérer les dates
                     const dateDebut = campagneOption.dataset.dateDebut;
@@ -759,10 +763,10 @@
                 const dateDebutFr = new Date(dateDebut).toLocaleDateString('fr-FR');
                 const dateFinFr = new Date(dateFin).toLocaleDateString('fr-FR');
                 const periode = `(${dateDebutFr} - ${dateFinFr})`;
-                nomComplet = `${nomLieu}-${nomCampagne} ${periode}`;
+                nomComplet = `${nomLieu}-${adresseLieu}-${nomCampagne} ${periode}`;
                 console.log('✅ Nom généré avec période:', nomComplet);
             } else {
-                nomComplet = `${nomLieu}-${nomCampagne}`;
+                nomComplet = `${nomLieu}-${adresseLieu}-${nomCampagne}`;
                 console.log('✅ Nom généré sans période:', nomComplet);
             }
             

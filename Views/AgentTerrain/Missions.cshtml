@@ -882,7 +882,7 @@
             {
                 var isBoss = a.ResponsableId != null && agent?.Id == a.ResponsableId;
                 var hd = a.HeureDebut; var hf = a.HeureFin;
-                                                            <div class="col mission" data-date="@a.DateActivation.ToString("yyyy-MM-dd")" data-statut="@a.Statut" data-text="@($"{a.Nom} {a.Campagne?.Nom} {a.Lieu?.Nom}")">
+                                                            <div class="col mission" data-date="@a.DateActivation.ToString("yyyy-MM-dd")" data-statut="@a.Statut" data-text="@($"{a.Nom} {a.Campagne?.Nom} {a.Lieu?.Nom} - {a.Lieu?.Adresse}")">
                                                                 <div class="card">
                                                                     <div class="head">
                                                                         <h3 class="title">@a.Nom</h3>
@@ -907,7 +907,7 @@
                                             </div>
                         <div class="body">
                             <div class="row"><div class="ico c1"><i class="fas fa-bullhorn"></i></div><div><div class="label">Campagne</div><div class="val">@a.Campagne?.Nom</div></div></div>
-                            <div class="row"><div class="ico c2"><i class="fas fa-map-marker-alt"></i></div><div><div class="label">Lieu</div><div class="val">@a.Lieu?.Nom</div></div></div>
+                            <div class="row"><div class="ico c2"><i class="fas fa-map-marker-alt"></i></div><div><div class="label">Lieu</div><div class="val">@a.Lieu?.Nom - @a.Lieu?.Adresse</div></div></div>
                             <div class="row"><div class="ico c3"><i class="fas fa-calendar"></i></div><div><div class="label">Date</div><div class="val">@a.DateActivation.ToString("dd/MM/yyyy")</div></div></div>
                             <div class="row"><div class="ico c4"><i class="fas fa-clock"></i></div><div><div class="label">Horaire</div><div class="val">@($"{hd.Hours:D2}:{hd.Minutes:D2}") - @($"{hf.Hours:D2}:{hf.Minutes:D2}")</div></div></div>
                             <div class="row"><div class="ico" style="color: #007bff;"><i class="fas fa-images"></i></div><div><div class="label">Preuves</div><div class="val">@(a.Medias?.Count ?? 0) preuve@(a.Medias?.Count > 1 ? "s" : "")</div></div></div>

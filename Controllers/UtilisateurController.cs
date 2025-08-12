@@ -67,6 +67,9 @@ namespace DiversityPub.Controllers
             {
                 utilisateur.Id = Guid.NewGuid();
                 utilisateur.Supprimer = 0;
+                
+                // Hasher le mot de passe
+                utilisateur.MotDePasse = BCrypt.Net.BCrypt.HashPassword(utilisateur.MotDePasse);
 
                 // Créer le profil spécifique selon le rôle
                 if (utilisateur.Role == Role.Client && clientId.HasValue)
@@ -141,7 +144,7 @@ namespace DiversityPub.Controllers
                 // Gérer le changement de mot de passe
                 if (!string.IsNullOrEmpty(MotDePasse))
                 {
-                    existingUser.MotDePasse = MotDePasse;
+                    existingUser.MotDePasse = BCrypt.Net.BCrypt.HashPassword(MotDePasse);
                 }
 
                 // Gérer les profils spécifiques selon le nouveau rôle
@@ -467,7 +470,7 @@ namespace DiversityPub.Controllers
                                     Nom = nom,
                                     Prenom = prenom,
                                     Email = email,
-                                    MotDePasse = motDePasse,
+                                    MotDePasse = BCrypt.Net.BCrypt.HashPassword(motDePasse),
                                     Role = role,
                                     Supprimer = 0
                                 };
@@ -528,6 +531,96 @@ namespace DiversityPub.Controllers
             {
                 ViewBag.Error = $"Erreur lors de l'import : {ex.Message}";
                 return View();
+            }
+        }
+
+        // POST: Utilisateur/MigrerMotsDePasse
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MigrerMotsDePasse()
+        {
+            try
+            {
+                var utilisateurs = await _context.Utilisateurs.ToListAsync();
+                var migrations = new List<string>();
+                var erreurs = new List<string>();
+
+                foreach (var utilisateur in utilisateurs)
+                {
+                    try
+                    {
+                        // Vérifier si le mot de passe est déjà hashé
+                        if (utilisateur.MotDePasse.StartsWith("$2a$") || utilisateur.MotDePasse.StartsWith("$2b$"))
+                        {
+                            migrations.Add($"✅ {utilisateur.Email}: Mot de passe déjà hashé");
+                            continue;
+                        }
+
+                        // Si le mot de passe est vide ou trop court, générer un mot de passe par défaut
+                        if (string.IsNullOrEmpty(utilisateur.MotDePasse) || utilisateur.MotDePasse.Length < 6)
+                        {
+                            string defaultPassword;
+                            switch (utilisateur.Role)
+                            {
+                                case Role.Admin:
+                                    defaultPassword = "Admin123!";
+                                    break;
+                                case Role.ChefProjet:
+                                    defaultPassword = "ChefProjet123!";
+                                    break;
+                                case Role.AgentTerrain:
+                                    defaultPassword = "AgentTerrain123!";
+                                    break;
+                                case Role.Client:
+                                    defaultPassword = "Client123!";
+                                    break;
+                                default:
+                                    defaultPassword = "User123!";
+                                    break;
+                            }
+                            
+                            utilisateur.MotDePasse = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+                            migrations.Add($"✅ {utilisateur.Email}: Mot de passe par défaut généré ({defaultPassword})");
+                        }
+                        else
+                        {
+                            // Hasher le mot de passe existant
+                            var motDePasseOriginal = utilisateur.MotDePasse;
+                            utilisateur.MotDePasse = BCrypt.Net.BCrypt.HashPassword(motDePasseOriginal);
+                            migrations.Add($"✅ {utilisateur.Email}: Mot de passe hashé");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        erreurs.Add($"❌ {utilisateur.Email}: {ex.Message}");
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                var result = new List<string>
+                {
+                    $"=== MIGRATION DES MOTS DE PASSE ===",
+                    $"Total utilisateurs traités: {utilisateurs.Count}",
+                    $"Migrations réussies: {migrations.Count}",
+                    $"Erreurs: {erreurs.Count}"
+                };
+
+                result.AddRange(migrations);
+                if (erreurs.Any())
+                {
+                    result.Add("=== ERREURS ===");
+                    result.AddRange(erreurs);
+                }
+
+                TempData["MigrationResult"] = string.Join("\n", result);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Erreur lors de la migration: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
 

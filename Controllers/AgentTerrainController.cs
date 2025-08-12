@@ -1108,15 +1108,35 @@ namespace DiversityPub.Controllers
                     return RedirectToAction("Profil");
                 }
 
-                // Vérifier l'ancien mot de passe
-                if (agent.Utilisateur.MotDePasse != CurrentPassword)
+                // Vérifier l'ancien mot de passe (gérer les mots de passe hashés et non hashés)
+                bool currentPasswordValid = false;
+                
+                // D'abord essayer de vérifier si c'est un hash BCrypt
+                if (agent.Utilisateur.MotDePasse.StartsWith("$2a$") || agent.Utilisateur.MotDePasse.StartsWith("$2b$"))
+                {
+                    try
+                    {
+                        currentPasswordValid = BCrypt.Net.BCrypt.Verify(CurrentPassword, agent.Utilisateur.MotDePasse);
+                    }
+                    catch
+                    {
+                        currentPasswordValid = false;
+                    }
+                }
+                else
+                {
+                    // Si ce n'est pas un hash BCrypt, comparer directement (pour les mots de passe en clair)
+                    currentPasswordValid = agent.Utilisateur.MotDePasse == CurrentPassword;
+                }
+
+                if (!currentPasswordValid)
                 {
                     TempData["Error"] = "Le mot de passe actuel est incorrect.";
                     return RedirectToAction("Profil");
                 }
 
-                // Changer le mot de passe
-                agent.Utilisateur.MotDePasse = NewPassword;
+                // Changer le mot de passe avec BCrypt
+                agent.Utilisateur.MotDePasse = BCrypt.Net.BCrypt.HashPassword(NewPassword);
                 await _context.SaveChangesAsync();
 
                 Console.WriteLine($"=== CHANGEMENT MOT DE PASSE ===");

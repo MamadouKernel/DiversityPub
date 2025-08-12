@@ -43,7 +43,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label text-muted small">Lieu</label>
-                                        <p class="h6 mb-0">@Model.Lieu?.Nom</p>
+                                        <p class="h6 mb-0">@Model.Lieu?.Nom - @Model.Lieu?.Adresse</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -67,6 +67,29 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Informations sur les restrictions selon le statut -->
+                            @if (Model.Statut == DiversityPub.Models.enums.StatutActivation.EnCours)
+                            {
+                                <div class="alert alert-info border-0 mt-3">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Activation en cours :</strong> Vous pouvez modifier les assignations. Si vous retirez tous les agents, considérez de suspendre ou terminer l'activation.
+                                </div>
+                            }
+                            else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Suspendue)
+                            {
+                                <div class="alert alert-warning border-0 mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Activation suspendue :</strong> Vous pouvez modifier les assignations. L'activation pourra être reprise une fois les agents assignés.
+                                </div>
+                            }
+                            else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Terminee)
+                            {
+                                <div class="alert alert-secondary border-0 mt-3">
+                                    <i class="fas fa-check-circle"></i>
+                                    <strong>Activation terminée :</strong> Les modifications d'assignation n'affecteront plus le déroulement de l'activation.
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -182,8 +205,121 @@
                     <a href="@Url.Action("Index", "Assignation")" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Annuler
                     </a>
-                    <button type="submit" class="btn btn-primary btn-lg" id="submitButton" disabled>
-                        <i class="fas fa-save"></i> Enregistrer l'Assignation
+                    
+                    <div class="d-flex gap-2">
+                        @if (Model.Statut == DiversityPub.Models.enums.StatutActivation.EnCours)
+                        {
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#suspendModal">
+                                <i class="fas fa-pause"></i> Suspendre l'Activation
+                            </button>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#terminateModal">
+                                <i class="fas fa-check"></i> Terminer l'Activation
+                            </button>
+                        }
+                        else if (Model.Statut == DiversityPub.Models.enums.StatutActivation.Suspendue)
+                        {
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#resumeModal">
+                                <i class="fas fa-play"></i> Reprendre l'Activation
+                            </button>
+                        }
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitButton" disabled>
+                            <i class="fas fa-save"></i> Enregistrer l'Assignation
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suspension -->
+<div class="modal fade" id="suspendModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-pause"></i> Suspendre l'Activation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ChangerStatut" asp-controller="Activation" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="nouveauStatut" value="@DiversityPub.Models.enums.StatutActivation.Suspendue" />
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir suspendre cette activation ?</p>
+                    <div class="mb-3">
+                        <label for="motifSuspension" class="form-label">Motif de suspension (obligatoire)</label>
+                        <textarea class="form-control" id="motifSuspension" name="motifSuspension" rows="3" required 
+                                  placeholder="Expliquez pourquoi vous suspendez cette activation..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-pause"></i> Suspendre
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de terminaison -->
+<div class="modal fade" id="terminateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check"></i> Terminer l'Activation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ChangerStatut" asp-controller="Activation" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="nouveauStatut" value="@DiversityPub.Models.enums.StatutActivation.Terminee" />
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir terminer cette activation ?</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Cette action est irréversible. L'activation sera marquée comme terminée.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Terminer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de reprise -->
+<div class="modal fade" id="resumeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-play"></i> Reprendre l'Activation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="ChangerStatut" asp-controller="Activation" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="nouveauStatut" value="@DiversityPub.Models.enums.StatutActivation.EnCours" />
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir reprendre cette activation ?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Assurez-vous que des agents sont assignés avant de reprendre l'activation.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-play"></i> Reprendre
                     </button>
                 </div>
             </form>

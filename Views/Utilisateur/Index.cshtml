@@ -3,6 +3,25 @@
     ViewData["Title"] = "Gestion des Utilisateurs";
 }
 
+<!-- Messages de migration -->
+@if (TempData["MigrationResult"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <h5><i class="fas fa-shield-alt"></i> Résultat de la Migration des Mots de Passe</h5>
+        <pre style="white-space: pre-wrap; font-size: 0.9rem; margin: 0;">@TempData["MigrationResult"]</pre>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
@@ -13,7 +32,13 @@
                 <div>
                     @if (User.IsInRole("Admin"))
                     {
-                        <a href="@Url.Action("Import", "Utilisateur")" class="btn btn-warning me-2">
+                        <form asp-action="MigrerMotsDePasse" method="post" style="display: inline;" class="me-2">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-warning" onclick="return confirm('Êtes-vous sûr de vouloir migrer tous les mots de passe ? Cette action est irréversible.')">
+                                <i class="fas fa-shield-alt"></i> Migrer Mots de Passe
+                            </button>
+                        </form>
+                        <a href="@Url.Action("Import", "Utilisateur")" class="btn btn-info me-2">
                             <i class="fas fa-file-excel"></i> Importer Excel
                         </a>
                         <a href="@Url.Action("Create", "Utilisateur")" class="btn btn-primary">

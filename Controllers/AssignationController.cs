@@ -73,17 +73,9 @@ namespace DiversityPub.Controllers
             if (activation == null)
                 return NotFound();
 
-            // Validation : Une activation ne peut pas démarrer sans agent terrain
-            if (activation.Statut == StatutActivation.EnCours)
-            {
-                var hasAgents = agentIds != null && agentIds.Any();
-                if (!hasAgents)
-                {
-                    TempData["Error"] = "❌ Impossible de démarrer une activation sans agent terrain. Veuillez assigner au moins un agent.";
-                    return RedirectToAction(nameof(Edit), new { id });
-                }
-            }
-
+            // Validation : Permettre la modification des assignations même pour les activations en cours
+            // Suppression de la restriction qui empêchait de retirer tous les agents d'une activation en cours
+            
             // Validation des agents terrain - vérifier qu'ils ne sont pas déjà affectés à d'autres activations non terminées
             if (agentIds != null && agentIds.Any())
             {
@@ -160,6 +152,12 @@ namespace DiversityPub.Controllers
 
                 _context.Update(activation);
                 await _context.SaveChangesAsync();
+                
+                // Validation post-mise à jour : si l'activation est en cours et n'a plus d'agents, proposer de la suspendre
+                if (activation.Statut == StatutActivation.EnCours && (!agentIds?.Any() ?? true))
+                {
+                    TempData["Warning"] = "⚠️ L'activation est en cours mais n'a plus d'agents assignés. Considérez de la suspendre ou de la terminer.";
+                }
                 
                 var message = "✅ Assignation des agents mise à jour avec succès !";
                 if (responsableId.HasValue && agentIds.Contains(responsableId.Value))

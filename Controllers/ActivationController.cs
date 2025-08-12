@@ -208,7 +208,7 @@ namespace DiversityPub.Controllers
                         if (campagneNom != null && lieu != null)
                         {
                             var periode = $"({campagneNom.DateDebut:dd/MM/yyyy} - {campagneNom.DateFin:dd/MM/yyyy})";
-                            activation.Nom = $"{lieu.Nom}-{campagneNom.Nom} {periode}";
+                            activation.Nom = $"{lieu.Nom}-{lieu.Adresse}-{campagneNom.Nom} {periode}";
                         }
                         else
                         {
@@ -451,17 +451,28 @@ namespace DiversityPub.Controllers
         // POST: Activation/ChangerStatut/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangerStatut(Guid id, DiversityPub.Models.enums.StatutActivation nouveauStatut)
+        public async Task<IActionResult> ChangerStatut(Guid id, DiversityPub.Models.enums.StatutActivation nouveauStatut, string? motifSuspension = null)
         {
             var activation = await _context.Activations.FindAsync(id);
             if (activation == null)
                 return NotFound();
+
+            // Validation pour la suspension
+            if (nouveauStatut == DiversityPub.Models.enums.StatutActivation.Suspendue)
+            {
+                if (string.IsNullOrWhiteSpace(motifSuspension))
+                {
+                    TempData["Error"] = "❌ Le motif de suspension est obligatoire.";
+                    return RedirectToAction("Edit", "Assignation", new { id });
+                }
+            }
 
             activation.Statut = nouveauStatut;
             
             if (nouveauStatut == DiversityPub.Models.enums.StatutActivation.Suspendue)
             {
                 activation.DateSuspension = DateTime.Now;
+                activation.MotifSuspension = motifSuspension?.Trim();
             }
             else if (nouveauStatut == DiversityPub.Models.enums.StatutActivation.Terminee)
             {
@@ -473,7 +484,7 @@ namespace DiversityPub.Controllers
             await _context.SaveChangesAsync();
             
             TempData["Success"] = $"✅ Statut de l'activation changé vers {nouveauStatut} !";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Assignation");
         }
 
         private bool ActivationExists(Guid id)
